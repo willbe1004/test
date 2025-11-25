@@ -1315,6 +1315,7 @@
       <div class="calendar-frame">
         <!-- 캘린더 ID는 이미 Apps Script에서 사용 중이므로 iframe만 UI용으로 유지 -->
         <iframe
+          id="calendarIframe"
           src="https://calendar.google.com/calendar/embed?src=d51a10e0014dcbd83e98d0da91cda4f52f629c19652c15fc693ee4529bbbab04%40group.calendar.google.com&ctz=Asia%2FSeoul&bgcolor=%23050915&mode=MONTH&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0"
         ></iframe>
       </div>
@@ -1661,19 +1662,27 @@
     document.getElementById("statTotalRaw").textContent = totalRaw.toLocaleString();
     document.getElementById("statFiltered").textContent = (stats.totalKept || items.length || 0).toLocaleString();
     document.getElementById("statAi").textContent = (stats.totalAiCalls || 0).toLocaleString();
-    document.getElementById("statApi").textContent = (stats.totalApiCalls || 0).toLocaleString();
+    // 상단 4번째 카드/도넛 숫자는 현재 검색 결과 기준으로 updateVisibleCount에서 관리
     if (document.getElementById("statPeriod"))
       document.getElementById("statPeriod").textContent = `기간: 최근 ${stats.daysBack || 7}일`;
     if (document.getElementById("statLastUpdate"))
       document.getElementById("statLastUpdate").textContent = `Last: ${stats.finishedAtText || '-'}`;
     
-    document.getElementById("donutMain").textContent = items.length.toLocaleString();
-    // Donut logic
+    // Donut 회전 속도 (전체 기준)
     let highOrMid = 0;
     items.forEach(it => { if (/\[(상|중)\]/.test(it.aiResult)) highOrMid++; });
     const ratio = items.length ? highOrMid / items.length : 0;
     const ring = document.getElementById("donutRing");
     if (ring) ring.style.animationDuration = Math.max(4, 10 - ratio * 6) + "s";
+  }
+
+  // 현재 화면에 보이는 건수(검색 결과)를 상단 카드/도넛에 반영
+  function updateVisibleCount(visibleCount) {
+    const n = visibleCount || 0;
+    const statApiEl = document.getElementById("statApi");
+    const donutMainEl = document.getElementById("donutMain");
+    if (statApiEl) statApiEl.textContent = n.toLocaleString();
+    if (donutMainEl) donutMainEl.textContent = n.toLocaleString();
   }
 
   // ---------------- 마감일 필터링 ----------------
@@ -1722,6 +1731,9 @@
       }
       return true;
     });
+
+    // 상단 카드/도넛에 현재 검색 결과 수 반영
+    updateVisibleCount(filtered.length);
     renderList(filtered);
   }
 
@@ -1731,6 +1743,7 @@
     if (!data.length) {
       list.innerHTML = '<div style="padding:20px;color:#b2bec3;font-size:12px;">조건에 맞는 공고가 없습니다.</div>';
       document.getElementById("resultCount").textContent = "0";
+      updateVisibleCount(0);
       return;
     }
     document.getElementById("resultCount").textContent = data.length;
@@ -1816,6 +1829,12 @@
   async function addToCalendarClientSide(title, deadline, client, link) {
     if (!accessToken) {
       alert("구글 로그인이 필요합니다.");
+      // 알럿 닫은 뒤 바로 Google 로그인 팝업 호출
+      if (tokenClient) {
+        tokenClient.requestAccessToken({ prompt: '' });
+      } else {
+        alert("구글 로그인 모듈이 아직 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.");
+      }
       return;
     }
     if (!deadline) {
@@ -1987,5 +2006,3 @@
 </script>
 </body>
 </html>
-
-
