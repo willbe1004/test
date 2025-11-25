@@ -1682,6 +1682,34 @@
     }
   }
 
+  // ---------------- 상태/출처 판별 ----------------
+
+  // 마감일 지난 여부 (당일 이전이면 true)
+  function isDeadlinePast(deadlineStr) {
+    if (!deadlineStr) return false;
+    // YYYY-MM-DD 또는 YYYY-MM-DD HH:mm, 구분자 -, /, .
+    const m = String(deadlineStr).match(/(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);
+    if (!m) return false;
+    const y  = parseInt(m[1], 10);
+    const mo = parseInt(m[2], 10) - 1;
+    const d  = parseInt(m[3], 10);
+
+    const deadlineDate = new Date(y, mo, d);
+    const now   = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    return deadlineDate < today;
+  }
+
+  // 출처 판별: 나라장터(API) vs 외부
+  function detectSource(item) {
+    const no   = String(item.no   || '');
+    const link = String(item.link || '');
+    if (/^R\d/i.test(no)) return 'API';
+    if (link.includes('g2b.go.kr')) return 'API';
+    return 'EXTERNAL';
+  }
+
   function updateStatsUI(stats, items) {
     let totalRaw = stats.totalCountRaw || stats.totalItemsFromApi || 0;
     document.getElementById("statTotalRaw").textContent = totalRaw.toLocaleString();
@@ -1699,35 +1727,37 @@
     const ratio = items.length ? highOrMid / items.length : 0;
     const ring = document.getElementById("donutRing");
     if (ring) ring.style.animationDuration = Math.max(4, 10 - ratio * 6) + "s";
+
+    // 🔹 전체 통계 로그 출력
+    let apiCount = 0, externalCount = 0;
+    items.forEach(it => {
+      if (detectSource(it) === 'API') apiCount++; else externalCount++;
+    });
+    console.log(
+      `[전체 통계] 원본:${totalRaw} / 시트:${items.length} (API:${apiCount}, 외부:${externalCount}) ` +
+      `/ 필터통과:${stats.totalKept || items.length} / AI요약:${stats.totalAiCalls || 0}`
+    );
   }
 
-  // 현재 화면에 보이는 건수(검색 결과)를 상단 카드/도넛에 반영
-  function updateVisibleCount(visibleCount) {
-    const n = visibleCount || 0;
-    const statApiEl = document.getElementById("statApi");
+  // 현재 화면에 보이는 건수(검색 결과)를 상단 카드/도넛에 반영 + API/외부 분리 카운트
+  function updateVisibleCount(visibleItems) {
+    const n = visibleItems.length || 0;
+    const statApiEl   = document.getElementById("statApi");
     const donutMainEl = document.getElementById("donutMain");
-    if (statApiEl) statApiEl.textContent = n.toLocaleString();
+    if (statApiEl)   statApiEl.textContent   = n.toLocaleString();
     if (donutMainEl) donutMainEl.textContent = n.toLocaleString();
+
+    const resultBreakdownEl = document.getElementById("resultBreakdown");
+    if (resultBreakdownEl) {
+      let apiCount = 0, externalCount = 0;
+      visibleItems.forEach(it => {
+        if (detectSource(it) === 'API') apiCount++; else externalCount++;
+      });
+      resultBreakdownEl.textContent = `API ${apiCount} / 외부 ${externalCount}`;
+    }
   }
 
-  // ---------------- 마감일 필터링 ----------------
-
-  function isDeadlinePast(deadlineStr) {
-    if (!deadlineStr) return false;
-    // YYYY-MM-DD 또는 YYYY-MM-DD HH:mm, 구분자 -, /, .
-    const m = String(deadlineStr).match(/(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);
-    if (!m) return false;
-    const y = parseInt(m[1], 10);
-    const mo = parseInt(m[2], 10) - 1;
-    const d = parseInt(m[3], 10);
-
-    const deadlineDate = new Date(y, mo, d);
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    // "당일 기준"이므로 날짜만 비교 (오늘 이전이면 숨김)
-    return deadlineDate < today;
-  }
+  // ---------------- 필터 적용 ----------------
 
   function applyFilter() {
     const kw     = document.getElementById('searchInput').value.trim().toLowerCase();
@@ -1757,21 +1787,26 @@
       return true;
     });
 
-    // 상단 카드/도넛에 현재 검색 결과 수 반영
-    updateVisibleCount(filtered.length);
+    // 🔹 로그 카운트 출력
+    console.log(
+      `[필터] 전체 ${allData.length}건 → 보이는 ${filtered.length}건` +
+      ` (검색="${kw}", 지역="${region || '전체'}", 모드="${filterMode}")`
+    );
+
+    // 상단 카드/도넛 및 헤더 분포에 현재 검색 결과 수 반영
+    updateVisibleCount(filtered);
     renderList(filtered);
   }
 
   function renderList(data) {
     const list = document.getElementById('bidList');
     list.innerHTML = '';
+    document.getElementById("resultCount").textContent = data.length;
+
     if (!data.length) {
       list.innerHTML = '<div style="padding:20px;color:#b2bec3;font-size:12px;">조건에 맞는 공고가 없습니다.</div>';
-      document.getElementById("resultCount").textContent = "0";
-      updateVisibleCount(0);
       return;
     }
-    document.getElementById("resultCount").textContent = data.length;
     
     data.forEach(item => {
       const card = document.createElement('article');
@@ -1782,7 +1817,23 @@
       else if (/\[.*하.*\]/.test(item.aiResult)) relTagClass = 'red';
       
       const isManual = item.status === '수동등록';
-      const statusHtml = `<span class="badge-status ${isManual ? 'manual' : ''}">${item.status || '공고중'}</span>`;
+      const closed   = isDeadlinePast(item.deadline);
+      const source   = detectSource(item);
+
+      // 🔹 상태/출처 라벨
+      const statusLabel = closed ? '마감' : '공고중';
+      const sourceLabel = (source === 'API') ? '나라장터' : '외부';
+
+      const statusBlockHtml = `
+        <div style="display:flex;gap:4px;align-items:center;">
+          <span class="badge-status ${
+            isManual ? 'manual' : (closed ? 'closed' : 'open')
+          }">
+            ${isManual ? '수동등록' : statusLabel}
+          </span>
+          <span class="badge-source">${sourceLabel}</span>
+        </div>
+      `;
       
       // Calendar 버튼
       const calBtnHtml =
@@ -1801,7 +1852,7 @@
               <span class="badge-region">${item.region || '지역미상'}</span>
               <span class="bid-no">#${item.no}</span>
             </div>
-            ${statusHtml}
+            ${statusBlockHtml}
           </div>
           <h3 class="bid-title">${escapeHtml(item.title)}</h3>
           <div class="bid-subline">
@@ -2031,4 +2082,3 @@
 </script>
 </body>
 </html>
-
