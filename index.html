@@ -1001,6 +1001,28 @@
 
     /* 전역 로딩 --------------------------------------------------------- */
 
+
+    /* 목록 영역 인라인 로딩 표시 */
+   .loading-inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 12px;
+      font-size: 12px;
+      color: #b2bec3;
+    }
+
+    .spinner-inline {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 200, 150, 0.25);
+      border-top-color: #00e0b0;
+      border-right-color: #ffb83f;
+      animation: spin 0.9s linear infinite;
+    }
+
+    
     .loading-overlay {
       position: fixed;
       inset: 0;
@@ -1610,8 +1632,14 @@
 
   async function loadData() {
     const list = document.getElementById('bidList');
+
+    // 🔸 로딩 중 안내 + 스피너
     list.innerHTML =
-      '<div style="font-size:12px; color:#b2bec3; padding:20px;">데이터를 불러오는 중...</div>';
+      '<div class="loading-inline">' +
+        '<div class="spinner-inline"></div>' +
+        '<div>데이터를 불러오는 중입니다...</div>' +
+      '</div>';
+
     try {
       const res = await fetch(API_BASE);
       const json = await res.json();
@@ -1641,6 +1669,7 @@
     }
   }
 
+  // 외부웨 수집 버튼 호출 함수
   async function externalUpdate() {
     const btn = document.getElementById('btnExternal');
     btn.classList.add('loading');
@@ -1772,8 +1801,9 @@
       const aiText = item.aiResult || '';
 
       // ① 마감일 지난 공고는 숨김 (삭제X)
-      if (isDeadlinePast(item.deadline)) return false;
-
+      //if (isDeadlinePast(item.deadline)) return false;
+      // 주석 처리로 마감 여부와 상관 없이 일단 리스트에 보이게 둠(마감 뱃지 추가).
+      
       // ② 지역 필터
       if (region && (!item.region || item.region.indexOf(region) === -1))
         return false;
@@ -2060,56 +2090,52 @@
     document.getElementById('smartModalBackdrop').classList.remove('active');
   }
 
-  async function handleSmartSubmit(e) {
-    e.preventDefault();
-    const text = document.getElementById('smartText').value.trim();
-    const urlRaw = document.getElementById('smartUrl').value.trim();
+async function handleSmartSubmit(e) {
+  e.preventDefault();
+  const text = document.getElementById('smartText').value.trim();
+  const urlRaw = document.getElementById('smartUrl').value.trim();
 
-    if (!text && !urlRaw) {
-      alert('본문 텍스트 또는 URL 중 하나는 입력해야 합니다.');
-      return;
-    }
-
-    const urls = urlRaw
-      ? urlRaw
-          .split(/[\n,]+/)
-          .map(s => s.trim())
-          .filter(Boolean)
-      : [];
-
-    const payload = {
-      text,
-      urls
-    };
-
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    if (submitBtn) submitBtn.classList.add('loading');
-
-    try {
-      setGlobalLoading(true, 'AI가 텍스트를 분석하여 한 행으로 정리 중입니다...');
-      const res = await fetch(API_BASE + '?action=smartAdd', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const json = await res.json();
-      if (json && json.ok) {
-        alert('스마트 등록이 완료되었습니다.');
-        closeSmartModal();
-        document.getElementById('smartForm').reset();
-        await loadData();
-      } else {
-        console.error('smartAdd 응답:', json);
-        alert('등록 중 오류가 발생했습니다. (상세는 콘솔 참조)');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('통신 오류: ' + err.message);
-    } finally {
-      if (submitBtn) submitBtn.classList.remove('loading');
-      setGlobalLoading(false);
-    }
+  if (!text && !urlRaw) {
+    alert('본문 텍스트 또는 URL 중 하나는 입력해야 합니다.');
+    return;
   }
+
+  // 서버는 fileUrl 하나의 문자열을 받아서 내부에서 줄바꿈/쉼표로 다시 나눕니다.
+  const payload = {
+    action: 'smart_add',
+    text: text,
+    fileUrl: urlRaw
+  };
+
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.classList.add('loading');
+
+  try {
+    setGlobalLoading(true, 'AI가 텍스트를 분석하여 한 행으로 정리 중입니다...');
+    const res = await fetch(API_BASE + '?action=smart_add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+
+    if (json && json.result === 'success') {
+      alert('스마트 등록이 완료되었습니다.');
+      closeSmartModal();
+      document.getElementById('smartForm').reset();
+      await loadData();
+    } else {
+      console.error('smart_add 응답:', json);
+      alert('등록 중 오류가 발생했습니다. (상세는 콘솔 참조)');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('통신 오류: ' + err.message);
+  } finally {
+    if (submitBtn) submitBtn.classList.remove('loading');
+    setGlobalLoading(false);
+  }
+}
 
   // ---------------- 2차 심화 분석 모달 ----------------
 
@@ -2342,4 +2368,5 @@
 </script>
 </body>
 </html>
+
 
