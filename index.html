@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>한국수안 AI 입찰관리</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- ✅ Google Identity Services 추가 -->
+  <!-- ✅ Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     :root {
@@ -573,7 +573,7 @@
       border: 1px solid rgba(0, 200, 150, 0.7);
       white-space: nowrap;
     }
-    
+
     .badge-status.open {
       background: rgba(2, 36, 25, 0.9);
       color: #b5ffe5;
@@ -586,6 +586,12 @@
       border: 1px solid rgba(255, 92, 122, 0.7);
     }
 
+    .badge-status.manual {
+      background: rgba(44, 26, 0, 0.9);
+      border-color: rgba(255, 184, 63, 0.7);
+      color: #ffe7b4;
+    }
+
     .badge-source {
       padding: 3px 8px;
       border-radius: 999px;
@@ -594,12 +600,6 @@
       border: 1px solid rgba(255, 255, 255, 0.16);
       color: var(--text-soft);
       white-space: nowrap;
-    }
-
-    .badge-status.manual {
-      background: rgba(44, 26, 0, 0.9);
-      border-color: rgba(255, 184, 63, 0.7);
-      color: #ffe7b4;
     }
 
     .bid-title {
@@ -693,6 +693,28 @@
 
     .btn-link:hover {
       text-decoration: underline;
+    }
+
+    .tag {
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .tag.green {
+      border-color: rgba(0, 200, 150, 0.8);
+      color: #bff8ea;
+      background: rgba(0, 200, 150, 0.12);
+    }
+    .tag.yellow {
+      border-color: rgba(255, 184, 63, 0.8);
+      color: #ffe7b4;
+      background: rgba(255, 184, 63, 0.12);
+    }
+    .tag.red {
+      border-color: rgba(255, 92, 122, 0.8);
+      color: #ffd0da;
+      background: rgba(255, 92, 122, 0.12);
     }
 
     /* 캘린더 카드 -------------------------------------------------------- */
@@ -1328,7 +1350,6 @@
       </header>
 
       <div class="calendar-frame">
-        <!-- 캘린더 ID는 이미 Apps Script에서 사용 중이므로 iframe만 UI용으로 유지 -->
         <iframe
           id="calendarIframe"
           src="https://calendar.google.com/calendar/embed?src=d51a10e0014dcbd83e98d0da91cda4f52f629c19652c15fc693ee4529bbbab04%40group.calendar.google.com&ctz=Asia%2FSeoul&bgcolor=%23050915&mode=MONTH&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0"
@@ -1468,21 +1489,25 @@
 </div>
 
 <script>
-  // ★★★ 본인의 Apps Script WebApp URL ★★★
-  const API_BASE = 'https://script.google.com/macros/s/AKfycbxi0Bfdty9LuMJyxCGTqTkyJQJrevz3AqRunbhNmePCh68tta-Fu8w1Lw4E_DROWB99zw/exec';
+  // ★★★ Apps Script WebApp URL ★★★
+  const API_BASE =
+    'https://script.google.com/macros/s/AKfycbxi0Bfdty9LuMJyxCGTqTkyJQJrevz3AqRunbhNmePCh68tta-Fu8w1Lw4E_DROWB99zw/exec';
 
-  // ★★★ 본인의 Google Client ID ★★★
-  const CLIENT_ID = '1049915608396-i3jn8jrm24bc9mkagdtokk3rfa3li513.apps.googleusercontent.com';
-  
+  // ★★★ Google Client ID ★★★
+  const CLIENT_ID =
+    '1049915608396-i3jn8jrm24bc9mkagdtokk3rfa3li513.apps.googleusercontent.com';
+
   // ★★★ 타겟 캘린더 ID ★★★
-  const TARGET_CALENDAR_ID = 'd51a10e0014dcbd83e98d0da91cda4f52f629c19652c15fc693ee4529bbbab04@group.calendar.google.com';
+  const TARGET_CALENDAR_ID =
+    'd51a10e0014dcbd83e98d0da91cda4f52f629c19652c15fc693ee4529bbbab04@group.calendar.google.com';
 
   // 토큰 보관용 localStorage 키
   const STORAGE_KEY_TOKEN = 'koreasuan_calendar_token';
-  const STORAGE_KEY_EXP   = 'koreasuan_calendar_token_exp';
+  const STORAGE_KEY_EXP = 'koreasuan_calendar_token_exp';
 
   let allData = [];
-  let filterMode = 'all'; 
+  let filterMode = 'all';
+
   let tokenClient = null;
   let accessToken = null;
 
@@ -1494,49 +1519,58 @@
 
   // ---------------- 공통 Helper ----------------
 
-  // 링크 정규화: backend에서 key 이름이 달라도 최대한 추출
   function normalizeLink(item) {
     const cand =
       (item.link ||
-       item.originUrl ||
-       item.url ||
-       item.srcUrl ||
-       item.detailUrl ||
-       '').toString().trim();
+        item.originUrl ||
+        item.url ||
+        item.srcUrl ||
+        item.detailUrl ||
+        '').toString().trim();
     if (!cand) return '';
     if (!/^https?:\/\//i.test(cand)) return '';
     return cand;
   }
 
-  // 제목 정규화: 외부소스일 때 rawTitle 등 사용 가능
   function normalizeTitle(item) {
-    return (
-      item.title ||
-      item.rawTitle ||
-      item.subject ||
-      ''
-    );
+    return (item.title || item.rawTitle || item.subject || '');
+  }
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // JS 문자열 리터럴용(싱글쿼트) 이스케이프
+  function escapeJs(str) {
+    return String(str || '')
+      .replace(/\\/g, '\\\\')
+      .replace(/'/g, '\\\'')
+      .replace(/\r?\n/g, ' ');
   }
 
   // ---------------- Google 로그인/로그아웃 & UI ----------------
 
   function updateLoginUI(connected) {
-    const btn  = document.getElementById("btnLogin");
-    const lbl  = document.getElementById("btnLoginLabel");
-    const dot  = document.getElementById("loginStatusDot");
-    const text = document.getElementById("loginStatusText");
+    const btn = document.getElementById('btnLogin');
+    const lbl = document.getElementById('btnLoginLabel');
+    const dot = document.getElementById('loginStatusDot');
+    const text = document.getElementById('loginStatusText');
     if (!btn || !lbl || !dot || !text) return;
 
     if (connected) {
-      lbl.textContent = "로그아웃";
+      lbl.textContent = '로그아웃';
       btn.disabled = false;
-      dot.classList.add("connected");
-      text.textContent = "캘린더 연동됨";
+      dot.classList.add('connected');
+      text.textContent = '캘린더 연동됨';
     } else {
-      lbl.textContent = "로그인";
+      lbl.textContent = '로그인';
       btn.disabled = false;
-      dot.classList.remove("connected");
-      text.textContent = "캘린더 미연동";
+      dot.classList.remove('connected');
+      text.textContent = '캘린더 미연동';
     }
   }
 
@@ -1552,7 +1586,7 @@
   }
 
   function loadSavedTokenIfValid() {
-    const t   = localStorage.getItem(STORAGE_KEY_TOKEN);
+    const t = localStorage.getItem(STORAGE_KEY_TOKEN);
     const exp = parseInt(localStorage.getItem(STORAGE_KEY_EXP) || '0', 10);
     if (t && exp && exp > Date.now()) {
       accessToken = t;
@@ -1566,11 +1600,10 @@
 
   function initGoogle() {
     if (!window.google || !google.accounts || !google.accounts.oauth2) {
-      // GSI 스크립트가 아직 안 올라왔을 때 대비
+      // GSI 스크립트가 아직 안 올라왔을 때
       return;
     }
 
-    // 기존 토큰 복구 (새로고침 후에도 유지)
     loadSavedTokenIfValid();
 
     tokenClient = google.accounts.oauth2.initTokenClient({
@@ -1578,7 +1611,7 @@
       scope: 'https://www.googleapis.com/auth/calendar.events',
       callback: (resp) => {
         if (resp.error) {
-          alert("로그인 실패: " + resp.error);
+          alert('로그인 실패: ' + resp.error);
           return;
         }
         if (resp.access_token) {
@@ -1589,9 +1622,8 @@
       }
     });
 
-    const btnLogin = document.getElementById("btnLogin");
+    const btnLogin = document.getElementById('btnLogin');
     btnLogin.onclick = () => {
-      // 이미 로그인 상태면 → 로그아웃
       if (accessToken) {
         const tokenToRevoke = accessToken;
         accessToken = null;
@@ -1602,7 +1634,6 @@
         }
         return;
       }
-      // 로그인 시도
       tokenClient.requestAccessToken({ prompt: '' });
     };
   }
@@ -1610,51 +1641,49 @@
   // ---------------- 공통 UI & 데이터 로드 ----------------
 
   function bindUI() {
-    document.getElementById("btnRefresh").addEventListener("click", refreshAll);
-    document.getElementById("btnExternal").addEventListener("click", externalUpdate);
-    document.getElementById("searchInput").addEventListener("input", applyFilter);
-    document.getElementById("filterRegion").addEventListener("change", applyFilter);
+    document.getElementById('btnRefresh').addEventListener('click', refreshAll);
+    document.getElementById('btnExternal').addEventListener('click', externalUpdate);
+    document.getElementById('searchInput').addEventListener('input', applyFilter);
+    document.getElementById('filterRegion').addEventListener('change', applyFilter);
 
-    // chip: data-rel 사용하도록 수정
-    document.querySelectorAll(".chip").forEach(chip => {
-      chip.addEventListener("click", () => {
-        document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
-        chip.classList.add("active");
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
         filterMode = chip.dataset.rel || 'all';
         applyFilter();
       });
     });
-```javascript
 
-    // 모달 관련
-    document.getElementById("btnSmartAddOpen").addEventListener("click", openSmartModal);
-    document.getElementById("btnSmartClose").addEventListener("click", closeSmartModal);
-    document.getElementById("btnSmartCancel").addEventListener("click", closeSmartModal);
-    document.getElementById("smartModalBackdrop").addEventListener("click", e => {
-      if (e.target.id === "smartModalBackdrop") closeSmartModal();
+    // 스마트 등록 모달
+    document.getElementById('btnSmartAddOpen').addEventListener('click', openSmartModal);
+    document.getElementById('btnSmartClose').addEventListener('click', closeSmartModal);
+    document.getElementById('btnSmartCancel').addEventListener('click', closeSmartModal);
+    document.getElementById('smartModalBackdrop').addEventListener('click', e => {
+      if (e.target.id === 'smartModalBackdrop') closeSmartModal();
     });
-    document.getElementById("smartForm").addEventListener("submit", handleSmartSubmit);
+    document.getElementById('smartForm').addEventListener('submit', handleSmartSubmit);
 
     // Deep modal
-    document.getElementById("deepModalBackdrop").addEventListener("click", e => {
-      if (e.target.id === "deepModalBackdrop") closeDeepModal();
+    document.getElementById('deepModalBackdrop').addEventListener('click', e => {
+      if (e.target.id === 'deepModalBackdrop') closeDeepModal();
     });
-    document.getElementById("deepCloseBtn").addEventListener("click", closeDeepModal);
-    document.getElementById("deepOkBtn").addEventListener("click", closeDeepModal);
+    document.getElementById('deepCloseBtn').addEventListener('click', closeDeepModal);
+    document.getElementById('deepOkBtn').addEventListener('click', closeDeepModal);
   }
 
   function setGlobalLoading(on, msg) {
-    const ol = document.getElementById("globalLoading");
-    const txt = document.getElementById("globalLoadingText");
-    const ring = document.getElementById("donutRing");
+    const ol = document.getElementById('globalLoading');
+    const txt = document.getElementById('globalLoadingText');
+    const ring = document.getElementById('donutRing');
     if (!ol) return;
-    ol.classList.toggle("active", !!on);
+    ol.classList.toggle('active', !!on);
     if (msg) txt.textContent = msg;
-    if (ring) ring.style.animationPlayState = on ? "running" : "paused";
+    if (ring) ring.style.animationPlayState = on ? 'running' : 'paused';
   }
 
   async function loadData() {
-    const list = document.getElementById("bidList");
+    const list = document.getElementById('bidList');
     list.innerHTML =
       '<div style="font-size:12px; color:#b2bec3; padding:20px;">데이터를 불러오는 중...</div>';
     try {
@@ -1667,48 +1696,46 @@
       list.innerHTML =
         '<div style="font-size:12px; color:#e17055; padding:20px;">로드 실패: ' +
         e.message +
-        "</div>";
+        '</div>';
     }
   }
 
   async function refreshAll() {
-    const btn = document.getElementById("btnRefresh");
-    btn.classList.add("loading");
+    const btn = document.getElementById('btnRefresh');
+    btn.classList.add('loading');
     try {
-      setGlobalLoading(true, "나라장터 API 재조회 및 AI 필터링 중...");
-      await fetch(API_BASE + "?action=updateAll");
+      setGlobalLoading(true, '나라장터 API 재조회 및 AI 필터링 중...');
+      await fetch(API_BASE + '?action=updateAll');
       await loadData();
     } catch (e) {
-      alert("오류: " + e.message);
+      alert('오류: ' + e.message);
     } finally {
-      btn.classList.remove("loading");
+      btn.classList.remove('loading');
       setGlobalLoading(false);
     }
   }
 
   async function externalUpdate() {
-    const btn = document.getElementById("btnExternal");
-    btn.classList.add("loading");
+    const btn = document.getElementById('btnExternal');
+    btn.classList.add('loading');
     try {
-      setGlobalLoading(true, "외부 소스 수집 중...");
-      const res = await fetch(API_BASE + "?action=external_update");
+      setGlobalLoading(true, '외부 소스 수집 중...');
+      const res = await fetch(API_BASE + '?action=external_update');
       const json = await res.json();
       alert(`신규 ${json.added}건 수집 완료`);
       await loadData();
     } catch (e) {
-      alert("오류: " + e.message);
+      alert('오류: ' + e.message);
     } finally {
-      btn.classList.remove("loading");
+      btn.classList.remove('loading');
       setGlobalLoading(false);
     }
   }
 
   // ---------------- 상태/출처 판별 ----------------
 
-  // 마감일 지난 여부 (당일 이전이면 true)
   function isDeadlinePast(deadlineStr) {
     if (!deadlineStr) return false;
-    // YYYY-MM-DD 또는 YYYY-MM-DD HH:mm, 구분자 -, /, .
     const m = String(deadlineStr).match(/(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);
     if (!m) return false;
     const y = parseInt(m[1], 10);
@@ -1722,20 +1749,19 @@
     return deadlineDate < today;
   }
 
-  // 출처 판별: 나라장터(API) vs 외부
   function detectSource(item) {
-    const no = String(item.no || "");
+    const no = String(item.no || '');
     const link = normalizeLink(item);
-    if (/^R\d/i.test(no)) return "API";
-    if (link.includes("g2b.go.kr")) return "API";
-    return "EXTERNAL";
+    if (/^R\d/i.test(no)) return 'API';
+    if (link.includes('g2b.go.kr')) return 'API';
+    return 'EXTERNAL';
   }
 
   function updateStatsUI(stats, items) {
     const totalRaw = stats.totalCountRaw || stats.totalItemsFromApi || 0;
-    const elTotal = document.getElementById("statTotalRaw");
-    const elFiltered = document.getElementById("statFiltered");
-    const elAi = document.getElementById("statAi");
+    const elTotal = document.getElementById('statTotalRaw');
+    const elFiltered = document.getElementById('statFiltered');
+    const elAi = document.getElementById('statAi');
 
     if (elTotal) elTotal.textContent = totalRaw.toLocaleString();
     if (elFiltered)
@@ -1743,56 +1769,50 @@
         (stats.totalKept || items.length || 0).toLocaleString();
     if (elAi) elAi.textContent = (stats.totalAiCalls || 0).toLocaleString();
 
-    if (document.getElementById("statPeriod")) {
-      document.getElementById(
-        "statPeriod"
-      ).textContent = `기간: 최근 ${stats.daysBack || 7}일`;
+    if (document.getElementById('statPeriod')) {
+      document.getElementById('statPeriod').textContent =
+        `기간: 최근 ${stats.daysBack || 7}일`;
     }
-    if (document.getElementById("statLastUpdate")) {
-      document.getElementById("statLastUpdate").textContent =
-        `Last: ${stats.finishedAtText || "-"}`;
+    if (document.getElementById('statLastUpdate')) {
+      document.getElementById('statLastUpdate').textContent =
+        `Last: ${stats.finishedAtText || '-'}`;
     }
 
-    // Donut 회전 속도 (전체 기준)
     let highOrMid = 0;
     items.forEach(it => {
-      if (/\[(상|중)\]/.test(it.aiResult || "")) highOrMid++;
+      if (/\[(상|중)\]/.test(it.aiResult || '')) highOrMid++;
     });
     const ratio = items.length ? highOrMid / items.length : 0;
-    const ring = document.getElementById("donutRing");
+    const ring = document.getElementById('donutRing');
     if (ring) {
-      ring.style.animationDuration = Math.max(4, 10 - ratio * 6) + "s";
+      ring.style.animationDuration = Math.max(4, 10 - ratio * 6) + 's';
     }
 
-    // 🔹 전체 통계 로그 출력
-    let apiCount = 0,
-      externalCount = 0;
+    let apiCount = 0;
+    let externalCount = 0;
     items.forEach(it => {
-      if (detectSource(it) === "API") apiCount++;
+      if (detectSource(it) === 'API') apiCount++;
       else externalCount++;
     });
     console.log(
       `[전체 통계] 원본:${totalRaw} / 시트:${items.length} (API:${apiCount}, 외부:${externalCount}) ` +
-        `/ 필터통과:${stats.totalKept || items.length} / AI요약:${
-          stats.totalAiCalls || 0
-        }`
+        `/ 필터통과:${stats.totalKept || items.length} / AI요약:${stats.totalAiCalls || 0}`
     );
   }
 
-  // 현재 화면에 보이는 건수(검색 결과)를 상단 카드/도넛에 반영 + API/외부 분리 카운트
   function updateVisibleCount(visibleItems) {
     const n = visibleItems.length || 0;
-    const statApiEl = document.getElementById("statApi");
-    const donutMainEl = document.getElementById("donutMain");
+    const statApiEl = document.getElementById('statApi');
+    const donutMainEl = document.getElementById('donutMain');
     if (statApiEl) statApiEl.textContent = n.toLocaleString();
     if (donutMainEl) donutMainEl.textContent = n.toLocaleString();
 
-    const resultBreakdownEl = document.getElementById("resultBreakdown");
+    const resultBreakdownEl = document.getElementById('resultBreakdown');
     if (resultBreakdownEl) {
-      let apiCount = 0,
-        externalCount = 0;
+      let apiCount = 0;
+      let externalCount = 0;
       visibleItems.forEach(it => {
-        if (detectSource(it) === "API") apiCount++;
+        if (detectSource(it) === 'API') apiCount++;
         else externalCount++;
       });
       resultBreakdownEl.textContent = `API ${apiCount} / 외부 ${externalCount}`;
@@ -1803,43 +1823,39 @@
 
   function applyFilter() {
     const kw = document
-      .getElementById("searchInput")
+      .getElementById('searchInput')
       .value.trim()
       .toLowerCase();
-    const region = document.getElementById("filterRegion").value.trim();
+    const region = document.getElementById('filterRegion').value.trim();
 
     const filtered = allData.filter(item => {
       const title = normalizeTitle(item);
       const link = normalizeLink(item);
-      const aiText = item.aiResult || "";
+      const aiText = item.aiResult || '';
 
-      // ① 마감일 지난 공고 제거
       if (isDeadlinePast(item.deadline)) return false;
 
-      // ② 지역 필터
       if (region && (!item.region || item.region.indexOf(region) === -1))
         return false;
 
-      // ③ 관련성 필터
-      let relFlag = "low";
-      if (/\[.*상.*\]/.test(aiText) || /관련성 상/.test(aiText)) relFlag = "high";
+      let relFlag = 'low';
+      if (/\[.*상.*\]/.test(aiText) || /관련성 상/.test(aiText)) relFlag = 'high';
       else if (/\[.*중.*\]/.test(aiText) || /관련성 중/.test(aiText))
-        relFlag = "mid";
+        relFlag = 'mid';
 
-      if (filterMode === "high" && relFlag !== "high") return false;
-      if (filterMode === "mid" && relFlag === "low") return false;
+      if (filterMode === 'high' && relFlag !== 'high') return false;
+      if (filterMode === 'mid' && relFlag === 'low') return false;
 
-      // ④ 키워드 검색
       if (kw) {
         const blob = (
           title +
-          " " +
-          (item.client || "") +
-          " " +
-          (item.agency || "") +
-          " " +
+          ' ' +
+          (item.client || '') +
+          ' ' +
+          (item.agency || '') +
+          ' ' +
           aiText +
-          " " +
+          ' ' +
           link
         ).toLowerCase();
         if (blob.indexOf(kw) === -1) return false;
@@ -1847,21 +1863,19 @@
       return true;
     });
 
-    // 🔹 로그 카운트 출력
     console.log(
       `[필터] 전체 ${allData.length}건 → 보이는 ${filtered.length}건` +
-        ` (검색="${kw}", 지역="${region || "전체"}", 모드="${filterMode}")`
+        ` (검색="${kw}", 지역="${region || '전체'}", 모드="${filterMode}")`
     );
 
-    // 상단 카드/도넛 및 헤더 분포에 현재 검색 결과 수 반영
     updateVisibleCount(filtered);
     renderList(filtered);
   }
 
   function renderList(data) {
-    const list = document.getElementById("bidList");
-    list.innerHTML = "";
-    document.getElementById("resultCount").textContent = data.length;
+    const list = document.getElementById('bidList');
+    list.innerHTML = '';
+    document.getElementById('resultCount').textContent = data.length;
 
     if (!data.length) {
       list.innerHTML =
@@ -1870,47 +1884,50 @@
     }
 
     data.forEach(item => {
-      const card = document.createElement("article");
-      card.className = "bid-card";
+      const card = document.createElement('article');
+      card.className = 'bid-card';
 
       const title = normalizeTitle(item);
       const link = normalizeLink(item);
 
-      let relTagClass = "yellow";
-      const aiResultText = item.aiResult || "";
-      if (/\[.*상.*\]/.test(aiResultText)) relTagClass = "green";
-      else if (/\[.*하.*\]/.test(aiResultText)) relTagClass = "red";
+      let relTagClass = 'yellow';
+      const aiResultText = item.aiResult || '';
+      if (/\[.*상.*\]/.test(aiResultText)) relTagClass = 'green';
+      else if (/\[.*하.*\]/.test(aiResultText)) relTagClass = 'red';
 
-      const isManual = item.status === "수동등록";
+      const isManual = item.status === '수동등록';
       const closed = isDeadlinePast(item.deadline);
       const source = detectSource(item);
 
-      // 🔹 상태/출처 라벨
-      const statusLabel = closed ? "마감" : "공고중";
-      const sourceLabel = source === "API" ? "나라장터" : "외부";
+      const statusLabel = closed ? '마감' : '공고중';
+      const sourceLabel = source === 'API' ? '나라장터' : '외부';
 
       const statusBlockHtml = `
         <div style="display:flex;gap:4px;align-items:center;">
-          <span class="badge-status ${
-            isManual ? "manual" : closed ? "closed" : "open"
-          }">
-            ${isManual ? "수동등록" : statusLabel}
+          <span class="badge-status ${isManual ? 'manual' : closed ? 'closed' : 'open'}">
+            ${isManual ? '수동등록' : statusLabel}
           </span>
           <span class="badge-source">${sourceLabel}</span>
         </div>
       `;
 
       const safeTitle = escapeHtml(title);
-      const safeClient = escapeHtml(item.client || "-");
-      const safeAgency = escapeHtml(item.agency || "-");
+      const safeClient = escapeHtml(item.client || '-');
+      const safeAgency = escapeHtml(item.agency || '-');
       const safeLink = escapeHtml(link);
+
+      const jsTitle = escapeJs(title);
+      const jsClient = escapeJs(item.client || '-');
+      const jsLink = escapeJs(link);
+      const jsNo = escapeJs(item.no || '');
+      const jsRowIndex = escapeJs(item.rowIndex != null ? String(item.rowIndex) : '');
 
       const calBtnHtml = `
         <button class="btn btn-ghost btn-small btn-calendar"
-                onclick="addToCalendarClientSide('${safeTitle}',
-                                                 '${item.deadline || ""}',
-                                                 '${safeClient}',
-                                                 '${safeLink}')">
+                onclick="addToCalendarClientSide('${jsTitle}',
+                                                 '${escapeJs(item.deadline || '')}',
+                                                 '${jsClient}',
+                                                 '${jsLink}')">
            <span class="icon">📅</span> 등록
         </button>`;
 
@@ -1918,10 +1935,8 @@
         <div class="bid-card-inner">
           <div class="bid-top-row">
             <div style="display:flex;gap:6px;align-items:center;">
-              <span class="badge-region">${escapeHtml(
-                item.region || "지역미상"
-              )}</span>
-              <span class="bid-no">#${escapeHtml(item.no || "")}</span>
+              <span class="badge-region">${escapeHtml(item.region || '지역미상')}</span>
+              <span class="bid-no">#${escapeHtml(item.no || '')}</span>
             </div>
             ${statusBlockHtml}
           </div>
@@ -1934,21 +1949,15 @@
           <div class="bid-meta-grid">
             <div class="bid-meta-item">
               <span class="meta-label">금액</span>
-              <span class="meta-value">${escapeHtml(
-                item.serviceAmount || "-"
-              )}</span>
+              <span class="meta-value">${escapeHtml(item.serviceAmount || '-')}</span>
             </div>
             <div class="bid-meta-item">
               <span class="meta-label">기간</span>
-              <span class="meta-value">${escapeHtml(
-                item.servicePeriod || "-"
-              )}</span>
+              <span class="meta-value">${escapeHtml(item.servicePeriod || '-')}</span>
             </div>
             <div class="bid-meta-item">
               <span class="meta-label">마감</span>
-              <span class="meta-value meta-value-em">${escapeHtml(
-                item.deadline || "-"
-              )}</span>
+              <span class="meta-value meta-value-em">${escapeHtml(item.deadline || '-')}</span>
             </div>
           </div>
           <div class="ai-result-box">
@@ -1956,29 +1965,27 @@
             <div class="ai-result-text">${escapeHtml(aiResultText)}</div>
           </div>
           <div class="bid-footer-row">
-             <div class="bid-buttons">
-               <button class="btn btn-ghost btn-small btn-deep"
-                       onclick="handleDeepAnalyzeClient('${escapeHtml(
-                         item.no || ""
-                       )}',
-                                                        '${safeLink}',
-                                                        '${safeTitle}',
-                                                        '${safeClient}',
-                                                        '${safeAgency}')">
-                 2차 상세분석
-               </button>
-               ${calBtnHtml}
-               ${
-                 link
-                   ? `<a href="${safeLink}" target="_blank" class="btn btn-ghost btn-small">📄 원문</a>`
-                   : ""
-               }
-               ${
-                 isManual && item.rowIndex != null
-                   ? `<button class="btn btn-ghost btn-small btn-danger" onclick="deleteRowClient('${item.rowIndex}')">삭제</button>`
-                   : ""
-               }
-             </div>
+            <div class="bid-buttons">
+              <button class="btn btn-ghost btn-small btn-deep"
+                      onclick="handleDeepAnalyzeClient('${jsNo}',
+                                                       '${jsLink}',
+                                                       '${jsTitle}',
+                                                       '${jsClient}',
+                                                       '${escapeJs(item.agency || '-')}')">
+                2차 상세분석
+              </button>
+              ${calBtnHtml}
+              ${
+                link
+                  ? `<a href="${safeLink}" target="_blank" class="btn btn-ghost btn-small">📄 원문</a>`
+                  : ''
+              }
+              ${
+                isManual && item.rowIndex != null
+                  ? `<button class="btn btn-ghost btn-small btn-danger" onclick="deleteRowClient('${jsRowIndex}')">삭제</button>`
+                  : ''
+              }
+            </div>
           </div>
         </div>`;
 
@@ -1989,28 +1996,24 @@
 
   // ---------------- Client-Side Actions ----------------
 
-  // 1. Add to Calendar (Client Side)
   async function addToCalendarClientSide(title, deadline, client, link) {
     if (!accessToken) {
-      alert("구글 로그인이 필요합니다.");
+      alert('구글 로그인이 필요합니다.');
       if (tokenClient) {
-        tokenClient.requestAccessToken({ prompt: "" });
+        tokenClient.requestAccessToken({ prompt: '' });
       } else {
-        alert(
-          "구글 로그인 모듈이 아직 준비되지 않았습니다. 잠시 후 다시 시도해 주세요."
-        );
+        alert('구글 로그인 모듈이 아직 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.');
       }
       return;
     }
     if (!deadline) {
-      alert("마감일 정보가 없습니다.");
+      alert('마감일 정보가 없습니다.');
       return;
     }
 
-    // Parse deadline (YYYY-MM-DD HH:mm)
-    const parts = String(deadline).split(" ");
-    const dateParts = parts[0].split("-");
-    const timeParts = parts[1] ? parts[1].split(":") : [18, 0];
+    const parts = String(deadline).split(' ');
+    const dateParts = parts[0].split('-');
+    const timeParts = parts[1] ? parts[1].split(':') : [18, 0];
     const end = new Date(
       dateParts[0],
       dateParts[1] - 1,
@@ -2018,18 +2021,18 @@
       timeParts[0],
       timeParts[1]
     );
-    const start = new Date(end.getTime() - 60 * 60 * 1000); // 1 hour before
+    const start = new Date(end.getTime() - 60 * 60 * 1000);
 
     const event = {
       summary: `[입찰] ${title}`,
       description: `발주처: ${client}\n링크: ${link}\n[한국수안 AI 입찰관리]`,
-      start: { dateTime: start.toISOString(), timeZone: "Asia/Seoul" },
-      end: { dateTime: end.toISOString(), timeZone: "Asia/Seoul" },
+      start: { dateTime: start.toISOString(), timeZone: 'Asia/Seoul' },
+      end: { dateTime: end.toISOString(), timeZone: 'Asia/Seoul' },
       reminders: {
         useDefault: false,
         overrides: [
-          { method: "popup", minutes: 60 },
-          { method: "popup", minutes: 24 * 60 }
+          { method: 'popup', minutes: 60 },
+          { method: 'popup', minutes: 24 * 60 }
         ]
       }
     };
@@ -2040,10 +2043,10 @@
           TARGET_CALENDAR_ID
         )}/events`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
             Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json"
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify(event)
         }
@@ -2056,7 +2059,7 @@
           saveToken(null);
           updateLoginUI(false);
           alert(
-            "로그인 세션이 만료되었습니다. 다시 로그인 후 시도해 주세요.\n\n상세: " +
+            '로그인 세션이 만료되었습니다. 다시 로그인 후 시도해 주세요.\n\n상세: ' +
               errText
           );
           return;
@@ -2064,21 +2067,20 @@
         throw new Error(errText);
       }
 
-      alert("✅ 캘린더 등록 성공!");
-      const iframe = document.getElementById("calendarIframe");
+      alert('✅ 캘린더 등록 성공!');
+      const iframe = document.getElementById('calendarIframe');
       if (iframe) {
         iframe.src = iframe.src;
       }
     } catch (e) {
-      alert("캘린더 등록 실패: " + e.message);
+      alert('캘린더 등록 실패: ' + e.message);
     }
   }
 
-  // 2. Deep Analyze (Calls backend)
   async function handleDeepAnalyzeClient(no, link, title, client, agency) {
-    setGlobalLoading(true, "2차 상세 분석 중...");
+    setGlobalLoading(true, '2차 상세 분석 중...');
     const params = new URLSearchParams({
-      action: "deepAnalyze",
+      action: 'deepAnalyze',
       no,
       link,
       title,
@@ -2090,183 +2092,160 @@
       const data = await res.json();
       openDeepModalClient(data);
     } catch (e) {
-      alert("분석 실패: " + e.message);
+      alert('분석 실패: ' + e.message);
     } finally {
       setGlobalLoading(false);
     }
   }
 
-  // 3. Delete Row (Calls backend)
   async function deleteRowClient(rowIndex) {
-    if (!confirm("정말 삭제하시겠습니까?")) return;
+    if (!confirm('정말 삭제하시겠습니까?')) return;
     try {
       const res = await fetch(
         `${API_BASE}?action=deleteRow&rowIndex=${encodeURIComponent(rowIndex)}`
       );
       const json = await res.json();
-      if (json.result === "success") {
-        alert("삭제됨");
+      if (json.result === 'success') {
+        alert('삭제됨');
         loadData();
       } else {
-        alert("삭제 실패: " + json.message);
+        alert('삭제 실패: ' + json.message);
       }
     } catch (e) {
-      alert("오류: " + e.message);
+      alert('오류: ' + e.message);
     }
   }
 
-  // 4. Smart Add (Calls backend)
   async function handleSmartSubmit(e) {
     e.preventDefault();
-    const text = document.getElementById("smartText").value;
-    const url = document.getElementById("smartUrl").value;
+    const text = document.getElementById('smartText').value;
+    const url = document.getElementById('smartUrl').value;
     if (!text && !url) {
-      alert("입력해주세요.");
+      alert('입력해주세요.');
       return;
     }
 
-    setGlobalLoading(true, "AI 분석 및 저장 중...");
+    setGlobalLoading(true, 'AI 분석 및 저장 중...');
     try {
       const res = await fetch(API_BASE, {
-        method: "POST",
-        body: JSON.stringify({ action: "smart_add", text, fileUrl: url })
+        method: 'POST',
+        body: JSON.stringify({ action: 'smart_add', text, fileUrl: url })
       });
       const json = await res.json();
-      if (json.result === "success") {
-        alert("저장 완료: " + (json.title || "성공"));
+      if (json.result === 'success') {
+        alert('저장 완료: ' + (json.title || '성공'));
         closeSmartModal();
         loadData();
       } else {
-        alert("실패: " + json.message);
+        alert('실패: ' + json.message);
       }
     } catch (e) {
-      alert("오류: " + e.message);
+      alert('오류: ' + e.message);
     } finally {
       setGlobalLoading(false);
     }
   }
 
-  // Helper functions (모달/Deep Modal/HTML Escape)
+  // ---------------- 모달 Helper ----------------
 
   function openSmartModal() {
-    document
-      .getElementById("smartModalBackdrop")
-      .classList.add("active");
+    document.getElementById('smartModalBackdrop').classList.add('active');
   }
 
   function closeSmartModal() {
-    document
-      .getElementById("smartModalBackdrop")
-      .classList.remove("active");
+    document.getElementById('smartModalBackdrop').classList.remove('active');
   }
 
   function closeDeepModal() {
-    document
-      .getElementById("deepModalBackdrop")
-      .classList.remove("active");
+    document.getElementById('deepModalBackdrop').classList.remove('active');
   }
 
   function openDeepModalClient(data) {
     const d = data.deep || {};
 
-    document.getElementById("deepTitle").textContent =
-      data.title || "공고명 없음";
-    document.getElementById("deepSummary").textContent =
-      d.summary2 || d.summary || "내용 없음";
-    document.getElementById("deepPeriod").textContent =
-      d.servicePeriod || "-";
-    document.getElementById("deepAmount").textContent =
-      d.serviceAmount || "-";
-    document.getElementById("deepBudget").textContent =
-      d.projectBudget || "-";
-    document.getElementById("deepSuggestion").textContent =
-      d.suggestion || "-";
+    document.getElementById('deepTitle').textContent =
+      data.title || '공고명 없음';
+    document.getElementById('deepSummary').textContent =
+      d.summary2 || d.summary || '내용 없음';
+    document.getElementById('deepPeriod').textContent =
+      d.servicePeriod || '-';
+    document.getElementById('deepAmount').textContent =
+      d.serviceAmount || '-';
+    document.getElementById('deepBudget').textContent =
+      d.projectBudget || '-';
+    document.getElementById('deepSuggestion').textContent =
+      d.suggestion || '-';
 
-    // 메타 라인
     const metaParts = [];
     if (data.no) metaParts.push(`공고번호: ${data.no}`);
     if (data.client) metaParts.push(`발주처: ${data.client}`);
     if (data.agency) metaParts.push(`집행기관: ${data.agency}`);
-    document.getElementById("deepMetaLine").textContent =
-      metaParts.join(" | ");
+    document.getElementById('deepMetaLine').textContent =
+      metaParts.join(' | ');
 
-    // 뱃지
-    const badgesWrap = document.getElementById("deepBadges");
-    badgesWrap.innerHTML = "";
+    const badgesWrap = document.getElementById('deepBadges');
+    badgesWrap.innerHTML = '';
     if (d.relevance) {
-      const b = document.createElement("span");
-      b.className = "deep-badge primary";
+      const b = document.createElement('span');
+      b.className = 'deep-badge primary';
       b.textContent = `관련성: ${d.relevance}`;
       badgesWrap.appendChild(b);
     }
     if (d.sizeGrade) {
-      const b = document.createElement("span");
-      b.className = "deep-badge";
+      const b = document.createElement('span');
+      b.className = 'deep-badge';
       b.textContent = `규모: ${d.sizeGrade}`;
       badgesWrap.appendChild(b);
     }
     if (d.riskLevel) {
-      const b = document.createElement("span");
+      const b = document.createElement('span');
       b.className =
-        d.riskLevel.indexOf("높음") !== -1
-          ? "deep-badge danger"
-          : "deep-badge warn";
+        d.riskLevel.indexOf('높음') !== -1
+          ? 'deep-badge danger'
+          : 'deep-badge warn';
       b.textContent = `리스크: ${d.riskLevel}`;
       badgesWrap.appendChild(b);
     }
 
-    // 체크포인트
-    const ul = document.getElementById("deepCheckpoints");
-    ul.innerHTML = "";
+    const ul = document.getElementById('deepCheckpoints');
+    ul.innerHTML = '';
     (d.checkPoints || []).forEach(c => {
-      const li = document.createElement("li");
+      const li = document.createElement('li');
       li.textContent = c;
       ul.appendChild(li);
     });
 
-    // 첨부파일
-    const ulAtt = document.getElementById("deepAttachmentsList");
-    const emptyAtt = document.getElementById("deepAttachmentsEmpty");
-    const noteAtt = document.getElementById("deepAttachmentsNote");
-    ulAtt.innerHTML = "";
+    const ulAtt = document.getElementById('deepAttachmentsList');
+    const emptyAtt = document.getElementById('deepAttachmentsEmpty');
+    const noteAtt = document.getElementById('deepAttachmentsNote');
+    ulAtt.innerHTML = '';
 
     const attachList = data.attachments || d.attachments || [];
     if (attachList.length) {
-      emptyAtt.style.display = "none";
-      noteAtt.style.display = "block";
+      emptyAtt.style.display = 'none';
+      noteAtt.style.display = 'block';
       attachList.forEach(a => {
-        const li = document.createElement("li");
+        const li = document.createElement('li');
         li.textContent = a;
         ulAtt.appendChild(li);
       });
     } else {
-      emptyAtt.style.display = "block";
-      noteAtt.style.display = "none";
+      emptyAtt.style.display = 'block';
+      noteAtt.style.display = 'none';
     }
 
-    // Footer 링크/리스크
-    const footer = document.getElementById("deepFooterInfo");
+    const footer = document.getElementById('deepFooterInfo');
     const parts = [];
     if (data.no) parts.push(`공고번호: ${data.no}`);
     if (data.link) {
       parts.push(`원문: ${data.link}`);
     }
-    footer.textContent = parts.join(" | ");
+    footer.textContent = parts.join(' | ');
 
-    document.getElementById("deepRisk").textContent =
-      d.riskSummary || "리스크 요약 정보 없음";
+    document.getElementById('deepRisk').textContent =
+      d.riskSummary || '리스크 요약 정보 없음';
 
-    document
-      .getElementById("deepModalBackdrop")
-      .classList.add("active");
-  }
-
-  function escapeHtml(str) {
-    return String(str || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+    document.getElementById('deepModalBackdrop').classList.add('active');
   }
 </script>
 </body>
