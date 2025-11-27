@@ -2220,6 +2220,15 @@ async function handleSmartSubmit(e) {
       elBadges.appendChild(loadingBadge);
     }
 
+    function closeDeepModal() {
+    const backdrop = document.getElementById('deepModalBackdrop');
+    if (!backdrop) return;
+    backdrop.classList.remove('active');
+
+    // 필요하면 모달 내용 초기화도 여기서 수행 가능
+    // (지금은 openDeepModal에서 항상 덮어쓰기 때문에 필수는 아님)
+    }
+
     // 서버에 2차 심화 분석 요청
     try {
       setGlobalLoading(true, '해당 공고의 2차 심화 분석을 진행 중입니다...');
@@ -2555,6 +2564,7 @@ async function handleSmartSubmit(e) {
 </script>
 </body>
 </html>
+
 
 
 
