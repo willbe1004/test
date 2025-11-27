@@ -2048,16 +2048,29 @@
       });
       btnBox.appendChild(btnDeep);
 
-      // 일정 등록 버튼 (캘린더 연동 사용)
-      const btnCalendar = document.createElement('button');
-      btnCalendar.type = 'button';
-      btnCalendar.className = 'btn btn-ghost btn-small';
-      btnCalendar.textContent = '일정 등록';
-      btnCalendar.addEventListener('click', async (e) => {
+      // 일정 등록 버튼들
+      // 1) 내 캘린더 (사용자 primary 캘린더, 프론트 OAuth 사용)
+      const btnMyCal = document.createElement('button');
+      btnMyCal.type = 'button';
+      btnMyCal.className = 'btn btn-ghost btn-small';
+      btnMyCal.textContent = '내 캘린더';
+      btnMyCal.addEventListener('click', async (e) => {
         e.stopPropagation();
-        await createCalendarEventForBid(item);
+        await createCalendarEventForBid(item);  // personal calendar
       });
-      btnBox.appendChild(btnCalendar);
+      btnBox.appendChild(btnMyCal);
+
+      // 2) 회사 공용 입찰 캘린더 (서버 Apps Script 사용)
+      const btnCorpCal = document.createElement('button');
+      btnCorpCal.type = 'button';
+      btnCorpCal.className = 'btn btn-ghost btn-small';
+      btnCorpCal.textContent = '회사 캘린더';
+      btnCorpCal.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await createCorporateCalendarEventForBid(item); // server-side corporate calendar
+      });
+      btnBox.appendChild(btnCorpCal);
+
 
       // 원문 보기 버튼
       if (link) {
@@ -2368,5 +2381,6 @@ async function handleSmartSubmit(e) {
 </script>
 </body>
 </html>
+
 
 
