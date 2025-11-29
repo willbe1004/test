@@ -1188,7 +1188,7 @@
         <div class="summary-icon">📄</div>
       </div>
       <div id="statTotalRaw" class="summary-value">0</div>
-      <div class="summary-sub">나라장터 API 기준 최근 7일 합계</div>
+      <div class="summary-sub">나라장터 기준 최근 7일 합계</div>
     </article>
 
     <article class="summary-card">
@@ -1658,7 +1658,7 @@
     const btn = document.getElementById('btnRefresh');
     btn.classList.add('loading');
     try {
-      setGlobalLoading(true, '나라장터 API 재조회 및 AI 필터링 중...');
+      setGlobalLoading(true, '나라장터 재조회 및 AI 필터링 중...');
       await fetch(API_BASE + '?action=updateAll');
       await loadData();
     } catch (e) {
@@ -1783,7 +1783,7 @@
         if (detectSource(it) === 'API') apiCount++;
         else externalCount++;
       });
-      resultBreakdownEl.textContent = `API ${apiCount} / 외부 ${externalCount}`;
+      resultBreakdownEl.textContent = `연동 사이트 ${apiCount} / 외부 사이트 ${externalCount}`;
     }
   }
 
@@ -1926,7 +1926,7 @@
       // 출처 뱃지
       const sourceBadge = document.createElement('span');
       sourceBadge.className = 'badge-source';
-      sourceBadge.textContent = source === 'API' ? '나라장터 API' : '외부수집';
+      sourceBadge.textContent = source === 'API' ? '나라장터' : '외부수집';
       rightTop.appendChild(sourceBadge);
 
       // 수동 태그 있으면 표시
@@ -2562,6 +2562,7 @@ async function handleSmartSubmit(e) {
 </script>
 </body>
 </html>
+
 
 
 
