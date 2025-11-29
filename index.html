@@ -2543,16 +2543,23 @@ async function handleSmartSubmit(e) {
       }
 
       const data = await res.json();
-      console.log('Corporate calendar event created via server:', data);
-
+      console.log('calendar_add response:', data);
+      
       if (data && data.result === 'success') {
         alert(
           '회사 공용 입찰 캘린더에 일정이 등록되었습니다.\n' +
           (data.eventStartText ? `시작: ${data.eventStartText}\n` : '') +
           (data.eventEndText   ? `종료: ${data.eventEndText}`   : '')
         );
+      } else if (data && data.result === 'error') {
+        // ★ 서버에서 내려준 이유 그대로 표시
+        alert('회사 공용 캘린더 등록 실패: ' + (data.message || '알 수 없는 오류'));
       } else {
-        alert('회사 공용 캘린더 등록 결과를 해석하지 못했습니다.');
+        // 혹시 모르는 형태 대비용 디버그
+        alert(
+          '회사 공용 캘린더 등록 결과를 해석하지 못했습니다.\n' +
+          '원본 응답: ' + JSON.stringify(data)
+        );
       }
     } catch (err) {
       console.error(err);
@@ -2564,4 +2571,5 @@ async function handleSmartSubmit(e) {
 </script>
 </body>
 </html>
+
 
