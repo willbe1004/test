@@ -2528,6 +2528,8 @@ async function handleSmartSubmit(e) {
       const params = new URLSearchParams();
       params.set('action', 'calendar_add');
       params.set('rowIndex', String(rowIndex));
+      params.set('target', 'company');   // ★ 회사 공용 캘린더로 강제
+
 
       const res = await fetch(`${API_BASE}?${params.toString()}`, {
         method: 'GET'
@@ -2562,3 +2564,4 @@ async function handleSmartSubmit(e) {
 </script>
 </body>
 </html>
+
