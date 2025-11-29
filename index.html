@@ -2397,14 +2397,14 @@ async function handleSmartSubmit(e) {
     } finally {
       setGlobalLoading(false);
     }
-    // ---------------- 2차 심화 분석 모달 공통 닫기 함수 ----------------
-    function closeDeepModal() {
-      const backdrop = document.getElementById('deepModalBackdrop');
-      if (!backdrop) return;
-      backdrop.classList.remove('active');
-    }
-
   }
+     // ---------------- 2차 심화 분석 모달 공통 닫기 함수 ----------------
+     function closeDeepModal() {
+       const backdrop = document.getElementById('deepModalBackdrop');
+       if (!backdrop) return;
+       backdrop.classList.remove('active');
+     }
+
 
   // ---------------- Google Calendar 일정 등록 ----------------
 
@@ -2562,6 +2562,7 @@ async function handleSmartSubmit(e) {
 </script>
 </body>
 </html>
+
 
 
 
