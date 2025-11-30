@@ -1464,6 +1464,7 @@
 
   let tokenClient = null;
   let accessToken = null;
+  let loginUserEmail = null;   // ← 로그인한 사용자 이메일
 
   window.addEventListener('load', () => {
     bindUI();
@@ -1500,24 +1501,26 @@
   // ---------------- Google 로그인/로그아웃 & UI ----------------
 
   function updateLoginUI(connected) {
-    const btn  = document.getElementById('btnLogin');
-    const lbl  = document.getElementById('btnLoginLabel');
-    const dot  = document.getElementById('loginStatusDot');
-    const text = document.getElementById('loginStatusText');
-    if (!btn || !lbl || !dot || !text) return;
+  const btn  = document.getElementById('btnLogin');
+  const lbl  = document.getElementById('btnLoginLabel');
+  const dot  = document.getElementById('loginStatusDot');
+  const text = document.getElementById('loginStatusText');
+  if (!btn || !lbl || !dot || !text) return;
 
-    if (connected) {
-      lbl.textContent = '로그아웃';
-      btn.disabled = false;
-      dot.classList.add('connected');
-      text.textContent = '캘린더 연동됨';
-    } else {
-      lbl.textContent = '로그인';
-      btn.disabled = false;
-      dot.classList.remove('connected');
-      text.textContent = '캘린더 미연동';
-    }
+  if (connected && accessToken) {
+    lbl.textContent = '로그아웃';
+    btn.disabled = false;
+    dot.classList.add('connected');
+    text.textContent = loginUserEmail
+      ? ('연동: ' + loginUserEmail)
+      : '캘린더 연동됨';
+  } else {
+    lbl.textContent = '로그인';
+    btn.disabled = false;
+    dot.classList.remove('connected');
+    text.textContent = '캘린더 미연동';
   }
+}
 
   function saveToken(token, expiresInSec) {
     if (!token) {
@@ -1552,20 +1555,37 @@
     loadSavedTokenIfValid();
 
     tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/calendar.events',
-      callback: (resp) => {
-        if (resp.error) {
-          alert('로그인 실패: ' + resp.error);
-          return;
-        }
-        if (resp.access_token) {
-          accessToken = resp.access_token;
-          saveToken(resp.access_token, resp.expires_in);
-          updateLoginUI(true);
-        }
+  client_id: CLIENT_ID,
+  scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/userinfo.email',
+  callback: async (resp) => {
+    if (resp.error) {
+      alert('로그인 실패: ' + resp.error);
+      return;
+    }
+    if (!resp.access_token) return;
+
+    accessToken = resp.access_token;
+    saveToken(resp.access_token, resp.expires_in);
+
+    try {
+      // 이메일 조회
+      const uRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: 'Bearer ' + accessToken }
+      });
+      if (uRes.ok) {
+        const info = await uRes.json();
+        loginUserEmail = info.email || null;
+      } else {
+        loginUserEmail = null;
       }
-    });
+    } catch (e) {
+      console.error('userinfo error', e);
+      loginUserEmail = null;
+    }
+
+    updateLoginUI(true);
+  }
+});
 
     const btnLogin = document.getElementById('btnLogin');
     btnLogin.onclick = () => {
@@ -1573,6 +1593,7 @@
       if (accessToken) {
         const tokenToRevoke = accessToken;
         accessToken = null;
+        loginUserEmail = null; 
         saveToken(null);
         updateLoginUI(false);
         if (google.accounts.oauth2.revoke) {
@@ -1717,12 +1738,17 @@
 
   // 출처 판별: 나라장터(API) vs 외부
   function detectSource(item) {
-    const no = String(item.no || '');
-    const link = normalizeLink(item);
-    if (/^R\d/i.test(no)) return 'API';
-    if (link.includes('g2b.go.kr')) return 'API';
-    return 'EXTERNAL';
-  }
+  const kind = (item.srcKind || item.sourceKind || '').toUpperCase();
+  if (kind === 'API') return 'API';
+  if (kind === 'SMART') return 'SMART';
+  if (kind === 'EXTERNAL') return 'EXTERNAL';
+
+  const no = String(item.no || '');
+  const link = normalizeLink(item);
+  if (/^R\d/i.test(no)) return 'API';
+  if (link.includes('g2b.go.kr')) return 'API';
+  return 'EXTERNAL';
+}
 
   function updateStatsUI(stats, items) {
     const totalRaw = stats.totalCountRaw || stats.totalItemsFromApi || 0;
@@ -1867,6 +1893,7 @@
       const amount = item.amount || item.budget || '';
       const bizType = item.bizType || item.field || item.jobType || '';
       const manualTag = item.manualTag || '';
+      const createdBy = item.createdBy || item.createdByEmail || '';  // ★ 등록자
 
       // AI 필드는 "관련성·요약"만, 원본 필드(제목/URL 등)는 손대지 않음
       const aiText = item.aiResult || '';
@@ -1926,7 +1953,13 @@
       // 출처 뱃지
       const sourceBadge = document.createElement('span');
       sourceBadge.className = 'badge-source';
-      sourceBadge.textContent = source === 'API' ? '나라장터' : '외부수집';
+      if (source === 'API') {
+        sourceBadge.textContent = '나라장터';
+      } else if (source === 'SMART') {
+        sourceBadge.textContent = '스마트 등록';
+      } else {
+        sourceBadge.textContent = '외부수집';
+      }
       rightTop.appendChild(sourceBadge);
 
       // 수동 태그 있으면 표시
@@ -1972,13 +2005,16 @@
       metaGrid.className = 'bid-meta-grid';
 
       const metaItems = [
-        { label: '공고일', value: regDate },
-        { label: '입찰 마감', value: deadline },
-        { label: '개찰 예정', value: openDate },
-        { label: '추정(계약) 금액', value: amount },
-        { label: '출처', value: source === 'API' ? '나라장터' : '외부사이트' },
-        { label: '순번', value: (index + 1).toString() }
-      ];
+  { label: '공고일', value: regDate },
+  { label: '입찰 마감', value: deadline },
+  { label: '개찰 예정', value: openDate },
+  { label: '추정(계약) 금액', value: amount },
+  { label: '출처', value: source === 'API'
+      ? '나라장터'
+      : (source === 'SMART' ? '스마트 등록' : '외부사이트') },
+  { label: '등록자', value: createdBy || '-' },          // ★ 추가
+  { label: '순번', value: (index + 1).toString() }
+];
 
       metaItems.forEach(m => {
         const itemDiv = document.createElement('div');
@@ -2070,7 +2106,19 @@
         await createCorporateCalendarEventForBid(item); // server-side corporate calendar
       });
       btnBox.appendChild(btnCorpCal);
-
+      
+      // 🗑 삭제 버튼 (로그인 + 권한 체크는 deleteBid 내부에서 처리)
+      if (item.rowIndex) {
+        const btnDel = document.createElement('button');
+        btnDel.type = 'button';
+        btnDel.className = 'btn btn-danger btn-small';
+        btnDel.textContent = '삭제';
+        btnDel.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          await deleteBid(item);
+        });
+        btnBox.appendChild(btnDel);
+      }
 
       // 원문 보기 버튼
       if (link) {
@@ -2112,6 +2160,57 @@ async function handleSmartSubmit(e) {
     alert('본문 텍스트 또는 URL 중 하나는 입력해야 합니다.');
     return;
   }
+
+  // 🔒 스마트 등록은 로그인 필수
+  if (!accessToken || !loginUserEmail) {
+    alert('스마트 등록은 Google 로그인 후에만 사용할 수 있습니다.');
+    return;
+  }
+
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  if (submitBtn) submitBtn.classList.add('loading');
+
+  try {
+    setGlobalLoading(true, 'AI가 텍스트를 분석하여 한 행으로 정리 중입니다...');
+
+    const form = new URLSearchParams();
+    form.set('action', 'smart_add');
+    form.set('text', text);
+    form.set('fileUrl', urlRaw);
+    form.set('userEmail', loginUserEmail);   // ★ 등록자 이메일 전송
+
+    const res = await fetch(API_BASE, {
+      method: 'POST',
+      body: form
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('smart_add HTTP error:', res.status, errText);
+      alert('등록 중 HTTP 오류가 발생했습니다: ' + res.status);
+      return;
+    }
+
+    const json = await res.json();
+    console.log('smart_add response:', json);
+
+    if (json && json.result === 'success') {
+      alert('스마트 등록이 완료되었습니다.');
+      closeSmartModal();
+      document.getElementById('smartForm').reset();
+      await loadData();
+    } else {
+      console.error('smart_add 응답:', json);
+      alert('등록 중 오류가 발생했습니다. (상세는 콘솔 참조)');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('통신 오류: ' + err.message);
+  } finally {
+    if (submitBtn) submitBtn.classList.remove('loading');
+    setGlobalLoading(false);
+  }
+}
 
   // 서버는 fileUrl 하나의 문자열을 받아서 내부에서 줄바꿈/쉼표로 다시 나눕니다.
   const submitBtn = e.target.querySelector('button[type="submit"]');
@@ -2415,6 +2514,65 @@ async function handleSmartSubmit(e) {
        backdrop.classList.remove('active');
      }
 
+    // ---------------검색결과 및 등록 공고 삭제---------------
+
+async function deleteBid(item) {
+  if (!accessToken || !loginUserEmail) {
+    alert('삭제 기능은 Google 로그인 후에만 사용 가능합니다.');
+    return;
+  }
+  if (!item || !item.rowIndex) {
+    alert('행 정보가 없어 삭제할 수 없습니다.');
+    return;
+  }
+
+  const source = detectSource(item);
+  const createdBy = item.createdByEmail || item.createdBy || '';
+
+  // 스마트 등록: 등록자만 삭제
+  if (source === 'SMART' && createdBy && createdBy !== loginUserEmail) {
+    alert('스마트 등록 공고는 등록자만 삭제할 수 있습니다.');
+    return;
+  }
+
+  if (!confirm('정말 이 공고를 목록에서 삭제하시겠습니까?')) return;
+
+  try {
+    setGlobalLoading(true, '공고 삭제 중입니다...');
+
+    const params = new URLSearchParams();
+    params.set('action', 'delete_bid');
+    params.set('rowIndex', String(item.rowIndex));
+    params.set('source', source);
+    params.set('userEmail', loginUserEmail || '');
+
+    const res = await fetch(`${API_BASE}?${params.toString()}`, {
+      method: 'GET'
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('delete_bid HTTP error:', res.status, errText);
+      alert('삭제 실패: HTTP ' + res.status);
+      return;
+    }
+
+    const data = await res.json();
+    console.log('delete_bid response:', data);
+
+    if (data && data.result === 'success') {
+      alert('공고가 삭제되었습니다.');
+      await loadData();
+    } else {
+      alert('삭제 처리 결과를 해석하지 못했습니다.\n' + JSON.stringify(data));
+    }
+  } catch (err) {
+    console.error(err);
+    alert('삭제 중 오류: ' + err.message);
+  } finally {
+    setGlobalLoading(false);
+  }
+}
 
   // ---------------- Google Calendar 일정 등록 ----------------
 
@@ -2600,6 +2758,7 @@ async function handleSmartSubmit(e) {
 </script>
 </body>
 </html>
+
 
 
 
