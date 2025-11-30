@@ -2212,52 +2212,6 @@ async function handleSmartSubmit(e) {
   }
 }
 
-  // 서버는 fileUrl 하나의 문자열을 받아서 내부에서 줄바꿈/쉼표로 다시 나눕니다.
-  const submitBtn = e.target.querySelector('button[type="submit"]');
-  if (submitBtn) submitBtn.classList.add('loading');
-
-  try {
-    setGlobalLoading(true, 'AI가 텍스트를 분석하여 한 행으로 정리 중입니다...');
-
-    // ✅ JSON 대신 "폼 데이터"로 전송 → Content-Type이
-    //    application/x-www-form-urlencoded 가 되어 프리플라이트(OPTIONS)가 안 뜹니다.
-    const form = new URLSearchParams();
-    form.set('action', 'smart_add');
-    form.set('text', text);
-    form.set('fileUrl', urlRaw);
-
-    const res = await fetch(API_BASE, {
-      method: 'POST',
-      body: form                // ⚠️ headers 설정하지 마세요 (자동으로 form 인식)
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error('smart_add HTTP error:', res.status, errText);
-      alert('등록 중 HTTP 오류가 발생했습니다: ' + res.status);
-      return;
-    }
-
-    const json = await res.json();
-    console.log('smart_add response:', json);
-
-    if (json && json.result === 'success') {
-      alert('스마트 등록이 완료되었습니다.');
-      closeSmartModal();
-      document.getElementById('smartForm').reset();
-      await loadData();
-    } else {
-      console.error('smart_add 응답:', json);
-      alert('등록 중 오류가 발생했습니다. (상세는 콘솔 참조)');
-    }
-  } catch (err) {
-    console.error(err);
-    alert('통신 오류: ' + err.message);
-  } finally {
-    if (submitBtn) submitBtn.classList.remove('loading');
-    setGlobalLoading(false);
-  }
-}
 
   // ---------------- 2차 심화 분석 모달 ----------------
 
@@ -2758,6 +2712,7 @@ async function deleteBid(item) {
 </script>
 </body>
 </html>
+
 
 
 
