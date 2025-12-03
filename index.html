@@ -1832,7 +1832,7 @@
   const elTotalBr  = document.getElementById('statTotalBreakdown');
   const elFiltBr   = document.getElementById('statFilteredBreakdown');
   const elAiBr     = document.getElementById('statAiBreakdown');
-  const elReviewBr = document.getElementById('statReviewBreakdown');
+  const elReviewBr = document.getElementById('statSourceCounts');
 
   if (elTotalBr) {
     elTotalBr.textContent =
@@ -1855,37 +1855,20 @@
       `스마트등록 : ${aiSmart.toLocaleString()}`;
   }
 
-  if (elReviewBr) {
+    if (elReviewBr) {
     elReviewBr.innerHTML =
       `나라장터 공고 수 : ${keptApi.toLocaleString()}<br>` +
       `외부웹 수집 공고 수 : ${keptExternal.toLocaleString()}<br>` +
       `공고 스마트 등록 공고 수 : ${keptSmart.toLocaleString()}`;
   }
 
-  // (도넛 그래프 / 로그 출력 부분은 기존 코드 그대로 유지)
-  ...
+  console.log(
+    `[전체 통계] API원본:${apiRaw} / 검토대상:${keptTotal}` +
+    ` (API:${keptApi}, 외부:${keptExternal}, SMART:${keptSmart})` +
+    ` / AI요약:${aiTotal}`
+  );
 }
 
-
-        // === 출처별 통계(API / 외부웹 / 스마트 등록) ===
-    let apiCount = 0, externalCount = 0, smartCount = 0;
-    items.forEach(it => {
-      const s = detectSource(it);
-      if (s === 'API') apiCount++;
-      else if (s === 'SMART') smartCount++;
-      else externalCount++;
-    });
-
-    // 상단 카드(검토 대상 공고) 아래에 표시
-    const srcEl = document.getElementById('statSourceCounts');
-    if (srcEl) {
-      srcEl.innerHTML =
-        `나라장터 공고 수 : ${apiCount.toLocaleString()}<br>` +
-        `외부웹 수집 공고 수 : ${externalCount.toLocaleString()}<br>` +
-        `공고 스마트 등록 공고 수 : ${smartCount.toLocaleString()}`;
-    }
-
-    console.log(
       `[전체 통계] 원본:${totalRaw} / 시트:${items.length}` +
       ` (API:${apiCount}, 외부:${externalCount}, SMART:${smartCount})` +
       ` / 필터통과:${stats.totalKept || items.length}` +
@@ -2826,6 +2809,7 @@ async function deleteBid(item) {
 </script>
 </body>
 </html>
+
 
 
 
