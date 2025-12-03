@@ -1507,7 +1507,10 @@
   const text = document.getElementById('loginStatusText');
   if (!btn || !lbl || !dot || !text) return;
 
-  if (connected && accessToken) {
+  // "로그인 상태" 판단 (기존 로직 유지)
+  const isLoggedIn = !!(connected && accessToken);
+
+  if (isLoggedIn) {
     lbl.textContent = '로그아웃';
     btn.disabled = false;
     dot.classList.add('connected');
@@ -1520,7 +1523,14 @@
     dot.classList.remove('connected');
     text.textContent = '캘린더 미연동';
   }
+
+  // 🔹 여기서 로그인 전용 버튼들 숨기기/보이기
+  const loginOnlyEls = document.querySelectorAll('.login-only');
+  loginOnlyEls.forEach(el => {
+    el.style.display = isLoggedIn ? '' : 'none';
+  });
 }
+
 
   function saveToken(token, expiresInSec) {
     if (!token) {
@@ -2088,7 +2098,7 @@
       // 1) 내 캘린더 (사용자 primary 캘린더, 프론트 OAuth 사용)
       const btnMyCal = document.createElement('button');
       btnMyCal.type = 'button';
-      btnMyCal.className = 'btn btn-ghost btn-small';
+      btnMyCal.className = 'btn btn-ghost btn-small login-only';
       btnMyCal.textContent = '내 캘린더';
       btnMyCal.addEventListener('click', async (e) => {
         e.stopPropagation();
@@ -2096,10 +2106,11 @@
       });
       btnBox.appendChild(btnMyCal);
 
+
       // 2) 회사 공용 입찰 캘린더 (서버 Apps Script 사용)
       const btnCorpCal = document.createElement('button');
       btnCorpCal.type = 'button';
-      btnCorpCal.className = 'btn btn-ghost btn-small';
+      btnCorpCal.className = 'btn btn-ghost btn-small login-only';
       btnCorpCal.textContent = '회사 캘린더';
       btnCorpCal.addEventListener('click', async (e) => {
         e.stopPropagation();
@@ -2111,7 +2122,7 @@
       if (item.rowIndex) {
         const btnDel = document.createElement('button');
         btnDel.type = 'button';
-        btnDel.className = 'btn btn-danger btn-small';
+        btnDel.className = 'btn btn-danger btn-small login-only';
         btnDel.textContent = '삭제';
         btnDel.addEventListener('click', async (e) => {
           e.stopPropagation();
@@ -2136,10 +2147,13 @@
 
       inner.appendChild(footer);
 
-      card.appendChild(inner);
-      list.appendChild(card);
-    });
-  }
+          card.appendChild(inner);
+    list.appendChild(card);
+  });
+
+  // 🔹 새로 그려진 버튼들에도 로그인 상태 반영
+  updateLoginUI(!!accessToken);
+}
 
   // ---------------- 스마트 등록 모달 ----------------
 
@@ -2712,6 +2726,7 @@ async function deleteBid(item) {
 </script>
 </body>
 </html>
+
 
 
 
