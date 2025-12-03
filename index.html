@@ -1189,6 +1189,9 @@
       </div>
       <div id="statTotalRaw" class="summary-value">0</div>
       <div class="summary-sub">나라장터 기준 최근 7일 합계</div>
+      <div id="statTotalBreakdown" style="font-size:11px;margin-top:2px;">
+      나라장터 : 0 / 외부웹 : 0 / 스마트등록 : 0
+    </div>
     </article>
 
     <article class="summary-card">
@@ -1198,6 +1201,9 @@
       </div>
       <div id="statFiltered" class="summary-value">0</div>
       <div class="summary-sub">패턴 필터 후 남은 공고</div>
+      <div id="statFilteredBreakdown" style="font-size:11px;margin-top:2px;">
+      나라장터 : 0 / 외부웹 : 0 / 스마트등록 : 0
+    </div>
     </article>
 
     <article class="summary-card">
@@ -1207,6 +1213,9 @@
       </div>
       <div id="statAi" class="summary-value">0</div>
       <div class="summary-sub">Gemini 1차 요약 건수</div>
+      <div id="statAiBreakdown" style="font-size:11px;margin-top:2px;">
+      나라장터 : 0 / 외부웹 : 0 / 스마트등록 : 0
+    </div>
     </article>
 
     <article class="summary-card">
@@ -1766,25 +1775,97 @@
 }
 
   function updateStatsUI(stats, items) {
-    const totalRaw = stats.totalCountRaw || stats.totalItemsFromApi || 0;
-    const elTotal   = document.getElementById('statTotalRaw');
-    const elFiltered = document.getElementById('statFiltered');
-    const elAi       = document.getElementById('statAi');
+  // 1) 기본 값
+  const apiRaw = stats.totalCountRaw || stats.totalItemsFromApi || 0;
 
-    if (elTotal) elTotal.textContent = totalRaw.toLocaleString();
-    if (elFiltered)
-      elFiltered.textContent =
-        (stats.totalKept || items.length || 0).toLocaleString();
-    if (elAi) elAi.textContent = (stats.totalAiCalls || 0).toLocaleString();
+  const elTotal    = document.getElementById('statTotalRaw');
+  const elFiltered = document.getElementById('statFiltered');
+  const elAi       = document.getElementById('statAi');
 
-    if (document.getElementById('statPeriod')) {
-      document.getElementById('statPeriod').textContent =
-        `기간: 최근 ${stats.daysBack || 7}일`;
+  // 2) 출처별 카운트 계산 (현재 시트에 올라와 있는 공고 기준)
+  let keptApi = 0, keptExternal = 0, keptSmart = 0;
+  let aiApi   = 0, aiExternal   = 0, aiSmart   = 0;
+
+  items.forEach(it => {
+    const src   = detectSource(it);  // 'API' | 'EXTERNAL' | 'SMART'
+    const hasAi = !!(it.aiResult || it.aiSummary);
+
+    if (src === 'API') {
+      keptApi++;
+      if (hasAi) aiApi++;
+    } else if (src === 'SMART') {
+      keptSmart++;
+      if (hasAi) aiSmart++;
+    } else {
+      keptExternal++;
+      if (hasAi) aiExternal++;
     }
-    if (document.getElementById('statLastUpdate')) {
-      document.getElementById('statLastUpdate').textContent =
-        `Last: ${stats.finishedAtText || '-'}`;
-    }
+  });
+
+  const keptTotal = keptApi + keptExternal + keptSmart;
+  const aiTotal   = aiApi   + aiExternal   + aiSmart;
+
+  // 외부 / 스마트의 "원본" 수치는 없으므로
+  // 일단 "현재 검토 대상" 수치와 동일하게 사용
+  const externalRaw = stats.externalRaw || keptExternal;
+  const smartRaw    = stats.smartRaw    || keptSmart;
+
+  const totalAllRaw = apiRaw + externalRaw + smartRaw;
+
+  // 3) 상단 큰 숫자 채우기
+  if (elTotal)    elTotal.textContent    = totalAllRaw.toLocaleString();
+  if (elFiltered) elFiltered.textContent = keptTotal.toLocaleString();
+  if (elAi)       elAi.textContent       = aiTotal.toLocaleString();
+
+  // 기간 텍스트
+  if (document.getElementById('statPeriod')) {
+    document.getElementById('statPeriod').textContent =
+      `기간: 최근 ${stats.daysBack || 7}일`;
+  }
+  if (document.getElementById('statLastUpdate')) {
+    document.getElementById('statLastUpdate').textContent =
+      `Last: ${stats.finishedAtText || '-'}`;
+  }
+
+  // 4) 출처별 브레이크다운 텍스트 채우기
+
+  const elTotalBr  = document.getElementById('statTotalBreakdown');
+  const elFiltBr   = document.getElementById('statFilteredBreakdown');
+  const elAiBr     = document.getElementById('statAiBreakdown');
+  const elReviewBr = document.getElementById('statReviewBreakdown');
+
+  if (elTotalBr) {
+    elTotalBr.textContent =
+      `나라장터 : ${apiRaw.toLocaleString()} / ` +
+      `외부웹 : ${externalRaw.toLocaleString()} / ` +
+      `스마트등록 : ${smartRaw.toLocaleString()}`;
+  }
+
+  if (elFiltBr) {
+    elFiltBr.textContent =
+      `나라장터 : ${keptApi.toLocaleString()} / ` +
+      `외부웹 : ${keptExternal.toLocaleString()} / ` +
+      `스마트등록 : ${keptSmart.toLocaleString()}`;
+  }
+
+  if (elAiBr) {
+    elAiBr.textContent =
+      `나라장터 : ${aiApi.toLocaleString()} / ` +
+      `외부웹 : ${aiExternal.toLocaleString()} / ` +
+      `스마트등록 : ${aiSmart.toLocaleString()}`;
+  }
+
+  if (elReviewBr) {
+    elReviewBr.innerHTML =
+      `나라장터 공고 수 : ${keptApi.toLocaleString()}<br>` +
+      `외부웹 수집 공고 수 : ${keptExternal.toLocaleString()}<br>` +
+      `공고 스마트 등록 공고 수 : ${keptSmart.toLocaleString()}`;
+  }
+
+  // (도넛 그래프 / 로그 출력 부분은 기존 코드 그대로 유지)
+  ...
+}
+
 
         // === 출처별 통계(API / 외부웹 / 스마트 등록) ===
     let apiCount = 0, externalCount = 0, smartCount = 0;
@@ -2745,6 +2826,7 @@ async function deleteBid(item) {
 </script>
 </body>
 </html>
+
 
 
 
