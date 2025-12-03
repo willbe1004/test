@@ -1215,9 +1215,14 @@
         <div class="summary-icon">📡</div>
       </div>
       <div id="statApi" class="summary-value">0</div>
-      <div class="summary-sub">
-        <span id="statPeriod" class="period-label">기간: 최근 7 일</span>
-      </div>
+        <div class="summary-sub">
+    <span id="statPeriod" class="period-label">기간: 최근 7 일</span><br />
+    <span id="statSourceCounts" class="period-label">
+      나라장터 공고 수 : 0<br />
+      외부웹 수집 공고 수 : 0<br />
+      공고 스마트 등록 공고 수 : 0
+    </span>
+  </div>
     </article>
 
     <article class="donut-card">
@@ -1781,26 +1786,29 @@
         `Last: ${stats.finishedAtText || '-'}`;
     }
 
-    // Donut 회전 속도
-    let highOrMid = 0;
+        // === 출처별 통계(API / 외부웹 / 스마트 등록) ===
+    let apiCount = 0, externalCount = 0, smartCount = 0;
     items.forEach(it => {
-      if (/\[(상|중)\]/.test(it.aiResult || '')) highOrMid++;
-    });
-    const ratio = items.length ? highOrMid / items.length : 0;
-    const ring = document.getElementById('donutRing');
-    if (ring) {
-      ring.style.animationDuration = Math.max(4, 10 - ratio * 6) + 's';
-    }
-
-    // 전체 통계 로그
-    let apiCount = 0, externalCount = 0;
-    items.forEach(it => {
-      if (detectSource(it) === 'API') apiCount++;
+      const s = detectSource(it);
+      if (s === 'API') apiCount++;
+      else if (s === 'SMART') smartCount++;
       else externalCount++;
     });
+
+    // 상단 카드(검토 대상 공고) 아래에 표시
+    const srcEl = document.getElementById('statSourceCounts');
+    if (srcEl) {
+      srcEl.innerHTML =
+        `나라장터 공고 수 : ${apiCount.toLocaleString()}<br>` +
+        `외부웹 수집 공고 수 : ${externalCount.toLocaleString()}<br>` +
+        `공고 스마트 등록 공고 수 : ${smartCount.toLocaleString()}`;
+    }
+
     console.log(
-      `[전체 통계] 원본:${totalRaw} / 시트:${items.length} (API:${apiCount}, 외부:${externalCount}) ` +
-      `/ 필터통과:${stats.totalKept || items.length} / AI요약:${stats.totalAiCalls || 0}`
+      `[전체 통계] 원본:${totalRaw} / 시트:${items.length}` +
+      ` (API:${apiCount}, 외부:${externalCount}, SMART:${smartCount})` +
+      ` / 필터통과:${stats.totalKept || items.length}` +
+      ` / AI요약:${stats.totalAiCalls || 0}`
     );
   }
 
@@ -1934,12 +1942,23 @@
         badgeRegion.textContent = region;
         leftTop.appendChild(badgeRegion);
       }
-      if (no) {
-        const bidNoSpan = document.createElement('span');
-        bidNoSpan.className = 'bid-no';
-        bidNoSpan.textContent = '#' + no;
-        leftTop.appendChild(bidNoSpan);
+      // 공고번호 표시
+      let displayNo = no;
+
+      // 나라장터가 아닌데 번호가 없거나 0 / 00 / 000 형태면 → "외부(번호없음)"로 표시
+      if (source !== 'API') {
+        if (!displayNo || /^0+$/.test(String(displayNo))) {
+          displayNo = '외부(번호없음)';
+        }
       }
+
+if (displayNo) {
+  const bidNoSpan = document.createElement('span');
+  bidNoSpan.className = 'bid-no';
+  bidNoSpan.textContent = '#' + displayNo;
+  leftTop.appendChild(bidNoSpan);
+}
+
       topRow.appendChild(leftTop);
 
       const rightTop = document.createElement('div');
@@ -2726,6 +2745,7 @@ async function deleteBid(item) {
 </script>
 </body>
 </html>
+
 
 
 
