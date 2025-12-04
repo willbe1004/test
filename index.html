@@ -1775,19 +1775,17 @@
 }
 
   function updateStatsUI(stats, items) {
-  // 1) 기본 값
-  const apiRaw = stats.totalCountRaw || stats.totalItemsFromApi || 0;
+  const apiRaw = stats.totalCountRaw || stats.totalItemsFromApi || stats.totalRaw || 0;
 
   const elTotal    = document.getElementById('statTotalRaw');
   const elFiltered = document.getElementById('statFiltered');
   const elAi       = document.getElementById('statAi');
 
-  // 2) 출처별 카운트 계산 (현재 시트에 올라와 있는 공고 기준)
   let keptApi = 0, keptExternal = 0, keptSmart = 0;
   let aiApi   = 0, aiExternal   = 0, aiSmart   = 0;
 
   items.forEach(it => {
-    const src   = detectSource(it);  // 'API' | 'EXTERNAL' | 'SMART'
+    const src   = detectSource(it);
     const hasAi = !!(it.aiResult || it.aiSummary);
 
     if (src === 'API') {
@@ -1805,30 +1803,26 @@
   const keptTotal = keptApi + keptExternal + keptSmart;
   const aiTotal   = aiApi   + aiExternal   + aiSmart;
 
-  // 외부 / 스마트의 "원본" 수치는 없으므로
-  // 일단 "현재 검토 대상" 수치와 동일하게 사용
+  // 외부/스마트 raw 통계가 서버에서 안오면, 현재 시트 건수로 대체
   const externalRaw = stats.externalRaw || keptExternal;
   const smartRaw    = stats.smartRaw    || keptSmart;
-
   const totalAllRaw = apiRaw + externalRaw + smartRaw;
 
-  // 3) 상단 큰 숫자 채우기
   if (elTotal)    elTotal.textContent    = totalAllRaw.toLocaleString();
   if (elFiltered) elFiltered.textContent = keptTotal.toLocaleString();
   if (elAi)       elAi.textContent       = aiTotal.toLocaleString();
 
-  // 기간 텍스트
-  if (document.getElementById('statPeriod')) {
-    document.getElementById('statPeriod').textContent =
-      `기간: 최근 ${stats.daysBack || 7}일`;
+  // 기간 / 마지막 업데이트
+  const elPeriod = document.getElementById('statPeriod');
+  if (elPeriod) {
+    elPeriod.textContent = `기간: 최근 ${stats.daysBack || 7}일`;
   }
-  if (document.getElementById('statLastUpdate')) {
-    document.getElementById('statLastUpdate').textContent =
-      `Last: ${stats.finishedAtText || '-'}`;
+  const elLast = document.getElementById('statLastUpdate');
+  if (elLast) {
+    elLast.textContent = `Last: ${stats.finishedAtText || '-'}`;
   }
 
-  // 4) 출처별 브레이크다운 텍스트 채우기
-
+  // 카드별 브레이크다운
   const elTotalBr  = document.getElementById('statTotalBreakdown');
   const elFiltBr   = document.getElementById('statFilteredBreakdown');
   const elAiBr     = document.getElementById('statAiBreakdown');
@@ -1855,7 +1849,7 @@
       `스마트등록 : ${aiSmart.toLocaleString()}`;
   }
 
-    if (elReviewBr) {
+  if (elReviewBr) {
     elReviewBr.innerHTML =
       `나라장터 공고 수 : ${keptApi.toLocaleString()}<br>` +
       `외부웹 수집 공고 수 : ${keptExternal.toLocaleString()}<br>` +
@@ -1869,31 +1863,27 @@
   );
 }
 
-      `[전체 통계] 원본:${totalRaw} / 시트:${items.length}` +
-      ` (API:${apiCount}, 외부:${externalCount}, SMART:${smartCount})` +
-      ` / 필터통과:${stats.totalKept || items.length}` +
-      ` / AI요약:${stats.totalAiCalls || 0}`
-    );
-  }
 
   // 현재 화면에 보이는 건수 반영
   function updateVisibleCount(visibleItems) {
-    const n = visibleItems.length || 0;
-    const statApiEl   = document.getElementById('statApi');
-    const donutMainEl = document.getElementById('donutMain');
-    if (statApiEl) statApiEl.textContent = n.toLocaleString();
-    if (donutMainEl) donutMainEl.textContent = n.toLocaleString();
+  const n = visibleItems.length || 0;
+  const statApiEl   = document.getElementById('statApi');
+  const donutMainEl = document.getElementById('donutMain');
+  if (statApiEl)   statApiEl.textContent   = n.toLocaleString();
+  if (donutMainEl) donutMainEl.textContent = n.toLocaleString();
 
-    const resultBreakdownEl = document.getElementById('resultBreakdown');
-    if (resultBreakdownEl) {
-      let apiCount = 0, externalCount = 0;
-      visibleItems.forEach(it => {
-        if (detectSource(it) === 'API') apiCount++;
-        else externalCount++;
-      });
-      resultBreakdownEl.textContent = `연동 사이트 ${apiCount} / 외부 사이트 ${externalCount}`;
-    }
+  const resultBreakdownEl = document.getElementById('resultBreakdown');
+  if (resultBreakdownEl) {
+    let apiCount = 0, externalCount = 0;
+    visibleItems.forEach(it => {
+      if (detectSource(it) === 'API') apiCount++;
+      else externalCount++;  // SMART + EXTERNAL 모두 외부 쪽으로
+    });
+    resultBreakdownEl.textContent =
+      `API ${apiCount} / 외부 ${externalCount}`;
   }
+}
+
 
   // ---------------- 필터 적용 ----------------
 
@@ -2809,6 +2799,7 @@ async function deleteBid(item) {
 </script>
 </body>
 </html>
+
 
 
 
