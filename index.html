@@ -1411,7 +1411,7 @@
         <div class="summary-icon">📡</div>
       </div>
       <div id="statApi" class="summary-value">0</div>
-      <div class="summary-sub">기간: 최근 7 일</div>
+      <div id="statPeriod" class="summary-sub">기간: 최근 7일</div>
       <div id="statSourceCounts" style="font-size:11px;margin-top:2px;">
       나라장터 : 0 / 외부웹 : 0 / 스마트등록 : 0
     </div>
@@ -1500,15 +1500,6 @@
           <span id="statLastUpdate">Last Update: -</span>
         </div>
       </header>
-
-      <div id="bidList"></div>
-    </section>
-    
-    <section class="bid-list-panel">
-      <header class="panel-header">
-        ...
-      </header>
-
       <!-- 왼쪽(상단) 필터 칩 세트 -->
       <div class="side-filters">
         <!-- 상태 필터 -->
@@ -2250,46 +2241,6 @@
 
   // 관련성 등급: 시트 컬럼(relevanceGrade)이 있으면 우선 사용
   // 없으면 aiResult / aiSummary 텍스트에서 추론
-  function getRelevanceGrade(item) {
-    const fromCol = (item.relevanceGrade || item.relevance || '').toString().trim();
-    if (fromCol) return fromCol; // "상" / "중" / "하" 기대
-
-    const txt = (item.aiResult || item.aiSummary || '').toString();
-    if (/관련성\s*상/.test(txt) || /\[.*상.*\]/.test(txt)) return '상';
-    if (/관련성\s*중/.test(txt) || /\[.*중.*\]/.test(txt)) return '중';
-    if (!txt) return '';
-    return '하';
-  }
-
-  // 영업 경로: 시트 컬럼(salesRoute)을 기본으로 사용
-  function getSalesRoute(item) {
-    return (item.salesRoute || item.sales_route || '').toString().trim();
-  }
-
-  // 정렬용 마감일 타임스탬프 (없으면 0)
-  function getDeadlineTime(item) {
-    const s = String(item.deadline || item.closeDate || '').trim();
-    if (!s) return 0;
-
-    const dateMatch = s.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
-    if (!dateMatch) return 0;
-
-    const y  = parseInt(dateMatch[1], 10);
-    const mo = parseInt(dateMatch[2], 10) - 1;
-    const d  = parseInt(dateMatch[3], 10);
-
-    const timeMatch = s.match(/(\d{1,2}):(\d{2})/);
-    let hh = 23, mm = 59;
-    if (timeMatch) {
-      hh = parseInt(timeMatch[1], 10);
-      mm = parseInt(timeMatch[2], 10);
-    }
-
-    const dt = new Date(y, mo, d, hh, mm, 59);
-    return dt.getTime();
-  }
-
-
   
   function updateStatsUI(stats, items) {
   const apiRaw = stats.totalCountRaw || stats.totalItemsFromApi || stats.totalRaw || 0;
@@ -3518,6 +3469,7 @@ async function deleteBid(item) {
 </script>
 </body>
 </html>
+
 
 
 
