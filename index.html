@@ -1047,6 +1047,46 @@
 
     .deep-attachments-list a:hover { text-decoration: underline; }
 
+
+    /* --- 3/3 확장: 조례/용량/대책문서 --- */
+    .deep-kv-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    @media (max-width: 720px) {
+      .deep-kv-grid { grid-template-columns: 1fr; }
+    }
+
+    .deep-small-block {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+    }
+
+    .deep-report-row {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .deep-report-left { min-width: 0; }
+    .deep-report-link {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text-soft);
+      word-break: break-all;
+    }
+    .deep-report-link a {
+      color: #c6e4ff;
+      text-decoration: none;
+    }
+    .deep-report-link a:hover { text-decoration: underline; }
+
     .deep-footer {
       padding: 10px 22px 16px;
       border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -1766,6 +1806,41 @@
       <section>
         <div class="deep-section-title">한국수안 대응 제안</div>
         <div id="deepSuggestion" class="deep-summary-text"></div>
+      </section>
+
+      <section>
+        <div class="deep-section-title">조례 / 용량 / 대책문서</div>
+
+        <div class="deep-kv-grid">
+          <div>
+            <div class="deep-grid-item-label">대지면적(숫자)</div>
+            <div id="deepAreaNum" class="deep-grid-item-value">-</div>
+          </div>
+          <div>
+            <div class="deep-grid-item-label">대상 구분</div>
+            <div id="deepTargetClass" class="deep-grid-item-value">-</div>
+          </div>
+        </div>
+
+        <div class="deep-small-block">
+          <div class="deep-grid-item-label">조례 근거</div>
+          <div id="deepOrdinanceBasis" class="deep-summary-text" style="margin-top:6px;"></div>
+        </div>
+
+        <div class="deep-small-block">
+          <div class="deep-grid-item-label">용량 산정 요약</div>
+          <div id="deepCapacitySummary" class="deep-summary-text" style="margin-top:6px;"></div>
+        </div>
+
+        <div class="deep-report-row">
+          <div class="deep-report-left">
+            <div class="deep-grid-item-label">우수유출 저감대책 문서</div>
+            <div id="deepMitigationLink" class="deep-report-link">-</div>
+          </div>
+          <button id="btnMitigationReport" class="btn btn-primary btn-small" type="button">
+            <span class="icon">📝</span> 대책문서 생성
+          </button>
+        </div>
       </section>
 
       <section>
@@ -2839,6 +2914,20 @@
       });
       btnBox.appendChild(btnDeep);
 
+      // 대책문서(있을 때만)
+      const reportUrl = item.mitigationDocUrl || item.mitigationUrl || item.mitigationReportUrl || item.reportUrl || item.docUrl || '';
+      if (reportUrl) {
+        const btnReport = document.createElement('button');
+        btnReport.type = 'button';
+        btnReport.className = 'btn btn-ghost btn-small';
+        btnReport.textContent = '대책문서';
+        btnReport.addEventListener('click', (e) => {
+          e.stopPropagation();
+          window.open(reportUrl, '_blank', 'noopener,noreferrer');
+        });
+        btnBox.appendChild(btnReport);
+      }
+
       // 내 캘린더
       const btnMyCal = document.createElement('button');
       btnMyCal.type = 'button';
@@ -3004,6 +3093,14 @@ async function handleSmartSubmit(e) {
     const elFooterInfo  = document.getElementById('deepFooterInfo');
     const elRisk        = document.getElementById('deepRisk');
 
+    const elAreaNum     = document.getElementById('deepAreaNum');
+    const elTargetClass = document.getElementById('deepTargetClass');
+    const elOrdinance   = document.getElementById('deepOrdinanceBasis');
+    const elCapacity    = document.getElementById('deepCapacitySummary');
+    const elMitigation  = document.getElementById('deepMitigationLink');
+    const btnMitigation = document.getElementById('btnMitigationReport');
+
+
     // 제목/메타 기본 세팅
     if (elTitle) elTitle.textContent = title;
     if (elBadges) elBadges.innerHTML = '';
@@ -3029,6 +3126,22 @@ async function handleSmartSubmit(e) {
     if (elFooterInfo) elFooterInfo.textContent = '';
     if (elRisk) elRisk.textContent = '';
 
+    if (elAreaNum) elAreaNum.textContent = '-';
+    if (elTargetClass) elTargetClass.textContent = '-';
+    if (elOrdinance) elOrdinance.textContent = '';
+    if (elCapacity) elCapacity.textContent = '';
+    if (elMitigation) elMitigation.textContent = '-';
+
+    const canMakeReport = !!(item && (item.rowIndex || item.no));
+    if (btnMitigation) {
+      btnMitigation.disabled = !canMakeReport;
+      btnMitigation.classList.remove('loading');
+      btnMitigation.classList.add('btn-primary');
+      btnMitigation.classList.remove('btn-ghost');
+      btnMitigation.innerHTML = '<span class="icon">📝</span> 대책문서 생성';
+    }
+
+
     if (elAttachEmpty) elAttachEmpty.style.display = 'block';
     if (elAttachNote)  elAttachNote.style.display  = 'none';
 
@@ -3046,11 +3159,13 @@ async function handleSmartSubmit(e) {
 
       const params = new URLSearchParams();
       params.set('action', 'deepAnalyze');
+      if (item.rowIndex) params.set('rowIndex', String(item.rowIndex));
       if (item.no) params.set('no', String(item.no));
       if (link)    params.set('link', link);
       if (title)   params.set('title', title);
       if (client)  params.set('client', client);
       if (agency)  params.set('agency', agency);
+      if (region)  params.set('region', region);
 
       const res = await fetch(`${API_BASE}?${params.toString()}`, {
         method: 'GET'
@@ -3067,6 +3182,126 @@ async function handleSmartSubmit(e) {
       const data = await res.json();
       const deep = data.deep || {};
       const attachments = data.attachments || [];
+
+      // --- 조례/용량/대책문서 정보 표시(확장) ---
+      const pick = (...vals) => vals.find(v => v !== undefined && v !== null && String(v).trim() !== '');
+      const formatTargetClass = (tc) => {
+        const v = String(tc || '').toLowerCase();
+        if (v === 'direct') return '직접 대상(<=소규모)';
+        if (v === 'review') return '확대 검토(<=확대기준)';
+        if (v === 'large')  return '대형(>확대기준)';
+        if (v) return tc;
+        return '-';
+      };
+
+      const areaNum = pick(deep.siteAreaSqm, deep.siteAreaM2, deep.siteArea, data.siteAreaSqm, data.siteAreaM2);
+      const targetClass = pick(deep.targetClass, deep.target, data.targetClass);
+
+      const ordinanceBasis = pick(deep.ordinanceBasis,
+                                  (data.ordinanceInfo && (data.ordinanceInfo.basisSummary || data.ordinanceInfo.ordinanceBasis)),
+                                  data.ordinanceBasis);
+
+      const capTon = pick(deep.capacityTon, deep.recommendedCapacityTon, deep.estimatedTon, deep.estimateTon, deep.ton);
+      const capSummary = pick(deep.capacityCalcSummary, deep.capacitySummary, deep.capacityRationale, deep.capacityCalc);
+
+      if (elAreaNum) elAreaNum.textContent = areaNum ? String(areaNum).replace(/[^\d.]/g, '') : '-';
+      if (elTargetClass) elTargetClass.textContent = formatTargetClass(targetClass);
+      if (elOrdinance) elOrdinance.textContent = ordinanceBasis ? String(ordinanceBasis) : '확인필요';
+      if (elCapacity) {
+        if (capTon || capSummary) {
+          elCapacity.textContent =
+            (capTon ? ('권장/예상 용량: ' + String(capTon).toString().replace(/[^\d.]/g, '') + '톤\n') : '') +
+            (capSummary ? String(capSummary) : '');
+        } else {
+          elCapacity.textContent = '확인필요';
+        }
+      }
+
+      let reportUrl = pick(deep.mitigationDocUrl, deep.mitigationDocURL, deep.mitigationReportUrl,
+                           item.mitigationDocUrl, item.mitigationDocURL, item.mitigationUrl, item.reportUrl, item.docUrl);
+
+      const renderReportLink = () => {
+        if (!elMitigation) return;
+        elMitigation.innerHTML = '';
+        if (reportUrl) {
+          const a = document.createElement('a');
+          a.href = reportUrl;
+          a.target = '_blank';
+          a.rel = 'noreferrer noopener';
+          a.textContent = reportUrl;
+          elMitigation.appendChild(a);
+        } else {
+          elMitigation.textContent = '아직 생성되지 않았습니다.';
+        }
+
+        if (btnMitigation) {
+          if (reportUrl) {
+            btnMitigation.classList.remove('btn-primary');
+            btnMitigation.classList.add('btn-ghost');
+            btnMitigation.innerHTML = '<span class="icon">🔗</span> 대책문서 열기';
+          } else {
+            btnMitigation.classList.add('btn-primary');
+            btnMitigation.classList.remove('btn-ghost');
+            btnMitigation.innerHTML = '<span class="icon">📝</span> 대책문서 생성';
+          }
+        }
+      };
+
+      renderReportLink();
+
+      if (btnMitigation) {
+        btnMitigation.onclick = async () => {
+          const canMakeReport = !!(item && (item.rowIndex || item.no));
+          if (!canMakeReport) return;
+
+          // 이미 있으면 열기
+          if (reportUrl) {
+            window.open(reportUrl, '_blank', 'noopener,noreferrer');
+            return;
+          }
+
+          btnMitigation.classList.add('loading');
+          try {
+            setGlobalLoading(true, '우수유출 저감대책 문서를 생성 중입니다...');
+
+            const p2 = new URLSearchParams();
+            p2.set('action', 'generate_mitigation_report');
+            if (item.rowIndex) p2.set('rowIndex', String(item.rowIndex));
+            if (item.no) p2.set('no', String(item.no));
+
+            const r2 = await fetch(`${API_BASE}?${p2.toString()}`, { method: 'GET' });
+            if (!r2.ok) {
+              const t = await r2.text();
+              console.error('generate_mitigation_report HTTP error:', r2.status, t);
+              alert('대책문서 생성 실패: HTTP ' + r2.status);
+              return;
+            }
+
+            const j2 = await r2.json();
+            if (!j2 || !j2.ok || !j2.docUrl) {
+              console.error('generate_mitigation_report response:', j2);
+              alert('대책문서 생성 실패: 서버 응답 오류');
+              return;
+            }
+
+            reportUrl = j2.docUrl;
+            // 현재 item에도 저장해두면 리스트에서도 사용 가능
+            item.mitigationDocUrl = reportUrl;
+            renderReportLink();
+            applyFilter(); // 리스트 갱신
+
+            // 즉시 열기
+            window.open(reportUrl, '_blank', 'noopener,noreferrer');
+          } catch (e) {
+            console.error(e);
+            alert('대책문서 생성 중 오류: ' + e.message);
+          } finally {
+            btnMitigation.classList.remove('loading');
+            setGlobalLoading(false);
+          }
+        };
+      }
+
 
       // 뱃지 영역 다시 구성
       if (elBadges) {
@@ -3469,19 +3704,5 @@ async function deleteBid(item) {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
