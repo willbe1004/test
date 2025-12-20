@@ -3212,6 +3212,10 @@ async function handleSmartSubmit(e) {
 
       const data = await res.json();
       const deep = data.deep || data.aiReport || data.report || {};
+      // JSON 파싱이 실패해 rawText로 내려오는 경우에도 화면에 표시
+      if (deep && deep.rawText && !deep.summary2) deep.summary2 = deep.rawText;
+      if (deep && deep._parseError) console.warn('AI JSON parse warning:', deep._parseError);
+
       const aiReport = deep;
       const attachments = data.attachments || deep.attachments || [];
 
