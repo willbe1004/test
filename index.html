@@ -1188,7 +1188,7 @@
         <div class="summary-icon">📄</div>
       </div>
       <div id="statTotalRaw" class="summary-value">0</div>
-      <div class="summary-sub">나라장터 API 기준 최근 7일 합계</div>
+      <div class="summary-sub">나라장터 기준 최근 7일 합계</div>
     </article>
 
     <article class="summary-card">
@@ -1658,7 +1658,7 @@
     const btn = document.getElementById('btnRefresh');
     btn.classList.add('loading');
     try {
-      setGlobalLoading(true, '나라장터 API 재조회 및 AI 필터링 중...');
+      setGlobalLoading(true, '나라장터 재조회 및 AI 필터링 중...');
       await fetch(API_BASE + '?action=updateAll');
       await loadData();
     } catch (e) {
@@ -1783,7 +1783,7 @@
         if (detectSource(it) === 'API') apiCount++;
         else externalCount++;
       });
-      resultBreakdownEl.textContent = `API ${apiCount} / 외부 ${externalCount}`;
+      resultBreakdownEl.textContent = `연동 사이트 ${apiCount} / 외부 사이트 ${externalCount}`;
     }
   }
 
@@ -1926,7 +1926,7 @@
       // 출처 뱃지
       const sourceBadge = document.createElement('span');
       sourceBadge.className = 'badge-source';
-      sourceBadge.textContent = source === 'API' ? '나라장터 API' : '외부수집';
+      sourceBadge.textContent = source === 'API' ? '나라장터' : '외부수집';
       rightTop.appendChild(sourceBadge);
 
       // 수동 태그 있으면 표시
@@ -2048,16 +2048,29 @@
       });
       btnBox.appendChild(btnDeep);
 
-      // 일정 등록 버튼 (캘린더 연동 사용)
-      const btnCalendar = document.createElement('button');
-      btnCalendar.type = 'button';
-      btnCalendar.className = 'btn btn-ghost btn-small';
-      btnCalendar.textContent = '일정 등록';
-      btnCalendar.addEventListener('click', async (e) => {
+      // 일정 등록 버튼들
+      // 1) 내 캘린더 (사용자 primary 캘린더, 프론트 OAuth 사용)
+      const btnMyCal = document.createElement('button');
+      btnMyCal.type = 'button';
+      btnMyCal.className = 'btn btn-ghost btn-small';
+      btnMyCal.textContent = '내 캘린더';
+      btnMyCal.addEventListener('click', async (e) => {
         e.stopPropagation();
-        await createCalendarEventForBid(item);
+        await createCalendarEventForBid(item);  // personal calendar
       });
-      btnBox.appendChild(btnCalendar);
+      btnBox.appendChild(btnMyCal);
+
+      // 2) 회사 공용 입찰 캘린더 (서버 Apps Script 사용)
+      const btnCorpCal = document.createElement('button');
+      btnCorpCal.type = 'button';
+      btnCorpCal.className = 'btn btn-ghost btn-small';
+      btnCorpCal.textContent = '회사 캘린더';
+      btnCorpCal.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await createCorporateCalendarEventForBid(item); // server-side corporate calendar
+      });
+      btnBox.appendChild(btnCorpCal);
+
 
       // 원문 보기 버튼
       if (link) {
@@ -2139,147 +2152,269 @@ async function handleSmartSubmit(e) {
 
   // ---------------- 2차 심화 분석 모달 ----------------
 
-  function openDeepModal(item) {
+  async function openDeepModal(item) {
     const backdrop = document.getElementById('deepModalBackdrop');
     if (!backdrop) return;
 
-    const title = normalizeTitle(item) || '(제목 없음)';
-    const source = detectSource(item);
-    const link   = normalizeLink(item);
-
-    const aiSummary = item.aiSummary || '';
-    const region = item.region || '';
-    const client = item.client || item.agency || '';
-    const deadline = item.deadline || '';
-    const amount = item.amount || item.budget || '';
-    const period = item.period || '';
-    const budget = item.totalBudget || '';
-
-    // 상단
-    document.getElementById('deepTitle').textContent = title;
-
-    const badgesBox = document.getElementById('deepBadges');
-    badgesBox.innerHTML = '';
-    if (region) {
-      const b = document.createElement('span');
-      b.className = 'deep-badge';
-      b.textContent = region;
-      badgesBox.appendChild(b);
-    }
-    const bSource = document.createElement('span');
-    bSource.className = 'deep-badge';
-    bSource.textContent = source === 'API' ? '나라장터' : '외부수집';
-    badgesBox.appendChild(bSource);
-
-    const aiText = item.aiResult || '';
-    const relMatchHigh = /\[.*상.*\]/.test(aiText) || /관련성 상/.test(aiText);
-    const relMatchMid  = /\[.*중.*\]/.test(aiText) || /관련성 중/.test(aiText);
-    if (relMatchHigh) {
-      const b = document.createElement('span');
-      b.className = 'deep-badge primary';
-      b.textContent = '관련성 상';
-      badgesBox.appendChild(b);
-    } else if (relMatchMid) {
-      const b = document.createElement('span');
-      b.className = 'deep-badge warn';
-      b.textContent = '관련성 중';
-      badgesBox.appendChild(b);
-    } else {
-      const b = document.createElement('span');
-      b.className = 'deep-badge';
-      b.textContent = '관련성 하';
-      badgesBox.appendChild(b);
-    }
-
-    document.getElementById('deepMetaLine').textContent =
-      [client, deadline].filter(Boolean).join(' · ');
-
-    // 요약/제안 텍스트
-    document.getElementById('deepSummary').textContent =
-      aiSummary || '요약 정보가 아직 준비되지 않았습니다.';
-
-    document.getElementById('deepSuggestion').textContent =
-      item.aiSuggestion || '한국수안 대응 제안이 아직 등록되지 않았습니다.';
-
-    // 금액/기간
-    document.getElementById('deepPeriod').textContent = period || deadline || '-';
-    document.getElementById('deepAmount').textContent = amount || '-';
-    document.getElementById('deepBudget').textContent = budget || '-';
-
-    // 체크 포인트
-    const checkpoints = document.getElementById('deepCheckpoints');
-    checkpoints.innerHTML = '';
-    const checklist =
-      item.aiCheckpoints ||
-      item.checkpoints ||
-      [];
-    if (Array.isArray(checklist) && checklist.length) {
-      checklist.forEach(c => {
-        const li = document.createElement('li');
-        li.textContent = c;
-        checkpoints.appendChild(li);
-      });
-    } else {
-      const li = document.createElement('li');
-      li.textContent = '아직 별도의 체크 포인트가 정리되지 않았습니다.';
-      checkpoints.appendChild(li);
-    }
-
-    // 첨부파일
-    const attachEmpty = document.getElementById('deepAttachmentsEmpty');
-    const attachList  = document.getElementById('deepAttachmentsList');
-    const attachNote  = document.getElementById('deepAttachmentsNote');
-    attachList.innerHTML = '';
-
-    const attachments = item.attachments || item.files || [];
-    if (Array.isArray(attachments) && attachments.length) {
-      attachEmpty.style.display = 'none';
-      attachNote.style.display = 'block';
-      attachments.forEach(a => {
-        const li = document.createElement('li');
-        const aLink = document.createElement('a');
-        aLink.href = a.url || a.link || link || '#';
-        aLink.target = '_blank';
-        aLink.rel = 'noreferrer noopener';
-        aLink.textContent = a.name || a.fileName || a.url || '첨부파일';
-        li.appendChild(aLink);
-        attachList.appendChild(li);
-      });
-    } else {
-      attachEmpty.style.display = 'block';
-      attachNote.style.display = 'none';
-    }
-
-    // 하단 정보
-    const deepFooterInfo = document.getElementById('deepFooterInfo');
-    const bidNo = item.no || item.bidNo || '';
-    const parts = [];
-    if (bidNo) parts.push(`공고번호: ${bidNo}`);
-    if (link) {
-      const span = document.createElement('span');
-      span.innerHTML =
-        `원문: <a href="${link}" target="_blank" rel="noreferrer noopener">페이지 열기</a>`;
-      deepFooterInfo.innerHTML = parts.join(' · ') +
-        (parts.length ? ' · ' : '') +
-        span.outerHTML;
-    } else {
-      deepFooterInfo.textContent =
-        parts.join(' · ') || '공고번호/원문 링크 정보 없음';
-    }
-
-    // 위험도 / 리스크
-    const deepRisk = document.getElementById('deepRisk');
-    deepRisk.textContent = item.aiRisk || '리스크 분석 정보 없음';
-
+    // 모달 열기
     backdrop.classList.add('active');
-  }
 
-  function closeDeepModal() {
-    document.getElementById('deepModalBackdrop').classList.remove('active');
+    // 기본 정보 준비
+    const title   = normalizeTitle(item) || '(제목 없음)';
+    const link    = normalizeLink(item);
+    const client  = item.client || '';
+    const agency  = item.agency || '';
+    const region  = item.region || '';
+    const deadline = item.deadline || '';
+    const firstSummary = item.aiResult || item.aiSummary || '';
+
+    // 모달 요소 캐시
+    const elTitle       = document.getElementById('deepTitle');
+    const elBadges      = document.getElementById('deepBadges');
+    const elMeta        = document.getElementById('deepMetaLine');
+    const elSummary     = document.getElementById('deepSummary');
+    const elPeriod      = document.getElementById('deepPeriod');
+    const elAmount      = document.getElementById('deepAmount');
+    const elBudget      = document.getElementById('deepBudget');
+    const elCheckpoints = document.getElementById('deepCheckpoints');
+    const elAttachEmpty = document.getElementById('deepAttachmentsEmpty');
+    const elAttachList  = document.getElementById('deepAttachmentsList');
+    const elAttachNote  = document.getElementById('deepAttachmentsNote');
+    const elSuggestion  = document.getElementById('deepSuggestion');
+    const elFooterInfo  = document.getElementById('deepFooterInfo');
+    const elRisk        = document.getElementById('deepRisk');
+
+    // 제목/메타 기본 세팅
+    if (elTitle) elTitle.textContent = title;
+    if (elBadges) elBadges.innerHTML = '';
+
+    const metaBits = [];
+    if (client || agency) metaBits.push(client || agency);
+    if (region) metaBits.push(region);
+    if (deadline) metaBits.push(deadline);
+    if (elMeta) elMeta.textContent = metaBits.join(' · ');
+
+    // 기존 내용 초기화
+    if (elSummary) {
+      elSummary.textContent =
+        firstSummary ||
+        '1차 요약 정보가 없습니다. AI 2차 심화 분석 결과를 불러오는 중입니다.';
+    }
+    if (elPeriod) elPeriod.textContent = '-';
+    if (elAmount) elAmount.textContent = '-';
+    if (elBudget) elBudget.textContent = '-';
+    if (elCheckpoints) elCheckpoints.innerHTML = '';
+    if (elAttachList) elAttachList.innerHTML = '';
+    if (elSuggestion) elSuggestion.textContent = '';
+    if (elFooterInfo) elFooterInfo.textContent = '';
+    if (elRisk) elRisk.textContent = '';
+
+    if (elAttachEmpty) elAttachEmpty.style.display = 'block';
+    if (elAttachNote)  elAttachNote.style.display  = 'none';
+
+    // 로딩 뱃지 표시
+    if (elBadges) {
+      const loadingBadge = document.createElement('span');
+      loadingBadge.className = 'deep-badge';
+      loadingBadge.textContent = '심화 분석 중...';
+      elBadges.appendChild(loadingBadge);
+    }
+
+    // 서버에 2차 심화 분석 요청
+    try {
+      setGlobalLoading(true, '해당 공고의 2차 심화 분석을 진행 중입니다...');
+
+      const params = new URLSearchParams();
+      params.set('action', 'deepAnalyze');
+      if (item.no) params.set('no', String(item.no));
+      if (link)    params.set('link', link);
+      if (title)   params.set('title', title);
+      if (client)  params.set('client', client);
+      if (agency)  params.set('agency', agency);
+
+      const res = await fetch(`${API_BASE}?${params.toString()}`, {
+        method: 'GET'
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('deepAnalyze HTTP error:', res.status, errText);
+        if (elRisk) elRisk.textContent = 'AI 심화 분석 호출 실패: HTTP ' + res.status;
+        if (elBadges) elBadges.textContent = '심화 분석 실패';
+        return;
+      }
+
+      const data = await res.json();
+      const deep = data.deep || {};
+      const attachments = data.attachments || [];
+
+      // 뱃지 영역 다시 구성
+      if (elBadges) {
+        elBadges.innerHTML = '';
+
+        // 관련성 등급 뱃지
+        if (deep.relevance) {
+          const b = document.createElement('span');
+          b.className = 'deep-badge';
+          b.textContent = '관련성 ' + deep.relevance;
+          elBadges.appendChild(b);
+        }
+
+        // 시설 유형 뱃지
+        if (deep.facilityType) {
+          const b = document.createElement('span');
+          b.className = 'deep-badge';
+          b.textContent = deep.facilityType;
+          elBadges.appendChild(b);
+        }
+
+        // 예상 톤수 뱃지
+        const estTon = deep.estimatedTon || '';
+        if (estTon) {
+          const b = document.createElement('span');
+          b.className = 'deep-badge';
+          b.textContent = '~' + String(estTon).replace(/[^0-9]/g, '') + '톤 예상';
+          elBadges.appendChild(b);
+        }
+
+        // 리스크 뱃지
+        if (deep.riskLevel) {
+          const b = document.createElement('span');
+          b.className = 'deep-badge';
+          b.textContent = '리스크 ' + deep.riskLevel;
+          elBadges.appendChild(b);
+        }
+      }
+
+      // 리스크 텍스트
+      if (elRisk) {
+        if (deep.riskLevel) {
+          elRisk.textContent = '리스크 수준: ' + deep.riskLevel;
+        } else {
+          elRisk.textContent = '';
+        }
+      }
+
+      // 요약 텍스트 (1차 + 2차 합쳐서 보여주기)
+      if (elSummary) {
+        if (deep.summary2) {
+          if (firstSummary) {
+            elSummary.textContent =
+              firstSummary + '\n\n[2차 심화 분석]\n' + deep.summary2;
+          } else {
+            elSummary.textContent = deep.summary2;
+          }
+        }
+      }
+
+      // 금액/기간/사업비
+      const periodText =
+        deep.servicePeriod ||
+        data.servicePeriod ||
+        item.servicePeriod ||
+        item.period ||
+        '';
+      const amountText =
+        deep.serviceAmount ||
+        data.serviceAmount ||
+        item.serviceAmount ||
+        item.amount ||
+        '';
+      const budgetText =
+        deep.projectBudget ||
+        data.projectBudget ||
+        item.projectBudget ||
+        item.budget ||
+        '';
+
+      if (elPeriod) elPeriod.textContent = periodText || '-';
+      if (elAmount) elAmount.textContent = amountText || '-';
+      if (elBudget) elBudget.textContent = budgetText || '-';
+
+      // 체크 포인트
+      if (elCheckpoints) {
+        elCheckpoints.innerHTML = '';
+        const cps = deep.checkPoints || deep.checkpoints || [];
+
+        if (Array.isArray(cps) && cps.length) {
+          cps.forEach(c => {
+            if (!c) return;
+            const li = document.createElement('li');
+            li.textContent = c;
+            elCheckpoints.appendChild(li);
+          });
+        } else {
+          const li = document.createElement('li');
+          li.textContent = '아직 별도의 체크 포인트가 정리되지 않았습니다.';
+          elCheckpoints.appendChild(li);
+        }
+      }
+
+      // 첨부파일
+      if (elAttachList && elAttachEmpty && elAttachNote) {
+        elAttachList.innerHTML = '';
+        if (attachments && attachments.length) {
+          elAttachEmpty.style.display = 'none';
+          elAttachNote.style.display  = 'block';
+
+          attachments.forEach(a => {
+            const li = document.createElement('li');
+            const aLink = document.createElement('a');
+            aLink.href = a.url || a.link || link || '#';
+            aLink.target = '_blank';
+            aLink.rel = 'noreferrer noopener';
+            aLink.textContent = a.name || a.fileName || a.url || '첨부파일';
+            li.appendChild(aLink);
+            elAttachList.appendChild(li);
+          });
+        } else {
+          elAttachEmpty.style.display = 'block';
+          elAttachNote.style.display  = 'none';
+        }
+      }
+
+      // 한국수안 대응 제안
+      if (elSuggestion) {
+        elSuggestion.textContent =
+          deep.suggestion ||
+          '아직 한국수안 대응 제안이 정리되지 않았습니다.';
+      }
+
+      // 하단 공고번호/링크
+      if (elFooterInfo) {
+        const infoParts = [];
+        const noVal = data.no || item.no || '';
+        if (noVal) infoParts.push('공고번호: ' + noVal);
+        if (link) infoParts.push('원문 링크: ' + link);
+        elFooterInfo.textContent = infoParts.join(' | ');
+      }
+
+    } catch (err) {
+      console.error('deepAnalyze exception:', err);
+      if (elRisk) {
+        elRisk.textContent = 'AI 심화 분석 중 오류가 발생했습니다: ' + err.message;
+      }
+    } finally {
+      setGlobalLoading(false);
+    }
   }
+     // ---------------- 2차 심화 분석 모달 공통 닫기 함수 ----------------
+     function closeDeepModal() {
+       const backdrop = document.getElementById('deepModalBackdrop');
+       if (!backdrop) return;
+       backdrop.classList.remove('active');
+     }
+
 
   // ---------------- Google Calendar 일정 등록 ----------------
 
+  // ---------------- 내 캘린더(프론트) / 회사 공용 캘린더(서버) 연동 ----------------
+
+  /**
+   * 내 Google 캘린더(사용자 계정의 primary 캘린더)에 일정 등록
+   * - 장점: 사용자별 리마인더, 개인 스케줄과 통합 관리
+   * - 전제: 상단 로그인 버튼으로 accessToken 확보 필요
+   */
   async function createCalendarEventForBid(item) {
     if (!accessToken) {
       alert('먼저 상단의 로그인 버튼으로 Google 계정 연동을 해주세요.');
@@ -2299,45 +2434,53 @@ async function handleSmartSubmit(e) {
       alert('마감일 형식을 해석하지 못했습니다: ' + deadlineStr);
       return;
     }
+
     const y  = parseInt(dateMatch[1], 10);
     const mo = parseInt(dateMatch[2], 10) - 1;
     const d  = parseInt(dateMatch[3], 10);
 
+    // 시간 정보가 없으면 기본 09:00으로 설정
     const timeMatch = s.match(/(\d{1,2}):(\d{2})/);
-    let hh = 9, mm = 0; // 기본 9시
+    let hh = 9, mm = 0;
     if (timeMatch) {
       hh = parseInt(timeMatch[1], 10);
       mm = parseInt(timeMatch[2], 10);
     }
 
-    const start = new Date(y, mo, d, hh, mm);
-    const end   = new Date(y, mo, d, hh + 1, mm); // 1시간짜리 블록
+    // Asia/Seoul 기준 Date 객체 생성
+    const local = new Date(y, mo, d, hh, mm, 0, 0);
+    // 기본 1시간짜리 개인 일정
+    const endLocal = new Date(local.getTime() + 60 * 60 * 1000);
 
     const link = normalizeLink(item);
-    const descLines = [];
-    descLines.push('입찰 마감 일정입니다.');
-    if (item.client || item.agency) descLines.push('발주처: ' + (item.client || item.agency));
-    if (link) descLines.push('원문: ' + link);
+
+    const descriptionLines = [
+      `입찰 공고번호: ${item.no || ''}`,
+      `발주처: ${item.client || ''}`,
+      `수요기관: ${item.agency || ''}`,
+      '',
+      link ? `원문 링크: ${link}` : '',
+      '',
+      (item.aiResult || '').slice(0, 500)
+    ].filter(Boolean);
 
     const event = {
-      summary: '[입찰마감] ' + title,
-      description: descLines.join('\n'),
+      summary: title,
+      description: descriptionLines.join('\n'),
       start: {
-        dateTime: start.toISOString(),
+        dateTime: local.toISOString(),
         timeZone: 'Asia/Seoul'
       },
       end: {
-        dateTime: end.toISOString(),
+        dateTime: endLocal.toISOString(),
         timeZone: 'Asia/Seoul'
       }
     };
 
     try {
-      setGlobalLoading(true, 'Google Calendar에 일정을 등록 중입니다...');
+      setGlobalLoading(true, '내 Google 캘린더에 일정을 등록 중입니다...');
       const res = await fetch(
-        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(
-          TARGET_CALENDAR_ID
-        )}/events`,
+        `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent('primary')}/events`,
         {
           method: 'POST',
           headers: {
@@ -2351,16 +2494,67 @@ async function handleSmartSubmit(e) {
       if (!res.ok) {
         const errText = await res.text();
         console.error('Calendar API error:', errText);
-        alert('일정 등록 실패: ' + res.status);
+        alert('내 캘린더 일정 등록 실패: ' + res.status);
         return;
       }
 
       const data = await res.json();
-      console.log('Calendar event created:', data);
-      alert('Google Calendar에 일정이 등록되었습니다.');
+      console.log('Personal calendar event created:', data);
+      alert('내 Google 캘린더에 일정이 등록되었습니다.');
     } catch (err) {
       console.error(err);
-      alert('일정 등록 중 오류: ' + err.message);
+      alert('내 캘린더 일정 등록 중 오류: ' + err.message);
+    } finally {
+      setGlobalLoading(false);
+    }
+  }
+
+  /**
+   * 회사 공용 입찰 캘린더(서버 Apps Script)를 통해 일정 등록
+   * - 장점: 중앙 DB(시트1)와 연동, 회사 전체에서 동일한 일정 공유
+   * - 프론트 OAuth 토큰 불필요 (서버 권한으로 캘린더 연동)
+   */
+  async function createCorporateCalendarEventForBid(item) {
+    if (!item || !item.rowIndex) {
+      alert('행(row) 정보가 없어 회사 공용 캘린더 등록을 할 수 없습니다.');
+      return;
+    }
+
+    const rowIndex = item.rowIndex;
+
+    try {
+      setGlobalLoading(true, '회사 공용 입찰 캘린더에 일정을 등록 중입니다...');
+
+      const params = new URLSearchParams();
+      params.set('action', 'calendar_add');
+      params.set('rowIndex', String(rowIndex));
+
+      const res = await fetch(`${API_BASE}?${params.toString()}`, {
+        method: 'GET'
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error('Server calendar_add error:', errText);
+        alert('회사 공용 캘린더 등록 실패: ' + res.status);
+        return;
+      }
+
+      const data = await res.json();
+      console.log('Corporate calendar event created via server:', data);
+
+      if (data && data.result === 'success') {
+        alert(
+          '회사 공용 입찰 캘린더에 일정이 등록되었습니다.\n' +
+          (data.eventStartText ? `시작: ${data.eventStartText}\n` : '') +
+          (data.eventEndText   ? `종료: ${data.eventEndText}`   : '')
+        );
+      } else {
+        alert('회사 공용 캘린더 등록 결과를 해석하지 못했습니다.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('회사 공용 캘린더 등록 중 오류: ' + err.message);
     } finally {
       setGlobalLoading(false);
     }
@@ -2368,5 +2562,13 @@ async function handleSmartSubmit(e) {
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
 
 
