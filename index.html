@@ -3211,6 +3211,14 @@ async function handleSmartSubmit(e) {
       }
 
       const data = await res.json();
+      if (data && data.ok === false) {
+        const msg = data.error || data.message || '서버 오류';
+        if (elRisk) elRisk.textContent = '2차 심화 분석 실패: ' + msg;
+        if (elBadges) elBadges.textContent = '심화 분석 실패';
+        alert('2차 심화 분석 실패: ' + msg);
+        return;
+      }
+
       const deep = data.deep || data.aiReport || data.report || {};
       // JSON 파싱이 실패해 rawText로 내려오는 경우에도 화면에 표시
       if (deep && deep.rawText && !deep.summary2) deep.summary2 = deep.rawText;
@@ -3252,6 +3260,31 @@ async function handleSmartSubmit(e) {
           elCapacity.textContent = '확인필요';
         }
       }
+      // ✅ 산정 결과 표(모달) 렌더링
+      if (elCalcBody) {
+        elCalcBody.innerHTML = '';
+        const rows = [];
+        if (areaNum) rows.push(['면적(㎡)', String(areaNum).replace(/[^\d.]/g, '')]);
+        rows.push(['적용대상', formatTargetClass(targetClass)]);
+        if (ordinanceBasis) rows.push(['조례 근거', String(ordinanceBasis)]);
+        if (capTon) rows.push(['권장/예상 용량(톤)', String(capTon).toString().replace(/[^\d.]/g, '')]);
+        if (capSummary) rows.push(['산정 요약', String(capSummary)]);
+
+        rows.forEach(([k, v]) => {
+          const tr = document.createElement('tr');
+          const th = document.createElement('th');
+          const td = document.createElement('td');
+          th.textContent = k;
+          td.textContent = v;
+          th.style.cssText = 'text-align:left;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.08);width:140px;vertical-align:top;font-weight:600;';
+          td.style.cssText = 'text-align:left;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.08);white-space:pre-wrap;';
+          tr.appendChild(th);
+          tr.appendChild(td);
+          elCalcBody.appendChild(tr);
+        });
+      }
+
+
 
       let reportUrl = pick(deep.mitigationDocUrl, deep.mitigationDocURL, deep.mitigationReportUrl,
                            item.mitigationDocUrl, item.mitigationDocURL, item.mitigationUrl, item.reportUrl, item.docUrl);
@@ -3316,7 +3349,8 @@ async function handleSmartSubmit(e) {
             const j2 = await r2.json();
             if (!j2 || !j2.ok || !j2.docUrl) {
               console.error('generate_mitigation_doc response:', j2);
-              alert('대책문서 생성 실패: 서버 응답 오류');
+              const msg = (j2 && (j2.error || j2.message)) ? (j2.error || j2.message) : '서버 응답 오류';
+              alert('대책문서 생성 실패: ' + msg);
               return;
             }
 
