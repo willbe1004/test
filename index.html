@@ -999,7 +999,6 @@
             font-size: 13px;
             line-height: 1.6;
             color: var(--text-main);
-            white-space: pre-line;
         }
 
         .deep-grid-3 {
@@ -1531,17 +1530,17 @@
 
         <!-- 업무 뷰 탭 -->
         <nav class="view-tabs">
-            <button class="view-tab active" data-view="direct">
-                <span class="view-tab-label">직접입찰 · 공고중</span>
-                <span class="view-tab-sub">D-Day 관제탑</span>
+            <button class="view-tab active" data-view="history">
+                <span class="view-tab-label">전체 / 히스토리</span>
+                <span class="view-tab-sub">전체 레퍼런스</span>
             </button>
             <button class="view-tab" data-view="target">
                 <span class="view-tab-label">낙찰자 타깃</span>
                 <span class="view-tab-sub">메인 영업화면</span>
             </button>
-            <button class="view-tab" data-view="history">
-                <span class="view-tab-label">전체 / 히스토리</span>
-                <span class="view-tab-sub">전체 레퍼런스</span>
+            <button class="view-tab" data-view="direct">
+                <span class="view-tab-label">직접입찰 · 공고중</span>
+                <span class="view-tab-sub">D-Day 관제탑</span>
             </button>
         </nav>
 
@@ -1827,7 +1826,7 @@
 
                 <section>
                     <div class="deep-section-title">한국수안 대응 제안</div>
-                    <div id="deepSuggestion" class="deep-summary-text"></div>
+                    <div id="deepSuggestion" class="deep-summary-text" style="white-space:pre-line;"></div>
                 </section>
 
                 <section>
@@ -1846,7 +1845,7 @@
 
                     <div class="deep-small-block">
                         <div class="deep-grid-item-label">조례 근거</div>
-                        <div id="deepOrdinanceBasis" class="deep-summary-text" style="margin-top:6px;"></div>
+                        <div id="deepOrdinanceBasis" class="deep-summary-text" style="margin-top:6px;white-space:pre-line;"></div>
                     </div>
 
                     <div class="deep-small-block">
@@ -1916,7 +1915,7 @@
 
   let allData = [];
   let filterMode = 'all';
-  let viewMode   = 'direct';   // 기본 뷰: 직접입찰 · 공고중
+  let viewMode   = 'history';   // 기본 뷰: 직접입찰 · 공고중
 
   // 2단계: 사이드 필터 상태
   let stateFilter  = 'all';   // all | open | closed | calendar
@@ -2122,7 +2121,7 @@
       tab.addEventListener('click', () => {
         document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        viewMode = tab.dataset.view || 'direct';  // direct / target / history
+        viewMode = tab.dataset.view || 'history';  // direct / target / history
         applyFilter();
       });
     });
@@ -3268,8 +3267,6 @@ async function handleSmartSubmit(e) {
         if (areaNum) rows.push(['면적(㎡)', String(areaNum).replace(/[^\d.]/g, '')]);
         rows.push(['적용대상', formatTargetClass(targetClass)]);
         if (ordinanceBasis) rows.push(['조례 근거', String(ordinanceBasis)]);
-        const salesOne = pick(deep.salesOneLiner, deep.salesOneLiner, data.salesOneLiner);
-        if (salesOne) rows.push(['영업 멘트(1줄)', String(salesOne)]);
         if (capTon) rows.push(['권장/예상 용량(톤)', String(capTon).toString().replace(/[^\d.]/g, '')]);
         if (capSummary) rows.push(['산정 요약', String(capSummary)]);
 
@@ -3501,17 +3498,11 @@ async function handleSmartSubmit(e) {
         }
       }
 
-      // 한국수안 대응 제안 (영업 멘트 1줄 우선 표시)
+      // 한국수안 대응 제안
       if (elSuggestion) {
-        const salesLine = (deep && deep.salesOneLiner) ? String(deep.salesOneLiner).trim() : '';
-        const baseSug =
+        elSuggestion.textContent =
           deep.suggestion ||
-          data.suggestion ||
-          item.suggestion ||
-          deep.summary2 ||
-          data.summary2 ||
           '아직 한국수안 대응 제안이 정리되지 않았습니다.';
-        elSuggestion.textContent = (salesLine ? ('[영업 멘트] ' + salesLine + '\n\n') : '') + baseSug;
       }
 
       // 하단 공고번호/링크
