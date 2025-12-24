@@ -3476,27 +3476,56 @@ async function handleSmartSubmit(e) {
       }
 
       // 첨부파일
+      
       if (elAttachList && elAttachEmpty && elAttachNote) {
         elAttachList.innerHTML = '';
+        const originUrl = link || (item && item.link) || (deep && deep.link) || '#';
+
         if (attachments && attachments.length) {
           elAttachEmpty.style.display = 'none';
-          elAttachNote.style.display  = 'block';
+
+          let hasMissingUrl = false;
 
           attachments.forEach(a => {
             const li = document.createElement('li');
-            const aLink = document.createElement('a');
-            aLink.href = a.url || a.link || link || '#';
-            aLink.target = '_blank';
-            aLink.rel = 'noreferrer noopener';
-            aLink.textContent = a.name || a.fileName || a.url || '첨부파일';
-            li.appendChild(aLink);
+
+            const name = (a && (a.name || a.fileName)) ? String(a.name || a.fileName) : (a && a.url ? String(a.url) : '첨부파일');
+            const url  = (a && (a.url || a.link)) ? String(a.url || a.link).trim() : '';
+
+            if (url) {
+              const aLink = document.createElement('a');
+              aLink.href = url;
+              aLink.target = '_blank';
+              aLink.rel = 'noreferrer noopener';
+              aLink.textContent = name;
+              li.appendChild(aLink);
+            } else {
+              hasMissingUrl = true;
+              const span = document.createElement('span');
+              span.textContent = name;
+              span.style.opacity = '0.9';
+              li.appendChild(span);
+            }
+
             elAttachList.appendChild(li);
           });
+
+          // 링크 없는 첨부가 있으면: 파일명만 보여주고, 원문 링크로 안내
+          if (hasMissingUrl) {
+            elAttachNote.style.display = 'block';
+            elAttachNote.innerHTML =
+              '원문 첨부파일(원문에서 확인)<br>' +
+              '※ 나라장터 원문 페이지에서 동일 파일명을 찾아 다운로드하실 수 있습니다. ' +
+              (originUrl && originUrl !== '#' ? ('<a href=\"' + originUrl + '\" target=\"_blank\" rel=\"noreferrer noopener\">원문 열기</a>') : '');
+          } else {
+            elAttachNote.style.display = 'none';
+          }
         } else {
           elAttachEmpty.style.display = 'block';
           elAttachNote.style.display  = 'none';
         }
       }
+
 
       // 한국수안 대응 제안
       if (elSuggestion) {
