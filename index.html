@@ -1464,6 +1464,8 @@
                     </div>
                 </div>
             </div>
+
+            <div id="externalUpdateInfo" class="external-update-info" style="margin-top:8px; font-size:12px; color: var(--text-soft); white-space:pre-line;"></div>
         </header>
 
         <!-- 상단 요약/도넛 -->
@@ -1846,6 +1848,8 @@
                     <div class="deep-small-block">
                         <div class="deep-grid-item-label">조례 근거</div>
                         <div id="deepOrdinanceBasis" class="deep-summary-text" style="margin-top:6px;white-space:pre-line;"></div>
+                        <div class="deep-grid-item-label" style="margin-top:10px;">조례 조항</div>
+                        <div id="deepOrdinanceClauses" class="deep-summary-text" style="margin-top:6px;white-space:pre-line;"></div>
                     </div>
 
                     <div class="deep-small-block">
@@ -1895,7 +1899,7 @@
 
     <script>// ★★★ Apps Script WebApp URL ★★★
   const API_BASE =
-    'https://script.google.com/macros/s/AKfycbyzv4zamaaWga3DgPcu_tQi3GRJYTGusg0Xw2-ZUgqxtCWIT5WGx_LM-xMJoK0IVjHAww/exec';
+    'https://script.google.com/macros/s/AKfycbwmJlW6zZdi7VuVuGdobZqjvEcKK0JXdBl1k2NOZdP2GqaxHC6pw8cdNhTxtL6VuWo7Fg/exec';
 
   // DOM helper (single element by id)
   const el = (id) => document.getElementById(id);
@@ -2195,15 +2199,51 @@
   // 외부웨 수집 버튼 호출 함수
   async function externalUpdate() {
     const btn = document.getElementById('btnExternal');
+    const infoEl = document.getElementById('externalUpdateInfo');
     btn.classList.add('loading');
     try {
       setGlobalLoading(true, '외부 소스 수집 중...');
       const res = await fetch(API_BASE + '?action=external_update');
       const json = await res.json();
-      alert(`신규 ${json.added}건 수집 완료`);
+
+      if (!json || json.ok === false) {
+        const emsg = (json && (json.error || json.message)) ? (json.error || json.message) : '외부웹 수집 실패';
+        alert(emsg);
+        if (infoEl) infoEl.textContent = emsg;
+        return;
+      }
+
+      const lines = [];
+      lines.push(`신규 ${json.added || 0}건 수집 완료`);
+
+      if (json.details && Array.isArray(json.details) && json.details.length) {
+        lines.push('');
+        lines.push('[사이트별]');
+        json.details.forEach(d => {
+          const name = d.siteName || d.source || 'SITE';
+          const cand = d.candidates ?? 0;
+          const add  = d.added ?? 0;
+          const errN = (d.errors && Array.isArray(d.errors)) ? d.errors.length : 0;
+          lines.push(`- ${name}: 후보 ${cand} / 신규 ${add}${errN ? ` / 오류 ${errN}` : ''}`);
+        });
+      }
+
+      if (json.errors && Array.isArray(json.errors) && json.errors.length) {
+        lines.push('');
+        lines.push('[오류 요약]');
+        json.errors.slice(0, 10).forEach(e => lines.push('- ' + e));
+        if (json.errors.length > 10) lines.push(`- (그 외 ${json.errors.length - 10}건 생략)`);
+      }
+
+      const msg = lines.join('\n');
+      alert(msg);
+      if (infoEl) infoEl.textContent = msg;
+
       await loadData();
     } catch (e) {
-      alert('오류: ' + e.message);
+      const emsg = '오류: ' + (e && e.message ? e.message : e);
+      alert(emsg);
+      if (infoEl) infoEl.textContent = emsg;
     } finally {
       btn.classList.remove('loading');
       setGlobalLoading(false);
@@ -3125,6 +3165,7 @@ async function handleSmartSubmit(e) {
     const elAreaNum     = document.getElementById('deepAreaNum');
     const elTargetClass = document.getElementById('deepTargetClass');
     const elOrdinance   = document.getElementById('deepOrdinanceBasis');
+    const elOrdinanceClauses = document.getElementById('deepOrdinanceClauses');
     const elCapacity    = document.getElementById('deepCapacitySummary');
     const elCalcBody   = document.getElementById('deepCalcTableBody');
     const elMitigation  = document.getElementById('deepMitigationLink');
@@ -3245,12 +3286,24 @@ async function handleSmartSubmit(e) {
                                   (data.ordinanceInfo && (data.ordinanceInfo.basisSummary || data.ordinanceInfo.ordinanceBasis)),
                                   data.ordinanceBasis);
 
+      let ordinanceClausesText = '';
+      try {
+        ordinanceClausesText = pick(
+          deep.ordinanceArticlesText,
+          (deep.ordinanceArticles && Array.isArray(deep.ordinanceArticles) ? deep.ordinanceArticles.join('\n') : ''),
+          (data.ordinanceInfo && (data.ordinanceInfo.articlesText || (Array.isArray(data.ordinanceInfo.articles) ? data.ordinanceInfo.articles.join('\n') : data.ordinanceInfo.articles) || '')),
+          ''
+        );
+        if (Array.isArray(ordinanceClausesText)) ordinanceClausesText = ordinanceClausesText.join('\n');
+      } catch (e) {}
+
       const capTon = pick(deep.capacityTon, deep.recommendedCapacityTon, deep.estimatedTon, deep.estimateTon, deep.ton);
       const capSummary = pick(deep.capacityCalcSummary, deep.capacitySummary, deep.capacityRationale, deep.capacityCalc);
 
       if (elAreaNum) elAreaNum.textContent = areaNum ? String(areaNum).replace(/[^\d.]/g, '') : '-';
       if (elTargetClass) elTargetClass.textContent = formatTargetClass(targetClass);
       if (elOrdinance) elOrdinance.textContent = ordinanceBasis ? String(ordinanceBasis) : '확인필요';
+      if (elOrdinanceClauses) elOrdinanceClauses.textContent = ordinanceClausesText ? String(ordinanceClausesText) : '';
       if (elCapacity) {
         if (capTon || capSummary) {
           elCapacity.textContent =
@@ -3802,10 +3855,3 @@ async function deleteBid(item) {
   }</script>
 </body>
 </html>
-
-
-
-
-
-
-
