@@ -1082,6 +1082,44 @@
             color: #f4f7ff;
         }
 
+
+        .deep-section-title-row{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+        }
+        .deep-section-actions{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+        }
+        .btn-small{ padding:7px 10px; font-size:12px; border-radius:10px; }
+        .deep-section-hint{ font-size:11px; color:var(--text-soft); margin-top:6px; }
+
+        .deep-input{
+            width:100%;
+            padding:10px 12px;
+            border-radius:12px;
+            border:1px solid rgba(255,255,255,.10);
+            background:rgba(255,255,255,.04);
+            color:var(--text);
+            outline:none;
+        }
+        .deep-input:focus{ border-color: rgba(255,184,63,.55); box-shadow: 0 0 0 3px rgba(255,184,63,.15); }
+        .deep-textarea{
+            width:100%;
+            min-height:84px;
+            resize:vertical;
+            padding:10px 12px;
+            border-radius:12px;
+            border:1px solid rgba(255,255,255,.10);
+            background:rgba(255,255,255,.04);
+            color:var(--text);
+            outline:none;
+        }
+
+
         .deep-checkpoints {
             font-size: 12px;
             padding-left: 18px;
@@ -1864,23 +1902,30 @@
 
             <div class="deep-modal-body">
                 <section>
-                    <div class="deep-section-title">영업 표준 정보 (샘플 엑셀 기준)</div>
+                    <div class="deep-section-title-row">
+                        <div class="deep-section-title">영업 표준 정보 (샘플 엑셀 기준)</div>
+                        <div class="deep-section-actions">
+                            <button id="btnStdSave" class="btn btn-primary btn-small" type="button"><span class="icon">💾</span> 저장</button>
+                            <button id="btnStdReset" class="btn btn-ghost btn-small" type="button">초기화</button>
+                        </div>
+                    </div>
+                    <div class="deep-section-hint">※ 이 섹션은 수기 입력 후 저장하면 <b>입찰DB</b>에 반영됩니다.</div>
                     <div class="deep-grid-4">
-                        <div><div class="deep-grid-item-label">지역</div><div id="deepStdRegion" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">발주처</div><div id="deepStdClient" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">사업명</div><div id="deepStdProject" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">공법 결정시기</div><div id="deepStdDecision" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">조사/영업현황</div><div id="deepStdSales" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">설계사</div><div id="deepStdDesigner" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">발주처 담당자</div><div id="deepStdContact" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">낙찰일</div><div id="deepStdAward" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">용역기간</div><div id="deepStdPeriod" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">종료일</div><div id="deepStdEnd" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">용역금액(억)</div><div id="deepStdAmount" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">사업비(억)</div><div id="deepStdBudget" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">대지면적(㎡)</div><div id="deepStdArea" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">용량</div><div id="deepStdCapacity" class="deep-grid-item-value">-</div></div>
-                        <div><div class="deep-grid-item-label">비고</div><div id="deepStdMemo" class="deep-grid-item-value">-</div></div>
+                        <div><div class="deep-grid-item-label">지역</div><input id="deepStdRegion" class="deep-input" type="text" /></div>
+                        <div><div class="deep-grid-item-label">발주처</div><input id="deepStdClient" class="deep-input" type="text" /></div>
+                        <div><div class="deep-grid-item-label">사업명</div><input id="deepStdProject" class="deep-input" type="text" /></div>
+                        <div><div class="deep-grid-item-label">공법 결정시기</div><input id="deepStdDecision" class="deep-input" type="text" placeholder="예: 공법 결정시기" /></div>
+                        <div><div class="deep-grid-item-label">조사/영업현황</div><input id="deepStdSales" class="deep-input" type="text" placeholder="예: 조사/영업현황" /></div>
+                        <div><div class="deep-grid-item-label">설계사</div><input id="deepStdDesigner" class="deep-input" type="text" /></div>
+                        <div><div class="deep-grid-item-label">발주처 담당자</div><input id="deepStdContact" class="deep-input" type="text" placeholder="예: 담당자/연락처" /></div>
+                        <div><div class="deep-grid-item-label">낙찰일</div><input id="deepStdAward" class="deep-input" type="text" placeholder="예: 2026-01-19" /></div>
+                        <div><div class="deep-grid-item-label">용역기간</div><input id="deepStdPeriod" class="deep-input" type="text" placeholder="예: 2026-02~2026-06" /></div>
+                        <div><div class="deep-grid-item-label">종료일</div><input id="deepStdEnd" class="deep-input" type="text" placeholder="예: 2026-06-30" /></div>
+                        <div><div class="deep-grid-item-label">용역금액(억)</div><input id="deepStdAmount" class="deep-input" type="text" placeholder="(억) 예: 3.2" /></div>
+                        <div><div class="deep-grid-item-label">사업비(억)</div><input id="deepStdBudget" class="deep-input" type="text" placeholder="(억) 예: 50" /></div>
+                        <div><div class="deep-grid-item-label">대지면적(㎡)</div><input id="deepStdArea" class="deep-input" type="text" placeholder="㎡" /></div>
+                        <div><div class="deep-grid-item-label">용량</div><input id="deepStdCapacity" class="deep-input" type="text" placeholder="톤" /></div>
+                        <div><div class="deep-grid-item-label">비고</div><textarea id="deepStdMemo" class="deep-textarea" placeholder="비고"></textarea></div>
                     </div>
                 </section>
 
@@ -2014,6 +2059,8 @@
         const STORAGE_KEY_EXP = 'koreasuan_calendar_token_exp';
 
         let allData = [];
+        let deepCurrentItem = null;
+
         let filterMode = 'all';
         let viewMode = 'history';   // 기본 뷰: 직접입찰 · 공고중
 
@@ -3085,7 +3132,7 @@
 
                     const val = document.createElement('div');
                     val.className = 'meta-value';
-                    val.textContent = m.value || '-';
+                    val.textContent = m.value || '';
 
                     itemDiv.appendChild(lab);
                     itemDiv.appendChild(val);
@@ -3384,6 +3431,143 @@
             if (elCalcBody) elCalcBody.innerHTML = '';
             if (elMitigation) elMitigation.textContent = '-';
 
+
+            deepCurrentItem = item;
+            const pick1 = (...vals) => {
+                for (const v of vals) {
+                    if (v === undefined || v === null) continue;
+                    const s = String(v).trim();
+                    if (s) return s;
+                }
+                return '';
+            };
+
+
+            const btnStdSave = document.getElementById('btnStdSave');
+            const btnStdReset = document.getElementById('btnStdReset');
+
+            const snapshotStdFromItem = (it) => ({
+                region: pick1(it.region, it.area) || '',
+                client: pick1(it.client, it.agency) || '',
+                projectName: pick1(it.projectName, normalizeTitle(it)) || '',
+                methodDecisionDate: pick1(it.methodDecisionDate) || '',
+                salesStatus: pick1(it.salesStatus) || '',
+                designer: pick1(it.designer) || '',
+                clientContact: pick1(it.clientContact, it.clientManager) || '',
+                awardDate: pick1(it.awardDate) || '',
+                servicePeriod: pick1(it.servicePeriod) || '',
+                endDate: pick1(it.endDate) || '',
+                serviceAmountEok: pick1(it.serviceAmountEok) || '',
+                projectBudgetEok: pick1(it.projectBudgetEok) || '',
+                siteArea: pick1(it.siteArea) || '',
+                capacityTon: pick1(it.capacityTon, it.expectedTon) || '',
+                memo: pick1(it.memo) || ''
+            });
+
+            const fillStdInputs = (vals) => {
+                if (elStdRegion) elStdRegion.value = vals.region || '';
+                if (elStdClient) elStdClient.value = vals.client || '';
+                if (elStdProject) elStdProject.value = vals.projectName || '';
+                if (elStdDecision) elStdDecision.value = vals.methodDecisionDate || '';
+                if (elStdSales) elStdSales.value = vals.salesStatus || '';
+                if (elStdDesigner) elStdDesigner.value = vals.designer || '';
+                if (elStdContact) elStdContact.value = vals.clientContact || '';
+                if (elStdAward) elStdAward.value = vals.awardDate || '';
+                if (elStdPeriod) elStdPeriod.value = vals.servicePeriod || '';
+                if (elStdEnd) elStdEnd.value = vals.endDate || '';
+                if (elStdAmount) elStdAmount.value = vals.serviceAmountEok || '';
+                if (elStdBudget) elStdBudget.value = vals.projectBudgetEok || '';
+                if (elStdArea) elStdArea.value = vals.siteArea || '';
+                if (elStdCapacity) elStdCapacity.value = vals.capacityTon || '';
+                if (elStdMemo) elStdMemo.value = vals.memo || '';
+            };
+
+            const collectStdInputs = () => ({
+                region: elStdRegion ? (elStdRegion.value || '').trim() : '',
+                client: elStdClient ? (elStdClient.value || '').trim() : '',
+                projectName: elStdProject ? (elStdProject.value || '').trim() : '',
+                methodDecisionDate: elStdDecision ? (elStdDecision.value || '').trim() : '',
+                salesStatus: elStdSales ? (elStdSales.value || '').trim() : '',
+                designer: elStdDesigner ? (elStdDesigner.value || '').trim() : '',
+                clientContact: elStdContact ? (elStdContact.value || '').trim() : '',
+                awardDate: elStdAward ? (elStdAward.value || '').trim() : '',
+                servicePeriod: elStdPeriod ? (elStdPeriod.value || '').trim() : '',
+                endDate: elStdEnd ? (elStdEnd.value || '').trim() : '',
+                serviceAmountEok: elStdAmount ? (elStdAmount.value || '').trim() : '',
+                projectBudgetEok: elStdBudget ? (elStdBudget.value || '').trim() : '',
+                siteArea: elStdArea ? (elStdArea.value || '').trim() : '',
+                capacityTon: elStdCapacity ? (elStdCapacity.value || '').trim() : '',
+                memo: elStdMemo ? (elStdMemo.value || '').trim() : ''
+            });
+
+            // 기본값(리스트 기반)으로 한번 채움
+            fillStdInputs(snapshotStdFromItem(item));
+
+            if (btnStdReset) {
+                btnStdReset.onclick = () => {
+                    if (!deepCurrentItem) return;
+                    fillStdInputs(snapshotStdFromItem(deepCurrentItem));
+                    alert('표준 정보 입력값을 초기화했습니다.');
+                };
+            }
+
+            if (btnStdSave) {
+                btnStdSave.onclick = async () => {
+                    if (!deepCurrentItem) return;
+                    const payload = {
+                        action: 'update_bid_fields',
+                        rowIndex: deepCurrentItem.rowIndex || '',
+                        no: deepCurrentItem.no || '',
+                        fields: collectStdInputs()
+                    };
+                    try {
+                        btnStdSave.classList.add('loading');
+                        const res = await fetch(API_BASE, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (!res.ok) {
+                            const t = await res.text();
+                            console.error('update_bid_fields HTTP error', res.status, t);
+                            alert('저장 실패: HTTP ' + res.status);
+                            return;
+                        }
+                        const j = await res.json();
+                        if (!j || j.ok === false) {
+                            const msg = (j && (j.error || j.message)) ? (j.error || j.message) : '서버 오류';
+                            alert('저장 실패: ' + msg);
+                            return;
+                        }
+                        const u = j.updated || {};
+                        // 현재 item + 전체 데이터에 반영
+                        Object.assign(deepCurrentItem, {
+                            region: u.region || deepCurrentItem.region,
+                            client: u.client || deepCurrentItem.client,
+                            projectName: u.projectName || deepCurrentItem.projectName,
+                            methodDecisionDate: u.methodDecisionDate || deepCurrentItem.methodDecisionDate,
+                            salesStatus: u.salesStatus || deepCurrentItem.salesStatus,
+                            designer: u.designer || deepCurrentItem.designer,
+                            clientContact: u.clientContact || deepCurrentItem.clientContact,
+                            awardDate: u.awardDate || deepCurrentItem.awardDate,
+                            servicePeriod: u.servicePeriod || deepCurrentItem.servicePeriod,
+                            endDate: u.endDate || deepCurrentItem.endDate,
+                            serviceAmountEok: u.serviceAmountEok || deepCurrentItem.serviceAmountEok,
+                            projectBudgetEok: u.projectBudgetEok || deepCurrentItem.projectBudgetEok,
+                            siteArea: u.siteArea || deepCurrentItem.siteArea,
+                            capacityTon: u.capacityTon || deepCurrentItem.capacityTon,
+                            memo: u.memo || deepCurrentItem.memo
+                        });
+                        applyFilter();
+                        alert('저장 완료 (입찰DB 반영)');
+                    } catch (e) {
+                        console.error(e);
+                        alert('저장 중 오류: ' + e.message);
+                    } finally {
+                        btnStdSave.classList.remove('loading');
+                    }
+                };
+            }
             const pick0 = (...vals) => {
                 for (const v of vals) {
                     if (v === undefined || v === null) continue;
@@ -3394,21 +3578,21 @@
             };
 
             // 2차 분석 전에도 보이는 기본값 세팅(있으면)
-            if (elStdRegion) elStdRegion.textContent = pick0(region, item.region, item.area) || '-';
-            if (elStdClient) elStdClient.textContent = pick0(client, agency, item.client, item.agency) || '-';
-            if (elStdProject) elStdProject.textContent = pick0(title, item.projectName, item.bizName) || '-';
-            if (elStdDecision) elStdDecision.textContent = pick0(item.methodDecisionDate, item.decisionDate, item.procDecisionDate) || '-';
-            if (elStdSales) elStdSales.textContent = pick0(item.salesStatus, item.salesMemo, item.salesNote) || '-';
-            if (elStdDesigner) elStdDesigner.textContent = pick0(item.designer, item.designFirm, item.architect, item.architectFirm) || '-';
-            if (elStdContact) elStdContact.textContent = pick0(item.clientContact, item.contactPerson, item.ownerContact, item.clientManager) || '-';
-            if (elStdAward) elStdAward.textContent = pick0(item.awardDate, item.winDate, item.contractDate) || '-';
-            if (elStdPeriod) elStdPeriod.textContent = pick0(item.servicePeriod, item.period) || '-';
-            if (elStdEnd) elStdEnd.textContent = pick0(item.endDate, item.finishDate) || '-';
-            if (elStdAmount) elStdAmount.textContent = pick0(item.serviceAmount, item.amount) || '-';
-            if (elStdBudget) elStdBudget.textContent = pick0(item.projectBudget, item.budget) || '-';
-            if (elStdArea) elStdArea.textContent = pick0(item.siteAreaSqm, item.siteAreaM2, item.siteArea) || '-';
-            if (elStdCapacity) elStdCapacity.textContent = pick0(item.capacityTon, item.estimatedTon, item.ton) || '-';
-            if (elStdMemo) elStdMemo.textContent = pick0(item.memo, item.note, item.remark) || '-';
+            if (elStdRegion) elStdRegion.value = pick0(region, item.region, item.area) || '';
+            if (elStdClient) elStdClient.value = pick0(client, agency, item.client, item.agency) || '';
+            if (elStdProject) elStdProject.value = pick0(title, item.projectName, item.bizName) || '';
+            if (elStdDecision) elStdDecision.value = pick0(item.methodDecisionDate, item.decisionDate, item.procDecisionDate) || '';
+            if (elStdSales) elStdSales.value = pick0(item.salesStatus, item.salesMemo, item.salesNote) || '';
+            if (elStdDesigner) elStdDesigner.value = pick0(item.designer, item.designFirm, item.architect, item.architectFirm) || '';
+            if (elStdContact) elStdContact.value = pick0(item.clientContact, item.contactPerson, item.ownerContact, item.clientManager) || '';
+            if (elStdAward) elStdAward.value = pick0(item.awardDate, item.winDate, item.contractDate) || '';
+            if (elStdPeriod) elStdPeriod.value = pick0(item.servicePeriod, item.period) || '';
+            if (elStdEnd) elStdEnd.value = pick0(item.endDate, item.finishDate) || '';
+            if (elStdAmount) elStdAmount.value = pick0(item.serviceAmount, item.amount) || '';
+            if (elStdBudget) elStdBudget.value = pick0(item.projectBudget, item.budget) || '';
+            if (elStdArea) elStdArea.value = pick0(item.siteAreaSqm, item.siteAreaM2, item.siteArea) || '';
+            if (elStdCapacity) elStdCapacity.value = pick0(item.capacityTon, item.estimatedTon, item.ton) || '';
+            if (elStdMemo) elStdMemo.value = pick0(item.memo, item.note, item.remark) || '';
 
             const canMakeReport = !!(item && (item.rowIndex || item.no));
             if (btnMitigation) {
@@ -3473,6 +3657,27 @@
 
                 const aiReport = deep;
                 const attachments = data.attachments || deep.attachments || [];
+
+                // (표준 입력) 2차 분석 결과로 빈칸만 보정
+                const fillIfEmpty = (el, v) => {
+                    if (!el) return;
+                    const cur = (el.value || '').trim();
+                    if (cur) return;
+                    const nv = (v == null) ? '' : String(v).trim();
+                    if (nv) el.value = nv;
+                };
+
+                try {
+                    fillIfEmpty(elStdDecision, deep.methodDecisionDate || deep.decisionDate || '');
+                    fillIfEmpty(elStdSales, deep.salesStatus || '');
+                    fillIfEmpty(elStdDesigner, deep.designer || deep.designFirm || '');
+                    fillIfEmpty(elStdAward, deep.awardDate || deep.winDate || '');
+                    fillIfEmpty(elStdEnd, deep.endDate || '');
+                    // 금액/면적/용량은 추정치가 있을 때만
+                    fillIfEmpty(elStdArea, deep.siteAreaSqm || deep.siteAreaM2 || deep.siteArea || '');
+                    fillIfEmpty(elStdCapacity, deep.capacityTon || deep.recommendedCapacityTon || deep.estimatedTon || '');
+                } catch(e) {}
+
 
                 // --- 조례/용량/대책문서 정보 표시(확장) ---
                 const pick = (...vals) => vals.find(v => v !== undefined && v !== null && String(v).trim() !== '');
@@ -3711,9 +3916,9 @@
                     item.budget ||
                     '';
 
-                if (elPeriod) elPeriod.textContent = periodText || '-';
-                if (elAmount) elAmount.textContent = amountText || '-';
-                if (elBudget) elBudget.textContent = budgetText || '-';
+                if (elPeriod) elPeriod.textContent = periodText || '';
+                if (elAmount) elAmount.textContent = amountText || '';
+                if (elBudget) elBudget.textContent = budgetText || '';
 
                 // 샘플 엑셀 표준 필드도 가능한 값으로 업데이트
                 const pickStd = (...vals) => {
@@ -3725,21 +3930,21 @@
                     return '';
                 };
 
-                if (elStdRegion) elStdRegion.textContent = pickStd(region, deep.region, data.region, item.region) || (elStdRegion.textContent || '-');
-                if (elStdClient) elStdClient.textContent = pickStd(client, agency, deep.client, deep.agency, data.client, data.agency, item.client, item.agency) || (elStdClient.textContent || '-');
-                if (elStdProject) elStdProject.textContent = pickStd(title, deep.projectName, deep.bizName, data.projectName, data.bizName) || (elStdProject.textContent || '-');
-                if (elStdDesigner) elStdDesigner.textContent = pickStd(deep.designer, deep.designFirm, item.designer, item.designFirm) || (elStdDesigner.textContent || '-');
-                if (elStdContact) elStdContact.textContent = pickStd(deep.clientContact, deep.contactPerson, item.clientContact, item.contactPerson) || (elStdContact.textContent || '-');
-                if (elStdAward) elStdAward.textContent = pickStd(deep.awardDate, deep.winDate, deep.contractDate, item.awardDate, item.winDate) || (elStdAward.textContent || '-');
-                if (elStdPeriod) elStdPeriod.textContent = pickStd(periodText, deep.servicePeriod, data.servicePeriod) || (elStdPeriod.textContent || '-');
-                if (elStdEnd) elStdEnd.textContent = pickStd(deep.endDate, deep.finishDate, item.endDate) || (elStdEnd.textContent || '-');
-                if (elStdAmount) elStdAmount.textContent = pickStd(amountText, deep.serviceAmount, data.serviceAmount) || (elStdAmount.textContent || '-');
-                if (elStdBudget) elStdBudget.textContent = pickStd(budgetText, deep.projectBudget, data.projectBudget) || (elStdBudget.textContent || '-');
-                if (elStdArea) elStdArea.textContent = pickStd(deep.siteAreaSqm, deep.siteAreaM2, deep.siteArea, areaNum, item.siteAreaSqm) || (elStdArea.textContent || '-');
-                if (elStdCapacity) elStdCapacity.textContent = pickStd(deep.capacityTon, deep.recommendedCapacityTon, deep.estimatedTon, capTon) || (elStdCapacity.textContent || '-');
-                if (elStdMemo) elStdMemo.textContent = pickStd(deep.memo, deep.note, deep.remark, item.memo, item.note) || (elStdMemo.textContent || '-');
-                if (elStdDecision) elStdDecision.textContent = pickStd(deep.methodDecisionDate, deep.decisionDate, item.methodDecisionDate) || (elStdDecision.textContent || '-');
-                if (elStdSales) elStdSales.textContent = pickStd(deep.salesStatus, deep.salesMemo, item.salesStatus) || (elStdSales.textContent || '-');
+                if (elStdRegion) elStdRegion.value = pickStd(region, deep.region, data.region, item.region) || (elStdRegion.textContent || '-');
+                if (elStdClient) elStdClient.value = pickStd(client, agency, deep.client, deep.agency, data.client, data.agency, item.client, item.agency) || (elStdClient.textContent || '-');
+                if (elStdProject) elStdProject.value = pickStd(title, deep.projectName, deep.bizName, data.projectName, data.bizName) || (elStdProject.textContent || '-');
+                if (elStdDesigner) elStdDesigner.value = pickStd(deep.designer, deep.designFirm, item.designer, item.designFirm) || (elStdDesigner.textContent || '-');
+                if (elStdContact) elStdContact.value = pickStd(deep.clientContact, deep.contactPerson, item.clientContact, item.contactPerson) || (elStdContact.textContent || '-');
+                if (elStdAward) elStdAward.value = pickStd(deep.awardDate, deep.winDate, deep.contractDate, item.awardDate, item.winDate) || (elStdAward.textContent || '-');
+                if (elStdPeriod) elStdPeriod.value = pickStd(periodText, deep.servicePeriod, data.servicePeriod) || (elStdPeriod.textContent || '-');
+                if (elStdEnd) elStdEnd.value = pickStd(deep.endDate, deep.finishDate, item.endDate) || (elStdEnd.textContent || '-');
+                if (elStdAmount) elStdAmount.value = pickStd(amountText, deep.serviceAmount, data.serviceAmount) || (elStdAmount.textContent || '-');
+                if (elStdBudget) elStdBudget.value = pickStd(budgetText, deep.projectBudget, data.projectBudget) || (elStdBudget.textContent || '-');
+                if (elStdArea) elStdArea.value = pickStd(deep.siteAreaSqm, deep.siteAreaM2, deep.siteArea, areaNum, item.siteAreaSqm) || (elStdArea.textContent || '-');
+                if (elStdCapacity) elStdCapacity.value = pickStd(deep.capacityTon, deep.recommendedCapacityTon, deep.estimatedTon, capTon) || (elStdCapacity.textContent || '-');
+                if (elStdMemo) elStdMemo.value = pickStd(deep.memo, deep.note, deep.remark, item.memo, item.note) || (elStdMemo.textContent || '-');
+                if (elStdDecision) elStdDecision.value = pickStd(deep.methodDecisionDate, deep.decisionDate, item.methodDecisionDate) || (elStdDecision.textContent || '-');
+                if (elStdSales) elStdSales.value = pickStd(deep.salesStatus, deep.salesMemo, item.salesStatus) || (elStdSales.textContent || '-');
 
                 // 체크 포인트
                 if (elCheckpoints) {
