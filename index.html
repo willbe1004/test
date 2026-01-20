@@ -2057,6 +2057,7 @@
         // 토큰 localStorage 키
         const STORAGE_KEY_TOKEN = 'koreasuan_calendar_token';
         const STORAGE_KEY_EXP = 'koreasuan_calendar_token_exp';
+        const STORAGE_KEY_EMAIL = 'koreasuan_login_email';
 
         let allData = [];
         let deepCurrentItem = null;
@@ -2072,15 +2073,6 @@
 
         let tokenClient = null;
         let accessToken = null;
-
-        // ✅ 로그인 필요 기능 공통
-        function ensureLoggedInFor_(purpose) {
-            if (!accessToken || !loginUserEmail) {
-                alert((purpose ? (purpose + '은(는) ') : '') + '로그인 후 이용 가능합니다. (상단 캘린더 연동 버튼)');
-                return false;
-            }
-            return true;
-        }
         let loginUserEmail = null;   // ← 로그인한 사용자 이메일
 
         window.addEventListener('load', () => {
@@ -2149,26 +2141,33 @@
         }
 
 
-        function saveToken(token, expiresInSec) {
+        function saveToken(token, expiresInSec, email) {
             if (!token) {
                 localStorage.removeItem(STORAGE_KEY_TOKEN);
                 localStorage.removeItem(STORAGE_KEY_EXP);
+                localStorage.removeItem(STORAGE_KEY_EMAIL);
                 return;
             }
             const exp = Date.now() + (expiresInSec || 3600) * 1000;
             localStorage.setItem(STORAGE_KEY_TOKEN, token);
             localStorage.setItem(STORAGE_KEY_EXP, String(exp));
+            if (email) localStorage.setItem(STORAGE_KEY_EMAIL, String(email));
         }
 
         function loadSavedTokenIfValid() {
             const t = localStorage.getItem(STORAGE_KEY_TOKEN);
             const exp = parseInt(localStorage.getItem(STORAGE_KEY_EXP) || '0', 10);
+            const savedEmail = localStorage.getItem(STORAGE_KEY_EMAIL);
+
             if (t && exp && exp > Date.now()) {
                 accessToken = t;
+                if (!loginUserEmail && savedEmail) loginUserEmail = savedEmail;
                 updateLoginUI(true);
             } else {
                 accessToken = null;
+                // email은 토큰과 함께 관리
                 saveToken(null);
+                loginUserEmail = null;
                 updateLoginUI(false);
             }
         }
@@ -2181,36 +2180,122 @@
             // 기존 토큰 복구
             loadSavedTokenIfValid();
 
+            // 토큰 갱신을 Promise로 기다릴 수 있게(세션이 풀린 것처럼 보이는 현상 방지)
+            let _tokenWaiter = null;
+            const _resolveTokenWaiter = (ok) => {
+                try { if (_tokenWaiter) { _tokenWaiter(ok); } } finally { _tokenWaiter = null; }
+            };
+
+            async function requestAccessTokenAsync(promptMode) {
+                if (!tokenClient) throw new Error('tokenClient not ready');
+                return await new Promise((resolve, reject) => {
+                    _tokenWaiter = (ok) => ok ? resolve(true) : resolve(false);
+                    try {
+                        tokenClient.requestAccessToken({ prompt: promptMode || '' });
+                    } catch (e) {
+                        _tokenWaiter = null;
+                        reject(e);
+                    }
+                });
+            }
+
+            async function ensureEmailLoaded() {
+                if (loginUserEmail) return true;
+                const savedEmail = localStorage.getItem(STORAGE_KEY_EMAIL);
+                if (savedEmail) {
+                    loginUserEmail = savedEmail;
+                    return true;
+                }
+                if (!accessToken) return false;
+                try {
+                    const uRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                        headers: { Authorization: 'Bearer ' + accessToken }
+                    });
+                    if (uRes.ok) {
+                        const info = await uRes.json();
+                        if (info && info.email) {
+                            loginUserEmail = info.email;
+                            localStorage.setItem(STORAGE_KEY_EMAIL, loginUserEmail);
+                            return true;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('ensureEmailLoaded userinfo error', e);
+                }
+                return false;
+            }
+
+            async function ensureLogin(reasonText) {
+                // access token이 없으면 로그인 필요
+                if (!accessToken) {
+                    alert((reasonText || '해당 기능') + '은(는) 로그인 후 이용 가능합니다. (상단 캘린더 연동 버튼)');
+                    return false;
+                }
+
+                // 만료 임박 시(60초) 자동 갱신 시도
+                const exp = parseInt(localStorage.getItem(STORAGE_KEY_EXP) || '0', 10);
+                if (exp && exp < Date.now() + 60 * 1000) {
+                    try {
+                        await requestAccessTokenAsync('');
+                    } catch (e) {
+                        console.warn('token refresh failed', e);
+                    }
+                }
+
+                // email 확보(실패해도 기존값 유지)
+                const okEmail = await ensureEmailLoaded();
+                if (!okEmail) {
+                    alert('로그인 정보(이메일)를 확인할 수 없습니다.\n상단 로그인(캘린더 연동) 버튼을 다시 눌러 주세요.');
+                    return false;
+                }
+                updateLoginUI(true);
+                return true;
+            }
+
+            // 전역에서 사용(저장/2차분석/대책문서 등)
+            window.__ensureLogin = ensureLogin;
+            window.__ensureEmailLoaded = ensureEmailLoaded;
+            window.__requestAccessTokenAsync = requestAccessTokenAsync;
+            window.__resolveTokenWaiter = _resolveTokenWaiter;
+
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/userinfo.email',
                 callback: async (resp) => {
                     if (resp.error) {
                         alert('로그인 실패: ' + resp.error);
+                        if (window.__resolveTokenWaiter) window.__resolveTokenWaiter(false);
                         return;
                     }
-                    if (!resp.access_token) return;
+                    if (!resp.access_token) { if (window.__resolveTokenWaiter) window.__resolveTokenWaiter(false); return; }
 
                     accessToken = resp.access_token;
                     saveToken(resp.access_token, resp.expires_in);
-
                     try {
-                        // 이메일 조회
+                        // 이메일 조회 (실패해도 기존 저장된 이메일을 유지)
                         const uRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                             headers: { Authorization: 'Bearer ' + accessToken }
                         });
                         if (uRes.ok) {
                             const info = await uRes.json();
-                            loginUserEmail = info.email || null;
+                            if (info && info.email) {
+                                loginUserEmail = info.email;
+                                localStorage.setItem(STORAGE_KEY_EMAIL, loginUserEmail);
+                            }
                         } else {
-                            loginUserEmail = null;
+                            // 유지
+                            const savedEmail = localStorage.getItem(STORAGE_KEY_EMAIL);
+                            if (!loginUserEmail && savedEmail) loginUserEmail = savedEmail;
                         }
                     } catch (e) {
                         console.error('userinfo error', e);
-                        loginUserEmail = null;
+                        const savedEmail = localStorage.getItem(STORAGE_KEY_EMAIL);
+                        if (!loginUserEmail && savedEmail) loginUserEmail = savedEmail;
                     }
 
                     updateLoginUI(true);
+                    // 토큰 갱신 대기자 해제
+                    if (window.__resolveTokenWaiter) window.__resolveTokenWaiter(true);
                 }
             });
 
@@ -2233,7 +2318,61 @@
             };
         }
 
-        // ---------------- 공통 UI & 데이터 로드 ----------------
+        
+
+        // ---------------- API helper (로그인/이메일/토큰 포함) ----------------
+
+        async function apiGet(action, paramsObj, requireLogin, reasonText) {
+            const params = new URLSearchParams();
+            params.set('action', action);
+            if (paramsObj) {
+                Object.keys(paramsObj).forEach(k => {
+                    const v = paramsObj[k];
+                    if (v === undefined || v === null) return;
+                    const s = String(v);
+                    if (s === '') return;
+                    params.set(k, s);
+                });
+            }
+
+            if (requireLogin) {
+                const ok = await window.__ensureLogin(reasonText || action);
+                if (!ok) return { ok: false, error: 'LOGIN_REQUIRED' };
+                params.set('userEmail', loginUserEmail || '');
+                params.set('authToken', accessToken || '');
+            }
+
+            const res = await fetch(`${API_BASE}?${params.toString()}`, { method: 'GET' });
+            if (!res.ok) {
+                const t = await res.text();
+                return { ok: false, error: 'HTTP_' + res.status, message: t };
+            }
+            return await res.json();
+        }
+
+        async function apiPostJson(action, bodyObj, requireLogin, reasonText) {
+            const payload = Object.assign({ action }, bodyObj || {});
+            if (requireLogin) {
+                const ok = await window.__ensureLogin(reasonText || action);
+                if (!ok) return { ok: false, error: 'LOGIN_REQUIRED' };
+                payload.userEmail = loginUserEmail || '';
+                payload.authToken = accessToken || '';
+            }
+
+            // ⚠️ preflight 방지: Content-Type 헤더를 지정하지 않음 (text/plain로 전송)
+            const res = await fetch(API_BASE, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                const t = await res.text();
+                return { ok: false, error: 'HTTP_' + res.status, message: t };
+            }
+            return await res.json();
+        }
+
+
+// ---------------- 공통 UI & 데이터 로드 ----------------
 
         function bindUI() {
             document.getElementById('btnRefresh').addEventListener('click', refreshAll);
@@ -3522,28 +3661,15 @@
 
             if (btnStdSave) {
                 btnStdSave.onclick = async () => {
-                    if (!ensureLoggedInFor_('저장')) return;
                     if (!deepCurrentItem) return;
                     const payload = {
-                        action: 'update_bid_fields',
-                        authToken: accessToken,
-                        rowIndex: deepCurrentItem.rowIndex || '',
                         no: deepCurrentItem.no || '',
+                        rowIndex: deepCurrentItem.rowIndex || '',
                         fields: collectStdInputs()
                     };
                     try {
                         btnStdSave.classList.add('loading');
-                        const res = await fetch(API_BASE, {
-                            method: 'POST',
-                            body: JSON.stringify(payload)
-                        });
-                        if (!res.ok) {
-                            const t = await res.text();
-                            console.error('update_bid_fields HTTP error', res.status, t);
-                            alert('저장 실패: HTTP ' + res.status);
-                            return;
-                        }
-                        const j = await res.json();
+                        const j = await apiPostJson('update_bid_fields', payload, true, '저장');
                         if (!j || j.ok === false) {
                             const msg = (j && (j.error || j.message)) ? (j.error || j.message) : '서버 오류';
                             alert('저장 실패: ' + msg);
@@ -3629,35 +3755,15 @@
             try {
                 setGlobalLoading(true, '해당 공고의 2차 심화 분석을 진행 중입니다...');
 
-                if (!ensureLoggedInFor_('2차 심화분석')) {
-                    setGlobalLoading(false);
-                    if (elRisk) elRisk.textContent = '로그인 후 2차 심화 분석이 가능합니다.';
-                    if (elBadges) elBadges.textContent = '심화 분석 대기(로그인 필요)';
-                    return;
-                }
-
-                const payload = {
-                    action: 'deepAnalyze',
-                    authToken: accessToken,
+                const data = await apiGet('deepAnalyze', {
                     rowIndex: item.rowIndex || '',
                     no: item.no || '',
-                    link, title, client, agency, region
-                };
-
-                const res = await fetch(API_BASE, {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
-
-                if (!res.ok) {
-                    const errText = await res.text();
-                    console.error('deepAnalyze HTTP error:', res.status, errText);
-                    if (elRisk) elRisk.textContent = 'AI 심화 분석 호출 실패: HTTP ' + res.status;
-                    if (elBadges) elBadges.textContent = '심화 분석 실패';
-                    return;
-                }
-
-                const data = await res.json();
+                    link: link || '',
+                    title: title || '',
+                    client: client || '',
+                    agency: agency || '',
+                    region: region || ''
+                }, true, '2차 심화분석');
                 if (data && data.ok === false) {
                     const msg = data.error || data.message || '서버 오류';
                     if (elRisk) elRisk.textContent = '2차 심화 분석 실패: ' + msg;
@@ -3803,8 +3909,6 @@
                         const canMakeReport = !!(item && (item.rowIndex || item.no));
                         if (!canMakeReport) return;
 
-                        if (!ensureLoggedInFor_('대책문서 생성')) return;
-
                         // 이미 있으면 열기
                         if (reportUrl) {
                             window.open(reportUrl, '_blank', 'noopener,noreferrer');
@@ -3814,26 +3918,10 @@
                         btnMitigation.classList.add('loading');
                         try {
                             setGlobalLoading(true, '우수유출 저감대책 문서를 생성 중입니다...');
-
-                            const payload2 = {
-                                action: 'generate_mitigation_doc',
-                                authToken: accessToken,
+                            const j2 = await apiGet('generate_mitigation_doc', {
                                 rowIndex: item.rowIndex || '',
                                 no: item.no || ''
-                            };
-
-                            const r2 = await fetch(API_BASE, {
-                                method: 'POST',
-                                body: JSON.stringify(payload2)
-                            });
-                            if (!r2.ok) {
-                                const t = await r2.text();
-                                console.error('generate_mitigation_doc HTTP error:', r2.status, t);
-                                alert('대책문서 생성 실패: HTTP ' + r2.status);
-                                return;
-                            }
-
-                            const j2 = await r2.json();
+                            }, true, '대책문서 생성');
                             if (!j2 || !j2.ok || !j2.docUrl) {
                                 console.error('generate_mitigation_doc response:', j2);
                                 const msg = (j2 && (j2.error || j2.message)) ? (j2.error || j2.message) : '서버 응답 오류';
