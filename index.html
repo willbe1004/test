@@ -2072,6 +2072,15 @@
 
         let tokenClient = null;
         let accessToken = null;
+
+        // ✅ 로그인 필요 기능 공통
+        function ensureLoggedInFor_(purpose) {
+            if (!accessToken || !loginUserEmail) {
+                alert((purpose ? (purpose + '은(는) ') : '') + '로그인 후 이용 가능합니다. (상단 캘린더 연동 버튼)');
+                return false;
+            }
+            return true;
+        }
         let loginUserEmail = null;   // ← 로그인한 사용자 이메일
 
         window.addEventListener('load', () => {
@@ -3513,9 +3522,11 @@
 
             if (btnStdSave) {
                 btnStdSave.onclick = async () => {
+                    if (!ensureLoggedInFor_('저장')) return;
                     if (!deepCurrentItem) return;
                     const payload = {
                         action: 'update_bid_fields',
+                        authToken: accessToken,
                         rowIndex: deepCurrentItem.rowIndex || '',
                         no: deepCurrentItem.no || '',
                         fields: collectStdInputs()
@@ -3618,18 +3629,24 @@
             try {
                 setGlobalLoading(true, '해당 공고의 2차 심화 분석을 진행 중입니다...');
 
-                const params = new URLSearchParams();
-                params.set('action', 'deepAnalyze');
-                if (item.rowIndex) params.set('rowIndex', String(item.rowIndex));
-                if (item.no) params.set('no', String(item.no));
-                if (link) params.set('link', link);
-                if (title) params.set('title', title);
-                if (client) params.set('client', client);
-                if (agency) params.set('agency', agency);
-                if (region) params.set('region', region);
+                if (!ensureLoggedInFor_('2차 심화분석')) {
+                    setGlobalLoading(false);
+                    if (elRisk) elRisk.textContent = '로그인 후 2차 심화 분석이 가능합니다.';
+                    if (elBadges) elBadges.textContent = '심화 분석 대기(로그인 필요)';
+                    return;
+                }
 
-                const res = await fetch(`${API_BASE}?${params.toString()}`, {
-                    method: 'GET'
+                const payload = {
+                    action: 'deepAnalyze',
+                    authToken: accessToken,
+                    rowIndex: item.rowIndex || '',
+                    no: item.no || '',
+                    link, title, client, agency, region
+                };
+
+                const res = await fetch(API_BASE, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
                 });
 
                 if (!res.ok) {
@@ -3786,6 +3803,8 @@
                         const canMakeReport = !!(item && (item.rowIndex || item.no));
                         if (!canMakeReport) return;
 
+                        if (!ensureLoggedInFor_('대책문서 생성')) return;
+
                         // 이미 있으면 열기
                         if (reportUrl) {
                             window.open(reportUrl, '_blank', 'noopener,noreferrer');
@@ -3796,12 +3815,17 @@
                         try {
                             setGlobalLoading(true, '우수유출 저감대책 문서를 생성 중입니다...');
 
-                            const p2 = new URLSearchParams();
-                            p2.set('action', 'generate_mitigation_doc');
-                            if (item.rowIndex) p2.set('rowIndex', String(item.rowIndex));
-                            if (item.no) p2.set('no', String(item.no));
+                            const payload2 = {
+                                action: 'generate_mitigation_doc',
+                                authToken: accessToken,
+                                rowIndex: item.rowIndex || '',
+                                no: item.no || ''
+                            };
 
-                            const r2 = await fetch(`${API_BASE}?${p2.toString()}`, { method: 'GET' });
+                            const r2 = await fetch(API_BASE, {
+                                method: 'POST',
+                                body: JSON.stringify(payload2)
+                            });
                             if (!r2.ok) {
                                 const t = await r2.text();
                                 console.error('generate_mitigation_doc HTTP error:', r2.status, t);
