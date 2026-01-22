@@ -2800,8 +2800,10 @@
             const filtered = allData.filter(item => {
                 const title = normalizeTitle(item);
                 const link = normalizeLink(item);
-                const aiText = item.aiResult || '';
-                const aiSummary = item.aiSummary || '';
+                const aiText = (item.aiResult || '').toString().trim();
+                const aiSummary = (item.aiSummary || '').toString().trim();
+                // aiSummary와 aiResult가 동일한 경우(중복 표기 방지)
+                const aiDetail = (aiSummary && aiText && aiText !== aiSummary) ? aiText : (aiSummary ? '' : aiText);
 
                 const deadlineStr = item.deadline || item.closeDate || '';
                 const isPast = isDeadlinePast(deadlineStr);
@@ -2962,8 +2964,10 @@
                 const winnerType = item.winnerType || '';
                 const winnerContact = item.winnerContact || item.winnerPhone || item.winnerTel || '';
 
-                const aiText = item.aiResult || '';
-                const aiSummary = item.aiSummary || '';
+                const aiText = (item.aiResult || '').toString().trim();
+                const aiSummary = (item.aiSummary || '').toString().trim();
+                // aiSummary와 aiResult가 동일한 경우(중복 표기 방지)
+                const aiDetail = (aiSummary && aiText && aiText !== aiSummary) ? aiText : (aiSummary ? '' : aiText);
 
                 const past = isDeadlinePast(deadline);
                 const ddayLabel = (!past && currentView === 'direct')
@@ -3290,7 +3294,7 @@
                 inner.appendChild(metaGrid);
 
                 // ---------------- AI 요약 박스 -----------------------------------------
-                if (aiText || aiSummary) {
+                if (aiSummary || aiDetail) {
                     const aiBox = document.createElement('div');
                     aiBox.className = 'ai-result-box';
 
@@ -3307,10 +3311,10 @@
                         strong.textContent = aiSummary;
                         textWrap.appendChild(strong);
                     }
-                    if (aiText) {
+                    if (aiDetail) {
                         if (aiSummary) textWrap.appendChild(document.createElement('br'));
                         const span = document.createElement('span');
-                        span.textContent = aiText;
+                        span.textContent = aiDetail;
                         textWrap.appendChild(span);
                     }
 
