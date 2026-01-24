@@ -3673,7 +3673,18 @@
                     };
                     try {
                         btnStdSave.classList.add('loading');
-                        const j = await apiPostJson('update_bid_fields', payload, true, '저장');
+                        let j;
+                        try {
+                          j = await apiPostJson('update_bid_fields', payload, true, '저장');
+                        } catch (e) {
+                          const msg = String((e && e.message) ? e.message : e);
+                          if (msg.includes('Failed to fetch')) {
+                            // POST(CORS) 실패 시 GET으로 자동 재시도
+                            j = await apiGet('update_bid_fields', { no: payload.no || '', rowIndex: payload.rowIndex || '', fields: JSON.stringify(payload.fields || {}) }, true, '저장');
+                          } else {
+                            throw e;
+                          }
+                        }
                         if (!j || j.ok === false) {
                             const msg = (j && (j.error || j.message)) ? (j.error || j.message) : '서버 오류';
                             alert('저장 실패: ' + msg);
