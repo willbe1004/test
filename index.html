@@ -2507,6 +2507,13 @@
                 const lines = [];
                 lines.push(`신규 ${json.added || 0}건 수집 완료`);
 
+                const tDup = json.dupSkipped ?? 0;
+                const tFil = json.filtered ?? 0;
+                const tLow = json.droppedLow ?? 0;
+                if (tDup || tFil || tLow) {
+                    lines.push(`(중복 ${tDup} / 필터제외 ${tFil} / 하제외 ${tLow})`);
+                }
+
                 if (json.details && Array.isArray(json.details) && json.details.length) {
                     lines.push('');
                     lines.push('[사이트별]');
@@ -2515,7 +2522,15 @@
                         const cand = d.candidates ?? 0;
                         const add = d.added ?? 0;
                         const errN = (d.errors && Array.isArray(d.errors)) ? d.errors.length : 0;
-                        lines.push(`- ${name}: 후보 ${cand} / 신규 ${add}${errN ? ` / 오류 ${errN}` : ''}`);
+                        const dup = d.dupSkipped ?? 0;
+                        const fil = d.filtered ?? 0;
+                        const low = d.droppedLow ?? 0;
+                        const parts = [`- ${name}: 후보 ${cand} / 신규 ${add}`];
+                        if (dup) parts.push(`중복 ${dup}`);
+                        if (fil) parts.push(`필터제외 ${fil}`);
+                        if (low) parts.push(`하제외 ${low}`);
+                        if (errN) parts.push(`오류 ${errN}`);
+                        lines.push(parts.join(' / '));
                     });
                 }
 
