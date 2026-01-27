@@ -2042,8 +2042,7 @@
 
     <script>
     // ★★★ Apps Script WebApp URL ★★★
-        const API_BASE =
-            'https://script.google.com/macros/s/AKfycbxt864ult1L58FXheATO11Abtli0j7N7h21o5AJAguKFpTzULe94uRLaqSoTMhI3PAhcA/exec';
+        const API_BASE = 'REPLACE_WITH_YOUR_WEBAPP_EXEC_URL';
 
         // DOM helper (single element by id)
         const el = (id) => document.getElementById(id);
@@ -4515,6 +4514,59 @@
             } finally {
                 setGlobalLoading(false);
             }
-        }</script>
+        }
+/* ===== v63 STEPWISE EAIS(L04) ===== */
+async function callBackend_(action, payload){
+  const url = (API_BASE || '').trim();
+  if(!url || url.indexOf('/exec')===-1){ alert('백엔드 WebApp URL(API_BASE)을 코드에 넣어주세요.'); throw new Error('API_BASE missing'); }
+  const body = Object.assign({ action }, payload || {});
+  const res = await fetch(url, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(body) });
+  const txt = await res.text();
+  try { return JSON.parse(txt); } catch(e){ return { ok:false, raw: txt }; }
+}
+async function stepCollectEAIS_(){
+  const out = await callBackend_('eais_collect', { accessToken: window.__accessToken||'', idToken: window.__idToken||'', max: 50 });
+  alert(out.ok ? `세움터(L04) 수집 완료\n후보 ${out.collected||0} / 신규 ${out.inserted||0}` : ('수집 실패: ' + (out.error||out.raw||'')));
+  try{ if(window.loadBidList) await window.loadBidList(); }catch(e){}
+  return out;
+}
+async function stepAiSummary_(){
+  const out = await callBackend_('eais_ai_summary', { accessToken: window.__accessToken||'', idToken: window.__idToken||'', limit: 10 });
+  alert(out.ok ? `AI 1차 요약 완료\n처리 ${out.done||0}건` : ('요약 실패: ' + (out.error||out.raw||'')));
+  try{ if(window.loadBidList) await window.loadBidList(); }catch(e){}
+  return out;
+}
+async function stepDeepAnalyze_(){
+  const out = await callBackend_('eais_deep_analyze', { accessToken: window.__accessToken||'', idToken: window.__idToken||'', limit: 10 });
+  alert(out.ok ? `2차 심화분석 완료\n처리 ${out.done||0}건` : ('2차 실패: ' + (out.error||out.raw||'')));
+  try{ if(window.loadBidList) await window.loadBidList(); }catch(e){}
+  return out;
+}
+async function stepCounterDoc_(){
+  const out = await callBackend_('eais_generate_doc', { accessToken: window.__accessToken||'', idToken: window.__idToken||'', limit: 10 });
+  alert(out.ok ? `대책문서 생성 완료\n문서 ${out.done||0}건` : ('문서 실패: ' + (out.error||out.raw||'')));
+  try{ if(window.loadBidList) await window.loadBidList(); }catch(e){}
+  return out;
+}
+
+</script>
+
+<!-- v63 STEPWISE buttons (simple UX) -->
+<div id="ksuanStepwiseBar" style="position:fixed; top:86px; left:22px; z-index:99999; display:flex; gap:8px; flex-wrap:wrap;">
+  <button id="btnStepCollect" style="padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:#0e1b2a; color:#e9f0ff; cursor:pointer;">세움터 수집</button>
+  <button id="btnStepSum" style="padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:#0e1b2a; color:#e9f0ff; cursor:pointer;">AI 1차 요약</button>
+  <button id="btnStepDeep" style="padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:#0e1b2a; color:#e9f0ff; cursor:pointer;">2차 심화분석</button>
+  <button id="btnStepDoc" style="padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:#0e1b2a; color:#e9f0ff; cursor:pointer;">대책문서</button>
+</div>
+<script>
+window.addEventListener('load', ()=>{
+  const $ = (id)=>document.getElementById(id);
+  if($('btnStepCollect')) $('btnStepCollect').onclick = ()=>stepCollectEAIS_();
+  if($('btnStepSum')) $('btnStepSum').onclick = ()=>stepAiSummary_();
+  if($('btnStepDeep')) $('btnStepDeep').onclick = ()=>stepDeepAnalyze_();
+  if($('btnStepDoc')) $('btnStepDoc').onclick = ()=>stepCounterDoc_();
+});
+</script>
+
 </body>
 </html>
