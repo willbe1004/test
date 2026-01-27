@@ -2,321 +2,145 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>한국수안 AI 입찰관리 (EAIS 메인)</title>
+  <title>한국수안 AI 입찰관리 (EAIS L04)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    :root{
-      --bg:#050b16; --card:#0e1b2a; --soft:#122538;
-      --accent:#ffb83f; --accent2:#ff77c8; --text:#e8f0ff; --muted:#9fb3c8;
-      --good:#00c896; --bad:#ff4d4d;
-    }
-    *{box-sizing:border-box;}
-    body{margin:0;background:radial-gradient(1200px 600px at 20% 0%, #0b2340, var(--bg)); color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Apple SD Gothic Neo,Noto Sans KR,sans-serif;}
-    header{padding:18px 22px; display:flex; gap:12px; align-items:center; justify-content:space-between;}
-    .brand{font-size:22px;font-weight:800;letter-spacing:-0.5px}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:rgba(0,200,150,.12); border:1px solid rgba(0,200,150,.25); color:var(--good); font-weight:700; font-size:12px;}
-    .wrap{padding:0 22px 24px; display:grid; grid-template-columns: 380px 1fr; gap:14px;}
-    .card{background:rgba(14,27,42,.85); border:1px solid rgba(255,255,255,.06); border-radius:18px; padding:14px; box-shadow:0 12px 30px rgba(0,0,0,.25);}
-    .card h3{margin:0 0 10px; font-size:14px; color:#cfe2ff;}
-    .btn{cursor:pointer; border:none; border-radius:12px; padding:10px 12px; font-weight:800; background:rgba(255,184,63,.14); color:#ffd18a; border:1px solid rgba(255,184,63,.25);}
-    .btn:hover{filter:brightness(1.1);}
-    .btn2{background:rgba(255,119,200,.14); color:#ffd1ea; border:1px solid rgba(255,119,200,.25);}
-    .btnGood{background:rgba(0,200,150,.14); color:#7dffdb; border:1px solid rgba(0,200,150,.25);}
-    .btnGhost{background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,.10);}
-    .row{display:flex; gap:8px; flex-wrap:wrap;}
-    .field{display:flex; flex-direction:column; gap:6px; margin-top:10px;}
-    input,textarea,select{background:rgba(18,37,56,.8); color:var(--text); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:10px 10px; outline:none;}
-    textarea{min-height:90px; resize:vertical;}
-    .muted{color:var(--muted); font-size:12px; line-height:1.4}
-    table{width:100%; border-collapse:separate; border-spacing:0 10px;}
-    td,th{padding:10px 10px; font-size:12px; vertical-align:top;}
-    th{color:#cfe2ff; text-align:left;}
-    .tr{background:rgba(18,37,56,.55); border:1px solid rgba(255,255,255,.07); border-radius:14px;}
-    .tag{display:inline-flex; padding:4px 8px; border-radius:999px; font-size:11px; border:1px solid rgba(255,255,255,.12); color:var(--muted);}
-    .tagGood{border-color:rgba(0,200,150,.35); color:#7dffdb;}
-    .tagWarn{border-color:rgba(255,184,63,.35); color:#ffd18a;}
-    .tagBad{border-color:rgba(255,77,77,.35); color:#ffb0b0;}
-    .actions{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
-    .modalBG{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; padding:18px;}
-    .modal{max-width:720px; width:100%; background:rgba(14,27,42,.95); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:16px;}
-    .modal h2{margin:0 0 10px; font-size:16px;}
-    pre{white-space:pre-wrap; background:rgba(18,37,56,.7); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px; color:#d7e6ff; font-size:12px; overflow:auto; max-height:240px;}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Apple SD Gothic Neo,Noto Sans KR,sans-serif; margin:0; background:#050b16; color:#e9f0ff;}
+    .wrap{max-width:1100px; margin:0 auto; padding:18px;}
+    .card{background:#0e1b2a; border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:16px; margin:12px 0;}
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    input{background:#122538; border:1px solid rgba(255,255,255,.12); color:#e9f0ff; border-radius:12px; padding:10px 12px; min-width:260px;}
+    button{background:#00c896; border:none; color:#042016; font-weight:900; border-radius:12px; padding:10px 12px; cursor:pointer;}
+    button.secondary{background:#ffb83f;}
+    button.ghost{background:transparent; border:1px solid rgba(255,255,255,.18); color:#e9f0ff;}
+    .log{white-space:pre-wrap; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; color:#b9c7ff;}
+    .muted{color:#a9b7d1; font-size:12px;}
+    a{color:#7ad7ff}
   </style>
 </head>
 <body>
-<header>
-  <div>
-    <div class="brand">한국수안 AI 입찰관리</div>
-    <div class="pill">EAIS(세움터) 메인 · 나라장터 보조</div>
+  <div class="wrap">
+    <h2 style="margin:8px 0 6px;">한국수안 AI 입찰관리 (EAIS L04 전용)</h2>
+    <div class="muted">직원용 웹앱: EAIS(L04) 자동 수집 → 상세/AI 요약/2차/대책문서까지 버튼으로 처리</div>
+
+    <div class="card">
+      <div class="row">
+        <input id="apiBase" placeholder="WebApp URL (https://script.google.com/macros/s/AKfycbxxoKyR07FkajC6dvjlrDy8ns0L_HJaCAtGds7My9KSaF5BTEye8v1jaVjzoFC-YsjhuA/exec)"/>
+        <button class="ghost" id="saveApi">URL 저장</button>
+        <div style="flex:1"></div>
+        <div id="loginBox"></div>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <input id="gateKeyword" placeholder="(선택) 단일 게이트키워드 예: 센터"/>
+        <input id="maxRows" placeholder="max (기본 50)" style="min-width:140px;"/>
+        <button id="btnCollect">EAIS(L04) 수집</button>
+        <button class="secondary" id="btnPipeline">수집 + AI요약 + 2차 + 대책문서</button>
+      </div>
+      <div class="muted" style="margin-top:8px;">
+        * 다중 게이트키워드는 백엔드 Script Properties의 <b>GATE_KEYWORDS</b>로 관리됩니다.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <button class="ghost" id="btnRefresh">DB 새로고침</button>
+      </div>
+      <div id="dbArea" class="log" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:800; margin-bottom:8px;">실행 로그</div>
+      <div id="log" class="log"></div>
+    </div>
   </div>
-  <div class="row">
-    <button class="btn2" id="btnEaisGuide">EAIS 임포트 도우미</button>
-    <button class="btn" id="btnRefresh">DB 새로고침</button>
-    <button class="btnGood" id="btnG2B">나라장터 보조수집</button>
-  </div>
-</header>
-
-<div class="wrap">
-  <div class="card">
-    <h3>설정/상태</h3>
-    <div class="muted" id="cfgBox">불러오는 중...</div>
-
-    <div class="field">
-      <label class="muted">빠른 검색(제목)</label>
-      <input id="q" placeholder="예: 센터, 빗물, 저류조" />
-    </div>
-    <div class="row" style="margin-top:10px">
-      <button class="btnGhost" id="btnClear">검색 초기화</button>
-      <button class="btn" id="btnApply">검색 적용</button>
-    </div>
-
-    <div class="field">
-      <h3 style="margin-top:14px">수동 등록(선택)</h3>
-      <input id="mTitle" placeholder="공고명" />
-      <input id="mAgency" placeholder="발주처" />
-      <input id="mUrl" placeholder="원문URL" />
-      <button class="btnGood" id="btnManual">수동 등록 저장</button>
-      <div class="muted">※ EAIS 임포트가 막힐 때 대체로 사용</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h3>공고 목록</h3>
-    <div class="muted" id="listMeta"></div>
-    <table id="tbl">
-      <thead>
-        <tr>
-          <th style="width:84px">출처</th>
-          <th>공고명</th>
-          <th style="width:120px">발주처</th>
-          <th style="width:90px">상태</th>
-          <th style="width:220px">작업</th>
-        </tr>
-      </thead>
-      <tbody id="tb"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- EAIS 가이드 모달 -->
-<div class="modalBG" id="modalBG">
-  <div class="modal">
-    <div class="row" style="justify-content:space-between;align-items:center">
-      <h2>EAIS(세움터) 검색 결과를 웹앱으로 가져오기</h2>
-      <button class="btnGhost" id="btnClose">닫기</button>
-    </div>
-
-    <div class="muted">
-      EAIS는 보안/세션 정책으로 인해 서버에서 직접 수집이 막히는 경우가 많습니다.  
-      그래서 **로그인된 브라우저에서 검색 → 목록 추출 → 우리 웹앱으로 전송** 방식이 가장 안정적입니다.
-    </div>
-
-    <ol class="muted">
-      <li>새 탭에서 EAIS L04 페이지를 열고 로그인합니다.</li>
-      <li>상단 검색에서 <b>입력검색유형=공모전명</b> 선택 후 게이트 키워드를 넣고 검색합니다.</li>
-      <li>검색 결과 목록이 보이면, 개발자도구(F12) → Console에 아래 스크립트를 붙여넣고 Enter 합니다.</li>
-      <li>전송 완료 후, 이 페이지에서 DB 새로고침을 누르면 목록이 들어옵니다.</li>
-    </ol>
-
-    <div class="row">
-      <button class="btn" id="btnOpenEais">EAIS L04 열기</button>
-      <button class="btn2" id="btnCopy">콘솔 스크립트 복사</button>
-    </div>
-
-    <pre id="scriptBox"></pre>
-  </div>
-</div>
 
 <script>
-  // ✅ 배포 후 여기에 웹앱 URL을 넣으세요.
-  // 예: const API_BASE = "https://script.google.com/macros/s/XXXX/exec";
-  const API_BASE = "https://script.google.com/macros/s/AKfycbxxoKyR07FkajC6dvjlrDy8ns0L_HJaCAtGds7My9KSaF5BTEye8v1jaVjzoFC-YsjhuA/exec"
-  const $ = (id)=>document.getElementById(id);
+  // ===== storage =====
+  const LS_API = "KSUA_API_BASE";
+  const LS_CLIENT = "KSUA_GOOGLE_CLIENT_ID";
+  const apiBaseEl = document.getElementById('apiBase');
+  apiBaseEl.value = localStorage.getItem(LS_API) || "";
+  document.getElementById('saveApi').onclick = ()=>{ localStorage.setItem(LS_API, apiBaseEl.value.trim()); alert("저장 완료"); };
 
-  async function api(action, body){
-    const url = API_BASE ? `${API_BASE}?action=${encodeURIComponent(action)}` : `?action=${encodeURIComponent(action)}`;
-    const res = await fetch(url, {
-      method:"POST",
-      headers:{ "Content-Type":"text/plain;charset=utf-8" },
-      body: JSON.stringify(Object.assign({action}, body||{}))
-    });
-    return await res.json();
-  }
+  // ===== login (GIS) =====
+  let accessToken = "";
+  let idToken = "";
+  function log(msg){ const el=document.getElementById('log'); el.textContent = (msg + "\n") + el.textContent; }
 
-  function esc(s){
-    return String(s??"").replace(/[&<>"]/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[m]));
-  }
-
-  let rows = [];
-
-  async function loadConfig(){
-    const r = await api("config", {});
-    if(!r.ok){ $("cfgBox").textContent = "config 오류: " + (r.error||""); return; }
-    $("cfgBox").innerHTML = `
-      <div>게이트키워드: <span class="tag tagGood">${esc((r.gateKeywords||[]).join(", "))}</span></div>
-      <div>나라장터 검색키워드(보조): <span class="tag">${esc((r.searchKeywords||[]).join(", "))}</span></div>
-      <div>DROP_LOW(하 저장 금지): <span class="tag tagWarn">${esc(r.dropLow)}</span></div>
-      <div class="muted" style="margin-top:6px">※ API_BASE는 프론트 코드 상단에 설정되어야 합니다.</div>
+  function renderLogin(){
+    const box = document.getElementById('loginBox');
+    const clientId = localStorage.getItem(LS_CLIENT) || "";
+    box.innerHTML = `
+      <input id="clientId" placeholder="Google Client ID" value="${clientId}" style="min-width:380px"/>
+      <button class="ghost" id="saveClient">ClientID 저장</button>
+      <button id="btnLogin">로그인</button>
+      <span class="muted" id="loginState">${accessToken ? "로그인됨" : "미로그인"}</span>
     `;
-    makeConsoleScript(r.gateKeywords||[]);
+    document.getElementById('saveClient').onclick=()=>{
+      localStorage.setItem(LS_CLIENT, document.getElementById('clientId').value.trim());
+      alert("저장 완료");
+    };
+    document.getElementById('btnLogin').onclick=()=>startLogin();
   }
 
-  function makeConsoleScript(gates){
-    const gateExample = (gates[0]||"빗물");
-    const script = `
-(async()=>{
-  // 1) 이 값은 '한국수안 웹앱'의 배포 URL로 자동 세팅됩니다.
-  const WEBAPP_URL = "${API_BASE}";
-  if(!WEBAPP_URL){ alert("WEBAPP_URL(API_BASE)이 비어 있습니다. 프론트에 배포 URL을 먼저 설정하세요."); return; }
+  async function startLogin(){
+    const clientId = (document.getElementById('clientId')?.value || localStorage.getItem(LS_CLIENT) || "").trim();
+    if(!clientId){ alert("Google Client ID를 저장하세요."); return; }
 
-  // 2) 게이트키워드(선택) — 공모전명에 포함된 것만 추출
-  const gate = prompt("게이트키워드(선택)", "${gateExample}") || "";
-  const rows = [...document.querySelectorAll("table tbody tr")];
-
-  const items = [];
-  for(const tr of rows){
-    const tds = [...tr.querySelectorAll("td")];
-    // EAIS 테이블 구조가 바뀔 수 있어 보수적으로 추출
-    const title = (tds[1]?.innerText || tds[0]?.innerText || "").trim();
-    if(!title) continue;
-    if(gate && !title.includes(gate)) continue;
-
-    const a = tr.querySelector("a[href]");
-    const url = a ? a.href : location.href;
-
-    items.push({ title, url });
-  }
-
-  if(!items.length){ alert("추출 0건 - 검색 결과가 있는지/테이블 구조를 확인하세요."); return; }
-
-  const payload = { action:"eais_import", source:"EAIS_L04", gate, collectedAt:new Date().toISOString(), items };
-  await fetch(WEBAPP_URL, {
-    method:"POST",
-    mode:"no-cors",
-    headers:{ "Content-Type":"text/plain;charset=utf-8" },
-    body: JSON.stringify(payload)
-  });
-  alert("전송 완료: "+items.length+"건 (이제 한국수안 웹앱에서 DB 새로고침)");
-})();`.trim();
-    $("scriptBox").textContent = script;
-  }
-
-  async function loadList(){
-    const r = await api("list", { limit: 200 });
-    if(!r.ok){ $("listMeta").textContent = "list 오류: " + (r.error||""); return; }
-    rows = r.rows || [];
-    render();
-  }
-
-  function render(){
-    const q = $("q").value.trim();
-    const filtered = q ? rows.filter(r => String(r["공고명"]||"").includes(q)) : rows;
-
-    $("listMeta").textContent = `표시 ${filtered.length}건 / 전체 ${rows.length}건 (최근순)`;
-
-    const tb = $("tb");
-    tb.innerHTML = "";
-    for(const r of filtered){
-      const src = String(r.source||"");
-      const title = String(r["공고명"]||"");
-      const agency = String(r["발주처"]||"");
-      const status = String(r["상태"]||"");
-      const url = String(r["원문URL"]||"");
-      const rowId = r.__row;
-
-      const tr = document.createElement("tr");
-      tr.className = "tr";
-      tr.innerHTML = `
-        <td><span class="tag ${src==="EAIS"?"tagGood":""}">${esc(src||"-")}</span></td>
-        <td>
-          <div style="font-weight:800">${esc(title)}</div>
-          <div class="muted">${url ? `<a href="${esc(url)}" target="_blank" style="color:#9fd3ff;text-decoration:none">원문</a>` : ""}</div>
-        </td>
-        <td>${esc(agency||"-")}</td>
-        <td><span class="tag ${status.includes("완료")?"tagGood":(status.includes("대기")?"tagWarn":"")}">${esc(status||"-")}</span></td>
-        <td>
-          <div class="actions">
-            <button class="btnGhost" data-act="sum" data-row="${rowId}">AI요약</button>
-            <button class="btnGhost" data-act="det" data-row="${rowId}">2차분석</button>
-            <button class="btnGhost" data-act="doc" data-row="${rowId}">대책문서</button>
-          </div>
-        </td>
-      `;
-      tb.appendChild(tr);
-    }
-
-    tb.querySelectorAll("button[data-act]").forEach(btn=>{
-      btn.addEventListener("click", async ()=>{
-        const act = btn.getAttribute("data-act");
-        const row = Number(btn.getAttribute("data-row"));
-        btn.disabled = true;
-        btn.textContent = "처리중...";
-        try{
-          if(act==="sum"){
-            const r = await api("ai_summary", { row });
-            alert(r.ok ? "요약 저장 완료" : ("요약 실패: "+r.error));
-          }else if(act==="det"){
-            const r = await api("ai_detail", { row });
-            alert(r.ok ? "2차분석 저장 완료" : ("2차 실패: "+r.error));
-          }else if(act==="doc"){
-            const r = await api("make_doc", { row });
-            alert(r.ok ? "문서 생성 완료" : ("문서 실패: "+r.error));
-          }
-          await loadList();
-        }finally{
-          btn.disabled = false;
-          btn.textContent = (act==="sum"?"AI요약":act==="det"?"2차분석":"대책문서");
-        }
-      });
+    const tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
+      callback: (resp) => {
+        accessToken = resp.access_token || "";
+        document.getElementById('loginState').textContent = accessToken ? "로그인됨" : "미로그인";
+        log("LOGIN OK");
+      }
     });
+    tokenClient.requestAccessToken({prompt: "consent"});
+  }
+  window.onload = ()=>renderLogin();
+
+  // ===== call backend =====
+  async function callApi(action, extra){
+    const api = (apiBaseEl.value || localStorage.getItem(LS_API) || "").trim();
+    if(!api){ alert("WebApp URL(…/exec)을 입력/저장하세요."); throw new Error("no api"); }
+    if(!accessToken){ alert("먼저 로그인하세요."); throw new Error("no token"); }
+
+    const payload = Object.assign({ action, accessToken, idToken }, extra || {});
+    const res = await fetch(api, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+    const txt = await res.text();
+    try { return JSON.parse(txt); } catch(e){ return { ok:false, raw: txt }; }
   }
 
-  // UI events
-  $("btnRefresh").addEventListener("click", loadList);
-  $("btnApply").addEventListener("click", render);
-  $("btnClear").addEventListener("click", ()=>{ $("q").value=""; render(); });
-
-  $("btnG2B").addEventListener("click", async ()=>{
-    if(!confirm("나라장터 보조수집을 실행할까요? (SEARCH_KEYWORDS 기준)")) return;
-    const r = await api("g2b_update", {});
-    alert(r.ok ? `완료: 신규 ${r.inserted} / 제외 ${r.skipped}` : ("실패: "+r.error));
-    await loadList();
-  });
-
-  $("btnManual").addEventListener("click", async ()=>{
-    const title = $("mTitle").value.trim();
-    const agency = $("mAgency").value.trim();
-    const url = $("mUrl").value.trim();
-    if(!title){ alert("공고명을 입력하세요."); return; }
-    const r = await api("eais_import", { items: [{ title, agency, url }] });
-    alert(r.ok ? `저장: ${r.inserted} / 제외: ${r.skipped}` : ("실패: "+r.error));
-    $("mTitle").value=""; $("mAgency").value=""; $("mUrl").value="";
-    await loadList();
-  });
-
-  // Modal
-  $("btnEaisGuide").addEventListener("click", ()=>{ $("modalBG").style.display="flex"; });
-  $("btnClose").addEventListener("click", ()=>{ $("modalBG").style.display="none"; });
-  $("btnOpenEais").addEventListener("click", ()=>{ window.open("https://www.eais.go.kr/moct/awp/aia01/AWPAIA01L04", "_blank"); });
-  $("btnCopy").addEventListener("click", async ()=>{
+  document.getElementById('btnCollect').onclick = async()=>{
     try{
-      await navigator.clipboard.writeText($("scriptBox").textContent);
-      alert("콘솔 스크립트를 클립보드에 복사했습니다.\nEAIS 결과 화면에서 F12 → Console에 붙여넣고 Enter 하세요.");
-    }catch(e){
-      alert("복사 실패: 브라우저 권한 문제일 수 있습니다.\n스크립트를 직접 드래그해서 복사해 주세요.");
-    }
-  });
+      log("EAIS 수집 시작...");
+      const gateKeyword = document.getElementById('gateKeyword').value.trim();
+      const max = Number(document.getElementById('maxRows').value || 50);
+      const out = await callApi("eais_l04_collect", { gateKeyword, max });
+      log(JSON.stringify(out, null, 2));
+      alert(out.ok ? `완료: 신규 ${out.inserted}건` : ("실패: " + (out.error||"")));
+    }catch(e){ log(String(e)); }
+  };
 
-  // boot
-  (async()=>{
-    if(!API_BASE){
-      $("cfgBox").innerHTML = `<span class="tag tagBad">API_BASE 미설정</span><div class="muted" style="margin-top:6px">프론트 파일 상단의 API_BASE에 배포 URL을 넣어야 동작합니다.</div>`;
-    }
-    await loadConfig();
-    await loadList();
-  })();
+  document.getElementById('btnPipeline').onclick = async()=>{
+    try{
+      log("EAIS 파이프라인 시작...");
+      const gateKeyword = document.getElementById('gateKeyword').value.trim();
+      const max = Number(document.getElementById('maxRows').value || 50);
+      const out = await callApi("eais_l04_pipeline", { gateKeyword, max });
+      log(JSON.stringify(out, null, 2));
+      alert(out.ok ? `완료: 처리 ${out.processed?.length||0}건 / 문서 ${out.docCreated||0}건` : ("실패: " + (out.error||"")));
+    }catch(e){ log(String(e)); }
+  };
+
+  document.getElementById('btnRefresh').onclick = async()=>{
+    try{
+      const out = await callApi("list", { limit: 30 });
+      document.getElementById('dbArea').textContent = JSON.stringify(out, null, 2);
+    }catch(e){ log(String(e)); }
+  };
 </script>
 </body>
 </html>
-
-
