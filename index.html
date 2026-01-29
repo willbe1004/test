@@ -1565,6 +1565,10 @@
 <button id="btnEAISL04" class="btn btn-ghost btn-small" title="세움터(EAIS) L04 목록에서 HTML/AI 방식으로 수집">
     <span class="icon">🏗️</span> 세움터 L04 수집
 </button>
+
+<button id="btnEAISAnalyze" class="btn btn-ghost btn-small" title="세움터(EAIS) L04로 수집된 대기건을 Gemini로 분석하여 저장">
+    <span class="icon">🧠</span> 세움터 AI 분석(대기)
+</button>
                 <button id="btnSmartAddOpen" class="btn btn-ghost btn-small">
                     <span class="icon">➕</span> 공고 스마트 등록
                 </button>
@@ -2044,7 +2048,7 @@
     <script>
     // ★★★ Apps Script WebApp URL ★★★
         const API_BASE =
-            'https://script.google.com/macros/s/AKfycbxxoKyR07FkajC6dvjlrDy8ns0L_HJaCAtGds7My9KSaF5BTEye8v1jaVjzoFC-YsjhuA/exec';
+            'https://script.google.com/macros/s/AKfycbxt864ult1L58FXheATO11Abtli0j7N7h21o5AJAguKFpTzULe94uRLaqSoTMhI3PAhcA/exec';
 
         // DOM helper (single element by id)
         const el = (id) => document.getElementById(id);
@@ -2382,6 +2386,7 @@
             document.getElementById('btnRefresh').addEventListener('click', refreshAll);
             document.getElementById('btnExternal').addEventListener('click', externalUpdate);
             document.getElementById('btnEAISL04').addEventListener('click', eaisUpdateL04);
+            document.getElementById('btnEAISAnalyze').addEventListener('click', eaisAnalyzePending);
             document.getElementById('searchInput').addEventListener('input', applyFilter);
             document.getElementById('filterRegion').addEventListener('change', applyFilter);
 
@@ -2581,6 +2586,40 @@ async function eaisUpdateL04() {
     } catch (e) {
         console.error(e);
         alert('세움터 L04 수집 오류: ' + (e && e.message ? e.message : e));
+    }
+}
+
+async function eaisAnalyzePending() {
+    const btn = document.getElementById('btnEAISAnalyze');
+    if (btn) btn.classList.add('loading');
+    try {
+        setStatus('세움터 AI 분석(대기) 실행 중... (최대 15건)');
+        const res = await fetch(API_BASE + '?action=seumter_analyze&maxAi=15', { cache: 'no-store' });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok || (j && j.result && j.result !== 'success')) {
+            console.warn('EAIS analyze failed:', j);
+            alert('세움터 AI 분석 실패: ' + (j && (j.message || j.error) ? (j.message || j.error) : res.status));
+            return;
+        }
+        const analyzed = (j && j.analyzed != null) ? j.analyzed : 0;
+        const failed = (j && j.failed != null) ? j.failed : 0;
+
+        let msg = `세움터 AI 분석 완료 (분석: ${analyzed}, 실패: ${failed})`;
+
+        if (j && Array.isArray(j.logs) && j.logs.length) {
+            const lines = j.logs.slice(0, 10).map(x => '- ' + x);
+            if (j.logs.length > 10) lines.push(`- (그 외 ${j.logs.length - 10}건 생략)`);
+            msg += '\n\n[로그]\n' + lines.join('\n');
+        }
+
+        setStatus(msg.replace(/\n/g, ' '));
+        alert(msg);
+        await loadData();
+    } catch (e) {
+        console.error(e);
+        alert('세움터 AI 분석 오류: ' + (e && e.message ? e.message : e));
+    } finally {
+        if (btn) btn.classList.remove('loading');
     }
 }
 
