@@ -2282,10 +2282,16 @@
 
   // 영업 경로: 시트 컬럼(salesRoute)을 기본으로 사용
   function getSalesRoute(item) {
-    return (item.salesRoute || item.sales_route || '').toString().trim();
+    const v = (item.salesRoute || item.sales_route || '').toString().trim();
+    if (v) return v;
+
+    // ✅ 기본값: 마감 전 공고는 '직접입찰'로 간주(초기 분류 전에도 리스트 노출)
+    const deadlineStr = item.deadline || item.closeDate || '';
+    const isPast = isDeadlinePast(deadlineStr);
+    return isPast ? '' : '직접입찰';
   }
 
-  // 정렬용 마감일 타임스탬프 (없으면 0)
+// 정렬용 마감일 타임스탬프 (없으면 0)
   function getDeadlineTime(item) {
     const s = String(item.deadline || item.closeDate || '').trim();
     if (!s) return 0;
@@ -2469,30 +2475,43 @@
       const relGrade    = getRelevanceGrade(item); // "상" / "중" / "하" / ""
       const hasCal      = hasCalendarEvent(item);
       const channel     = detectSourceChannel(item); // API / EAIS / EXTERNAL / SMART
+      const isExternal  = (channel === 'EXTERNAL');
       const hasWin      = hasWinner(item);
 
       // ① 업무 탭별 기본 조건 --------------------------------------
       if (viewMode === 'direct') {
-        // 직접입찰 · 공고중: 마감 전 + 영업경로 = 직접입찰
-        if (isPast) return false;
-        if (salesRoute !== '직접입찰') return false;
+        // 직접입찰 · 공고중: (기본) 마감 전 + 영업경로 = 직접입찰
+        // ✅ 단, 외부웹(EXTERNAL)은 마감 여부/영업경로와 무관하게 항상 표시
+        if (!isExternal) {
+          if (isPast) return false;
+          if (salesRoute !== '직접입찰') return false;
+        }
       } else if (viewMode === 'target') {
-        // 낙찰자 타깃: 마감된 건 + 관련성 상/중 + 영업경로 = 설계사/시공사 타깃
-        if (!isPast) return false;
-        if (relGrade !== '상' && relGrade !== '중') return false;
-        if (salesRoute !== '설계사타깃' && salesRoute !== '시공사타깃') return false;
+        // 낙찰자 타깃: (기본) 마감된 건 + 관련성 상/중 + 영업경로 = 설계사/시공사 타깃
+        // ✅ 단, 외부웹(EXTERNAL)은 마감 여부/관련성/영업경로와 무관하게 항상 표시
+        if (!isExternal) {
+          if (!isPast) return false;
+          if (relGrade !== '상' && relGrade !== '중') return false;
+          if (salesRoute !== '설계사타깃' && salesRoute !== '시공사타깃') return false;
+        }
       }
       // history(전체/히스토리)는 별도 기본 조건 없음
 
       // ② 상태 필터 (공고중 / 마감 / 캘린더 등록됨) -----------------
-      if (stateFilter === 'open'     && isPast)   return false;
-      if (stateFilter === 'closed'   && !isPast)  return false;
-      if (stateFilter === 'calendar' && !hasCal)  return false;
+      // ✅ 외부웹(EXTERNAL)은 마감 여부와 무관하게 항상 표시(기본 탭 포함)
+      if (stateFilter === 'calendar' && !hasCal) return false;
+      if (!isExternal) {
+        if (stateFilter === 'open'   && isPast)  return false;
+        if (stateFilter === 'closed' && !isPast) return false;
+      }
 
       // ③ 영업 경로 필터 --------------------------------------------
-      if (routeFilter === 'direct'   && salesRoute !== '직접입찰')    return false;
-      if (routeFilter === 'designer' && salesRoute !== '설계사타깃')  return false;
-      if (routeFilter === 'builder'  && salesRoute !== '시공사타깃')  return false;
+      // ✅ 외부웹(EXTERNAL)은 영업경로와 무관하게 항상 표시
+      if (!isExternal) {
+        if (routeFilter === 'direct'   && salesRoute !== '직접입찰')    return false;
+        if (routeFilter === 'designer' && salesRoute !== '설계사타깃')  return false;
+        if (routeFilter === 'builder'  && salesRoute !== '시공사타깃')  return false;
+      }
 
       // ④ 소스/채널 필터 -------------------------------------------
       if (sourceFilter === 'API'      && channel !== 'API')      return false;
