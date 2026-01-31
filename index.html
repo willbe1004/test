@@ -1422,7 +1422,91 @@
             .bid-title a:hover {
                 text-decoration: underline;
             }
-    </style>
+    
+
+        /* =======================
+           2026-02-01 UI 패치
+           - 캘린더: 패널 제거 → 모달로 이동
+           - 모바일 가독성 개선(폰트/여백 확대)
+           ======================= */
+
+        .main-layout {
+            grid-template-columns: 1fr !important;
+        }
+
+        .modal.modal-calendar {
+            width: min(96vw, 980px);
+            max-width: 980px;
+        }
+
+        .calendar-frame.calendar-frame-modal {
+            height: min(78vh, 720px);
+            border-radius: 0 0 18px 18px;
+        }
+
+        .calendar-frame.calendar-frame-modal iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        html {
+            font-size: 15px;
+        }
+
+        body {
+            font-size: 1rem;
+        }
+
+        .bid-title {
+            font-size: 1.05rem;
+            line-height: 1.35;
+        }
+
+        .btn {
+            font-size: 0.95rem;
+        }
+
+        .chip {
+            font-size: 0.9rem;
+        }
+
+        .meta-row,
+        .winner-meta,
+        .panel-header,
+        .login-status-text,
+        .summary-sub {
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 720px) {
+            html { font-size: 17px; }
+
+            .app-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+
+            .btn.btn-small {
+                padding: 10px 14px;
+            }
+
+            .chip {
+                padding: 8px 12px;
+            }
+
+            .bid-list-panel {
+                max-height: none;
+            }
+        }
+</style>
 </head>
 <body>
     <div class="page-shell">
@@ -1453,6 +1537,9 @@
                     <button id="btnLogin" class="btn btn-ghost btn-small">
                         <span class="icon">🔑</span>
                         <span id="btnLoginLabel">로그인</span>
+                    </button>
+                    <button id="btnCalendar" class="btn btn-ghost btn-small">
+                        <span class="icon">📅</span> 캘린더
                     </button>
                     <div>
                         <div id="loginStatusDot" class="login-status-dot"></div>
@@ -1701,30 +1788,28 @@
 
                 <div id="bidList"></div>
             </section>
-
-            <aside class="calendar-panel">
-                <header class="calendar-header">
-                    <div class="calendar-header-left">
-                        <span>입찰 마감 캘린더</span>
-                        <span class="calendar-tag">Google Calendar</span>
-                    </div>
-                    <span style="font-size:11px;color:var(--text-soft);">
-                        일정 등록 시 자동으로 동기화 됩니다.
-                    </span>
-                </header>
-
-                <div class="calendar-frame">
-                    <!-- showTabs / showNav 활성화 -->
-                    <iframe id="calendarIframe"
-                            src="https://calendar.google.com/calendar/embed?src=d51a10e0014dcbd83e98d0da91cda4f52f629c19652c15fc693ee4529bbbab04%40group.calendar.google.com&ctz=Asia%2FSeoul&bgcolor=%23050915&mode=MONTH&showTitle=0&showPrint=0&showTabs=1&showCalendars=0&showTz=0&showNav=1&showDate=1"></iframe>
-                    <!-- Feedback 버튼 가리기 -->
-                    <div class="calendar-mask"></div>
-                </div>
-            </aside>
-        </section>
+</section>
     </div>
 
-    <!-- 스마트 등록 모달 -->
+    
+    <!-- 캘린더 모달 -->
+    <div id="calendarModalBackdrop" class="modal-backdrop">
+        <div class="modal modal-calendar">
+            <div class="modal-header">
+                <div class="modal-title">입찰 마감 캘린더</div>
+                <button id="btnCalClose" class="btn btn-ghost btn-small">닫기</button>
+            </div>
+            <div class="modal-body" style="padding:0;">
+                <div class="calendar-frame calendar-frame-modal">
+                    <iframe id="calendarIframe"
+                            src="https://calendar.google.com/calendar/embed?src=d51a10e0014dcbd83e98d0da91cda4f52f629c19652c15fc693ee4529bbbab04%40group.calendar.google.com&ctz=Asia%2FSeoul&bgcolor=%23050915&mode=MONTH&showTitle=0&showPrint=0&showTabs=1&showCalendars=0&showTz=0&showNav=1&showDate=1"></iframe>
+                    <div class="calendar-mask"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- 스마트 등록 모달 -->
     <div id="smartModalBackdrop" class="modal-backdrop">
         <div class="modal">
             <div class="modal-header">
@@ -2125,6 +2210,14 @@
       if (e.target.id === 'smartModalBackdrop') closeSmartModal();
     });
     document.getElementById('smartForm').addEventListener('submit', handleSmartSubmit);
+
+    // 캘린더 모달
+    document.getElementById('btnCalendar').addEventListener('click', openCalendarModal);
+    document.getElementById('btnCalClose').addEventListener('click', closeCalendarModal);
+    document.getElementById('calendarModalBackdrop').addEventListener('click', e => {
+      if (e.target.id === 'calendarModalBackdrop') closeCalendarModal();
+    });
+
 
     // Deep modal
     document.getElementById('deepModalBackdrop').addEventListener('click', e => {
@@ -3034,6 +3127,17 @@
 
   function closeSmartModal() {
     document.getElementById('smartModalBackdrop').classList.remove('active');
+  }
+
+
+  // ---------------- 캘린더 모달 ----------------
+
+  function openCalendarModal() {
+    document.getElementById('calendarModalBackdrop').classList.add('active');
+  }
+
+  function closeCalendarModal() {
+    document.getElementById('calendarModalBackdrop').classList.remove('active');
   }
 
 async function handleSmartSubmit(e) {
