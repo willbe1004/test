@@ -2427,14 +2427,21 @@
 
   // 채널(소스) 구분: 나라장터 / EAIS / 외부웹 / 스마트등록
   function detectSourceChannel(item) {
-    const base = detectSource(item); // API / SMART / EXTERNAL
-    if (base === 'API') return 'API';
-    if (base === 'SMART') return 'SMART';
+  // srcKind로 먼저 판별 (링크가 없어도 잡히게)
+  const kind = (item.srcKind || item.sourceKind || '').toUpperCase();
+  if (kind === 'API') return 'API';
+  if (kind === 'SMART') return 'SMART';
+  if (kind === 'EAIS') return 'EAIS';
+  if (kind === 'EXTERNAL') return 'EXTERNAL';
 
-    const link = normalizeLink(item);
-    if (link.includes('eais.go.kr')) return 'EAIS';
-    return 'EXTERNAL';
-  }
+  const base = detectSource(item); // 기존 로직 유지
+  if (base === 'API') return 'API';
+  if (base === 'SMART') return 'SMART';
+
+  const link = normalizeLink(item);
+  if (link.includes('eais.go.kr')) return 'EAIS';
+  return 'EXTERNAL';
+}
 
   // 상단 요약 카드 통계 반영
   function updateStatsUI(stats, items) {
@@ -2590,13 +2597,15 @@
       const aiText    = item.aiResult || '';
       const aiSummary = item.aiSummary || '';
 
-      const deadlineStr = item.deadline || item.closeDate || '';
+      const deadlineStr =
+         item.deadline || item.closeDate || item.closeDt || item.bidEndDt || item.endDt || '';
+
       const isPast      = isDeadlinePast(deadlineStr);
       const salesRoute  = getSalesRoute(item);
       const relGrade    = getRelevanceGrade(item); // "상" / "중" / "하" / ""
       const hasCal      = hasCalendarEvent(item);
       const channel     = detectSourceChannel(item); // API / EAIS / EXTERNAL / SMART
-      const isExternal  = (channel === 'EXTERNAL');
+      const isExternal = (channel === 'EXTERNAL' || channel === 'EAIS');
       const hasWin      = hasWinner(item);
 
       // ① 업무 탭별 기본 조건 --------------------------------------
@@ -2606,7 +2615,7 @@
         if (!isExternal) {
           if (salesRoute !== '직접입찰') return false;
         }
-      } else if (viewMode === 'target') { {
+      } else if (viewMode === 'target') {
         // 낙찰자 타깃: (기본) 마감된 건 + 관련성 상/중 + 영업경로 = 설계사/시공사 타깃
         // ✅ 단, 외부웹(EXTERNAL)은 마감 여부/관련성/영업경로와 무관하게 항상 표시
         if (!isExternal) {
@@ -2634,10 +2643,16 @@
       }
 
       // ④ 소스/채널 필터 -------------------------------------------
-      if (sourceFilter === 'API'      && channel !== 'API')      return false;
-      if (sourceFilter === 'EAIS'     && channel !== 'EAIS')     return false;
-      if (sourceFilter === 'EXTERNAL' && channel !== 'EXTERNAL') return false;
-      if (sourceFilter === 'SMART'    && channel !== 'SMART')    return false;
+      // 정책: "외부웹(EXTERNAL)" 선택 시 세움터(EAIS)까지 같이 보여주기
+       if (sourceFilter !== 'all') {
+       if (sourceFilter === 'EXTERNAL') {
+      // 외부웹 버튼 = 외부수집 + 세움터(EAIS)
+       if (!(channel === 'EXTERNAL' || channel === 'EAIS')) return false;
+       } else {
+      // API / EAIS / SMART는 각각만
+      if (channel !== sourceFilter) return false;
+       }
+      }
 
       // ⑤ 지역 필터 -------------------------------------------------
       if (region) {
@@ -3873,3 +3888,4 @@ async function deleteBid(item) {
   }</script>
 </body>
 </html>
+
