@@ -2601,13 +2601,12 @@
 
       // ① 업무 탭별 기본 조건 --------------------------------------
       if (viewMode === 'direct') {
-        // 직접입찰 · 공고중: (기본) 마감 전 + 영업경로 = 직접입찰
-        // ✅ 단, 외부웹(EXTERNAL)은 마감 여부/영업경로와 무관하게 항상 표시
+        // 직접입찰 탭: 영업경로=직접입찰 (마감 여부는 '상태' 필터에서 제어)
+        // ✅ 외부웹(EXTERNAL)은 영업경로/마감 여부와 무관하게 항상 표시
         if (!isExternal) {
-          if (isPast) return false;
           if (salesRoute !== '직접입찰') return false;
         }
-      } else if (viewMode === 'target') {
+      } else if (viewMode === 'target') { {
         // 낙찰자 타깃: (기본) 마감된 건 + 관련성 상/중 + 영업경로 = 설계사/시공사 타깃
         // ✅ 단, 외부웹(EXTERNAL)은 마감 여부/관련성/영업경로와 무관하게 항상 표시
         if (!isExternal) {
