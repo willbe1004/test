@@ -2366,6 +2366,123 @@
   return 'EXTERNAL';
 }
 
+  // 캘린더 등록 여부
+  function hasCalendarEvent(item) {
+    return !!(
+      item.calendarId ||
+      item.calendar_id ||
+      item.calendarEventId ||
+      item.calendar_event_id
+    );
+  }
+
+  // 낙찰자 정보 존재 여부
+  function hasWinner(item) {
+    return !!((item.winnerName || item.winner || '').toString().trim());
+  }
+
+  // 채널(소스) 구분: 나라장터 / EAIS / 외부웹 / 스마트등록
+  function detectSourceChannel(item) {
+    const base = detectSource(item); // API / SMART / EXTERNAL
+    if (base === 'API') return 'API';
+    if (base === 'SMART') return 'SMART';
+
+    const link = normalizeLink(item);
+    if (link.includes('eais.go.kr')) return 'EAIS';
+    return 'EXTERNAL';
+  }
+
+  // 상단 요약 카드 통계 반영
+  function updateStatsUI(stats, items) {
+    const apiRaw = stats.totalCountRaw || stats.totalItemsFromApi || stats.totalRaw || 0;
+
+    const elTotal    = document.getElementById('statTotalRaw');
+    const elFiltered = document.getElementById('statFiltered');
+    const elAi       = document.getElementById('statAi');
+
+    let keptApi = 0, keptExternal = 0, keptSmart = 0;
+    let aiApi   = 0, aiExternal   = 0, aiSmart   = 0;
+
+    (items || []).forEach(it => {
+      const src   = detectSource(it);
+      const hasAi = !!(it.aiResult || it.aiSummary);
+
+      if (src === 'API') {
+        keptApi++;
+        if (hasAi) aiApi++;
+      } else if (src === 'SMART') {
+        keptSmart++;
+        if (hasAi) aiSmart++;
+      } else {
+        keptExternal++;
+        if (hasAi) aiExternal++;
+      }
+    });
+
+    const keptTotal = keptApi + keptExternal + keptSmart;
+    const aiTotal   = aiApi   + aiExternal   + aiSmart;
+
+    // 외부/스마트 raw 통계가 서버에서 안오면, 현재 시트 건수로 대체
+    const externalRaw = stats.externalRaw || keptExternal;
+    const smartRaw    = stats.smartRaw    || keptSmart;
+    const totalAllRaw = apiRaw + externalRaw + smartRaw;
+
+    if (elTotal)    elTotal.textContent    = totalAllRaw.toLocaleString();
+    if (elFiltered) elFiltered.textContent = keptTotal.toLocaleString();
+    if (elAi)       elAi.textContent       = aiTotal.toLocaleString();
+
+    // 기간 / 마지막 업데이트
+    const elPeriod = document.getElementById('statPeriod');
+    if (elPeriod) {
+      elPeriod.textContent = `기간: 최근 ${stats.daysBack || 7}일`;
+    }
+    const elLast = document.getElementById('statLastUpdate');
+    if (elLast) {
+      elLast.textContent = `Last: ${stats.finishedAtText || '-'}`;
+    }
+
+    // 카드별 브레이크다운
+    const elTotalBr  = document.getElementById('statTotalBreakdown');
+    const elFiltBr   = document.getElementById('statFilteredBreakdown');
+    const elAiBr     = document.getElementById('statAiBreakdown');
+    const elReviewBr = document.getElementById('statSourceCounts');
+
+    if (elTotalBr) {
+      elTotalBr.textContent =
+        `나라장터 : ${apiRaw.toLocaleString()} / ` +
+        `외부웹 : ${externalRaw.toLocaleString()} / ` +
+        `스마트등록 : ${smartRaw.toLocaleString()}`;
+    }
+
+    if (elFiltBr) {
+      elFiltBr.textContent =
+        `나라장터 : ${keptApi.toLocaleString()} / ` +
+        `외부웹 : ${keptExternal.toLocaleString()} / ` +
+        `스마트등록 : ${keptSmart.toLocaleString()}`;
+    }
+
+    if (elAiBr) {
+      elAiBr.textContent =
+        `나라장터 : ${aiApi.toLocaleString()} / ` +
+        `외부웹 : ${aiExternal.toLocaleString()} / ` +
+        `스마트등록 : ${aiSmart.toLocaleString()}`;
+    }
+
+    if (elReviewBr) {
+      elReviewBr.innerHTML =
+        `나라장터 공고 수 : ${keptApi.toLocaleString()}<br>` +
+        `외부웹 수집 공고 수 : ${keptExternal.toLocaleString()}<br>` +
+        `공고 스마트 등록 공고 수 : ${keptSmart.toLocaleString()}`;
+    }
+
+    console.log(
+      `[전체 통계] API원본:${apiRaw} / 검토대상:${keptTotal}` +
+      ` (API:${keptApi}, 외부:${keptExternal}, SMART:${keptSmart})` +
+      ` / AI요약:${aiTotal}`
+    );
+  }
+
+
   // 관련성 등급: 시트 컬럼(relevanceGrade)이 있으면 우선 사용
   // 없으면 aiResult/aiSummary에서 추론 (1단계에서 이미 있으시면 중복 추가 X)
   function getRelevanceGrade(item) {
