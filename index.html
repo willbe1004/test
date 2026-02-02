@@ -1523,76 +1523,53 @@
             }
         }
     
-        /* ======================================================
-         * ✅ PATCH(2026-02-03): 2차 표준입력 저장 UI + 가독성 강화
-         * - 20251221(v5) UI 기반
-         * - 20260129(v22) 기능(표준입력 저장/대책문서 생성) 참조
-         * ====================================================== */
 
-        /* 가독성(폰트/간격) 오버라이드 */
-        body { font-size: 15px; line-height: 1.55; }
-        .btn { font-size: 14px; padding: 9px 16px; }
-        .btn-small { font-size: 13px; padding: 8px 13px; }
-        input, select, textarea { font-size: 14px; }
-
+        /* =============================
+         * 가독성 강화(폰트/여백)
+         * ============================= */
+        body { font-size: 14px; }
+        .search-input { font-size: 14px; padding: 10px 12px; }
+        .chip { font-size: 13px; padding: 8px 12px; }
+        .input, .textarea { font-size: 14px; padding: 10px 12px; }
+        .btn { font-size: 14px; padding: 10px 14px; }
+        .btn-small { font-size: 13px; padding: 8px 12px; }
+        .bid-title { font-size: 16px; line-height: 1.35; }
+        .bid-meta, .deep-grid-item-label { font-size: 13px; }
         .deep-modal-title { font-size: 18px; }
-        .deep-section-title { font-size: 15px; }
+        .deep-section-title { font-size: 14px; }
         .deep-summary-text { font-size: 14px; line-height: 1.6; }
 
-        .deep-section-title-row{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:10px;
-            flex-wrap:wrap;
+        .std-subtitle {
+            margin-top: 14px;
+            font-size: 13px;
+            color: var(--text-soft);
+            letter-spacing: 0.2px;
         }
-        .deep-section-actions{
-            display:flex;
-            gap:8px;
-            flex-wrap:wrap;
+        .std-grid {
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
         }
-        .deep-section-hint{
-            font-size:12px;
-            color:var(--text-soft);
-            margin-top:6px;
-            line-height:1.5;
+        .std-grid label {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-soft);
         }
-        .deep-grid-4{
-            display:grid;
-            grid-template-columns:repeat(4, minmax(0, 1fr));
-            gap:10px 18px;
-            margin-top:10px;
+        .std-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
         }
-        .deep-input{
-            width:100%;
-            padding:10px 12px;
-            border-radius:12px;
-            border:1px solid rgba(255,255,255,.12);
-            background:rgba(255,255,255,.04);
-            color:var(--text-main);
-            outline:none;
+        #stdSaveStatus {
+            font-size: 12px;
+            color: var(--text-soft);
         }
-        .deep-input:focus,
-        .deep-textarea:focus{
-            border-color: rgba(255,184,63,.55);
-            box-shadow: 0 0 0 4px rgba(255,184,63,.12);
-        }
-        .deep-textarea{
-            width:100%;
-            min-height:92px;
-            resize:vertical;
-            padding:10px 12px;
-            border-radius:12px;
-            border:1px solid rgba(255,255,255,.12);
-            background:rgba(255,255,255,.04);
-            color:var(--text-main);
-            outline:none;
-        }
-
-        @media (max-width: 768px){
-            .deep-grid-4{ grid-template-columns:1fr; gap:10px; }
-            .btn{ padding:10px 16px; }
-            .btn-small{ padding:9px 14px; }
+        #deepOrdinanceArticles {
+            white-space: pre-line;
         }
 
     </style>
@@ -1955,38 +1932,6 @@
             </div>
 
             <div class="deep-modal-body">
-
-                <section>
-                    <div class="deep-section-title-row">
-                        <div class="deep-section-title">영업 표준 정보 (수기 입력 → 저장)</div>
-                        <div class="deep-section-actions">
-                            <button id="btnStdSave" class="btn btn-primary btn-small" type="button"><span class="icon">💾</span> 저장</button>
-                            <button id="btnStdReset" class="btn btn-ghost btn-small" type="button">초기화</button>
-                        </div>
-                    </div>
-                    <div class="deep-section-hint">※ 이 섹션은 저장 시 <b>입찰DB</b> 및 <b>DeepMeta</b>에 반영되며, 대책문서 생성 시 변경값을 우선 적용합니다.</div>
-                    <div class="deep-grid-4">
-                        <div><div class="deep-grid-item-label">지역</div><input id="deepStdRegion" class="deep-input" type="text" /></div>
-                        <div><div class="deep-grid-item-label">발주처</div><input id="deepStdClient" class="deep-input" type="text" /></div>
-                        <div><div class="deep-grid-item-label">사업명</div><input id="deepStdProject" class="deep-input" type="text" /></div>
-                        <div><div class="deep-grid-item-label">공법 결정시기</div><input id="deepStdDecision" class="deep-input" type="text" placeholder="예: 공법 결정시기" /></div>
-
-                        <div><div class="deep-grid-item-label">조사/영업현황</div><input id="deepStdSales" class="deep-input" type="text" placeholder="예: 조사/영업현황" /></div>
-                        <div><div class="deep-grid-item-label">설계사</div><input id="deepStdDesigner" class="deep-input" type="text" /></div>
-                        <div><div class="deep-grid-item-label">발주처 담당자</div><input id="deepStdContact" class="deep-input" type="text" placeholder="예: 담당자/연락처" /></div>
-                        <div><div class="deep-grid-item-label">낙찰일</div><input id="deepStdAward" class="deep-input" type="text" placeholder="예: 2026-01-19" /></div>
-
-                        <div><div class="deep-grid-item-label">용역기간</div><input id="deepStdPeriod" class="deep-input" type="text" placeholder="예: 2026-02~2026-06" /></div>
-                        <div><div class="deep-grid-item-label">종료일</div><input id="deepStdEnd" class="deep-input" type="text" placeholder="예: 2026-06-30" /></div>
-                        <div><div class="deep-grid-item-label">용역금액(억)</div><input id="deepStdAmount" class="deep-input" type="text" placeholder="(억) 예: 3.2" /></div>
-                        <div><div class="deep-grid-item-label">사업비(억)</div><input id="deepStdBudget" class="deep-input" type="text" placeholder="(억) 예: 50" /></div>
-
-                        <div><div class="deep-grid-item-label">대지면적(㎡)</div><input id="deepStdArea" class="deep-input" type="text" placeholder="㎡" /></div>
-                        <div><div class="deep-grid-item-label">용량(톤)</div><input id="deepStdCapacity" class="deep-input" type="text" placeholder="톤" /></div>
-                        <div style="grid-column: span 2;"><div class="deep-grid-item-label">비고</div><textarea id="deepStdMemo" class="deep-textarea" placeholder="비고"></textarea></div>
-                    </div>
-                </section>
-
                 <section>
                     <div class="deep-section-title">요약</div>
                     <div id="deepSummary" class="deep-summary-text"></div>
@@ -2048,12 +1993,51 @@
                     <div class="deep-small-block">
                         <div class="deep-grid-item-label">조례 근거</div>
                         <div id="deepOrdinanceBasis" class="deep-summary-text" style="margin-top:6px;"></div>
-                        <div id="deepOrdinanceArticlesText" class="deep-summary-text" style="margin-top:10px; white-space:pre-line;"></div>
                     </div>
 
                     <div class="deep-small-block">
                         <div class="deep-grid-item-label">용량 산정 요약</div>
                         <div id="deepCapacitySummary" class="deep-summary-text" style="margin-top:6px;"></div>
+                    </div>
+
+                    <div class="deep-small-block">
+                        <div class="deep-grid-item-label">조례/조문 매칭</div>
+                        <div id="deepOrdinanceArticles" class="deep-summary-text" style="margin-top:6px;"></div>
+                    </div>
+
+                    <div class="std-subtitle">표준입력(수기 저장) · 대책문서 생성 시 이 값이 우선 적용됩니다.</div>
+                    <div class="std-grid">
+                        <label>지역(수정 가능)
+                            <input id="std_region" class="input" type="text" placeholder="예: 서울특별시 강서구" />
+                        </label>
+                        <label>발주처/수요기관
+                            <input id="std_client" class="input" type="text" placeholder="예: ○○대학교병원" />
+                        </label>
+                        <label>발주처 담당/연락
+                            <input id="std_clientContact" class="input" type="text" placeholder="예: 홍길동 010-0000-0000" />
+                        </label>
+                        <label>용역기간/공사기간
+                            <input id="std_servicePeriod" class="input" type="text" placeholder="예: 2026.03~2026.10 (8개월)" />
+                        </label>
+                        <label>용역(계약) 금액(억원)
+                            <input id="std_serviceAmountEok" class="input" type="text" placeholder="예: 1.2" />
+                        </label>
+                        <label>총 사업비(억원)
+                            <input id="std_projectBudgetEok" class="input" type="text" placeholder="예: 12" />
+                        </label>
+                        <label>대지면적(㎡)
+                            <input id="std_siteArea" class="input" type="text" placeholder="예: 12500" />
+                        </label>
+                        <label>예상 용량(톤/일)
+                            <input id="std_capacityTon" class="input" type="text" placeholder="예: 300" />
+                        </label>
+                        <label style="grid-column: 1 / -1;">추가 메모(선택)
+                            <textarea id="std_memo" class="textarea" placeholder="대책문서에 반영할 특이사항 / 변경사항"></textarea>
+                        </label>
+                    </div>
+                    <div class="std-actions">
+                        <button id="btnStdSave" class="btn btn-primary btn-small" type="button">표준입력 저장</button>
+                        <div id="stdSaveStatus"></div>
                     </div>
 
                     <div class="deep-report-row">
@@ -2128,178 +2112,33 @@
 
         // ✅ 2차 심화 분석 모달에서 표준입력 저장을 위해 현재 선택 공고 보관
         let deepCurrentItem = null;
+        let deepLastStd = null;
 
         window.addEventListener('load', () => {
-            bindUI();
-            loadData();
-            initGoogle();
+            try {
+                bindUI();
+                loadData();
+                initGoogle();
+            } catch (err) {
+                console.error('init error:', err);
+                if (!window.__initErrorShown) {
+                    window.__initErrorShown = true;
+                    alert('초기화 오류: ' + (err && err.message ? err.message : err));
+                }
+            }
+        });
+
+        window.addEventListener('error', (e) => {
+            try {
+                const msg = (e && e.message) ? e.message : '알 수 없는 오류';
+                if (!window.__runtimeErrorShown) {
+                    window.__runtimeErrorShown = true;
+                    alert('스크립트 오류: ' + msg);
+                }
+            } catch (_) {}
         });
 
         // ---------------- 공통 Helper ----------------
-        // ✅ API 호출 helper (POST 우선, 실패 시 GET으로 자동 폴백 가능)
-        async function apiGet(action, params = {}) {
-            const u = new URL(API_BASE);
-            u.searchParams.set('action', action);
-            Object.keys(params || {}).forEach(k => {
-                if (params[k] === undefined || params[k] === null) return;
-                u.searchParams.set(k, String(params[k]));
-            });
-            const res = await fetch(u.toString(), { method: 'GET' });
-            if (!res.ok) {
-                const t = await res.text();
-                throw new Error(`GET ${action} HTTP ${res.status}: ${t}`);
-            }
-            return await res.json();
-        }
-
-        async function apiPostJson(action, payload = {}) {
-            const bodyObj = Object.assign({ action }, payload || {});
-            const res = await fetch(API_BASE, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(bodyObj)
-            });
-            if (!res.ok) {
-                const t = await res.text();
-                throw new Error(`POST ${action} HTTP ${res.status}: ${t}`);
-            }
-            return await res.json();
-        }
-
-        function pick1(...vals) {
-            for (const v of vals) {
-                if (v === undefined || v === null) continue;
-                const s = String(v).trim();
-                if (s) return s;
-            }
-            return '';
-        }
-
-        function snapshotStdFromItem(it) {
-            if (!it) return {};
-            return {
-                region: pick1(it.region, it.area),
-                client: pick1(it.client, it.agency),
-                projectName: pick1(it.projectName, normalizeTitle(it)),
-                methodDecisionDate: pick1(it.methodDecisionDate, it.decisionDate),
-                salesStatus: pick1(it.salesStatus),
-                designer: pick1(it.designer, it.designFirm),
-                clientContact: pick1(it.clientContact, it.clientManager),
-                awardDate: pick1(it.awardDate, it.winDate),
-                servicePeriod: pick1(it.servicePeriod),
-                endDate: pick1(it.endDate),
-                serviceAmountEok: pick1(it.serviceAmountEok, it.serviceAmount),
-                projectBudgetEok: pick1(it.projectBudgetEok, it.projectBudget),
-                siteArea: pick1(it.siteArea, it.siteAreaSqm, it.siteAreaM2),
-                capacityTon: pick1(it.capacityTon, it.estimatedTon, it.ton),
-                memo: pick1(it.memo)
-            };
-        }
-
-        function collectStdInputs() {
-            const v = (id) => (el(id) ? String(el(id).value || '').trim() : '');
-            return {
-                region: v('deepStdRegion'),
-                client: v('deepStdClient'),
-                projectName: v('deepStdProject'),
-                methodDecisionDate: v('deepStdDecision'),
-                salesStatus: v('deepStdSales'),
-                designer: v('deepStdDesigner'),
-                clientContact: v('deepStdContact'),
-                awardDate: v('deepStdAward'),
-                servicePeriod: v('deepStdPeriod'),
-                endDate: v('deepStdEnd'),
-                serviceAmountEok: v('deepStdAmount'),
-                projectBudgetEok: v('deepStdBudget'),
-                siteArea: v('deepStdArea'),
-                capacityTon: v('deepStdCapacity'),
-                memo: v('deepStdMemo')
-            };
-        }
-
-        function fillStdInputs(obj) {
-            obj = obj || {};
-            const setV = (id, val) => {
-                const e = el(id);
-                if (!e) return;
-                e.value = (val === undefined || val === null) ? '' : String(val);
-            };
-            setV('deepStdRegion', obj.region);
-            setV('deepStdClient', obj.client);
-            setV('deepStdProject', obj.projectName);
-            setV('deepStdDecision', obj.methodDecisionDate);
-            setV('deepStdSales', obj.salesStatus);
-            setV('deepStdDesigner', obj.designer);
-            setV('deepStdContact', obj.clientContact);
-            setV('deepStdAward', obj.awardDate);
-            setV('deepStdPeriod', obj.servicePeriod);
-            setV('deepStdEnd', obj.endDate);
-            setV('deepStdAmount', obj.serviceAmountEok);
-            setV('deepStdBudget', obj.projectBudgetEok);
-            setV('deepStdArea', obj.siteArea);
-            setV('deepStdCapacity', obj.capacityTon);
-            setV('deepStdMemo', obj.memo);
-        }
-
-        function bindStdEditor() {
-            const btnSave = el('btnStdSave');
-            const btnReset = el('btnStdReset');
-
-            if (btnReset) {
-                btnReset.onclick = () => {
-                    if (!deepCurrentItem) return;
-                    fillStdInputs(snapshotStdFromItem(deepCurrentItem));
-                    alert('표준 정보 입력값을 초기화했습니다.');
-                };
-            }
-
-            if (btnSave) {
-                btnSave.onclick = async () => {
-                    if (!deepCurrentItem) return;
-
-                    const payload = {
-                        no: deepCurrentItem.no || '',
-                        rowIndex: deepCurrentItem.rowIndex || '',
-                        fields: collectStdInputs()
-                    };
-
-                    try {
-                        btnSave.classList.add('loading');
-
-                        let j;
-                        try {
-                            j = await apiPostJson('update_bid_fields', payload);
-                        } catch (e) {
-                            const msg = String((e && e.message) ? e.message : e);
-                            // POST(CORS) 실패 가능 → GET 폴백
-                            if (msg.includes('Failed to fetch') || msg.includes('CORS') || msg.includes('TypeError')) {
-                                j = await apiGet('update_bid_fields', {
-                                    no: payload.no,
-                                    rowIndex: payload.rowIndex,
-                                    fields: JSON.stringify(payload.fields || {})
-                                });
-                            } else {
-                                throw e;
-                            }
-                        }
-
-                        if (!j || !j.ok) throw new Error((j && j.message) ? j.message : '서버 저장 실패');
-
-                        // 로컬 데이터 갱신(리스트/필터 즉시 반영)
-                        Object.assign(deepCurrentItem, payload.fields);
-                        applyFilter();
-
-                        alert('저장 완료 (입찰DB/DeepMeta 반영)');
-                    } catch (e) {
-                        console.error(e);
-                        alert('저장 중 오류: ' + (e && e.message ? e.message : e));
-                    } finally {
-                        btnSave.classList.remove('loading');
-                    }
-                };
-            }
-        }
-
 
         // 링크 정규화: 원문 URL(originUrl)을 최우선 사용
         function normalizeLink(item) {
@@ -2446,10 +2285,10 @@
         // ---------------- 공통 UI & 데이터 로드 ----------------
 
         function bindUI() {
-            document.getElementById('btnRefresh').addEventListener('click', refreshAll);
-            document.getElementById('btnExternal').addEventListener('click', externalUpdate);
-            document.getElementById('searchInput').addEventListener('input', applyFilter);
-            document.getElementById('filterRegion').addEventListener('change', applyFilter);
+            document.getElementById('btnRefresh')?.addEventListener('click', refreshAll);
+            document.getElementById('btnExternal')?.addEventListener('click', externalUpdate);
+            document.getElementById('searchInput')?.addEventListener('input', applyFilter);
+            document.getElementById('filterRegion')?.addEventListener('change', applyFilter);
 
             // 관련성 칩 (전체 / 상 / 중 이상)
             document.querySelectorAll('.chip-rel').forEach(chip => {
@@ -2493,32 +2332,28 @@
             });
 
             // 모달 관련
-            document.getElementById('btnSmartAddOpen').addEventListener('click', openSmartModal);
-            document.getElementById('btnSmartClose').addEventListener('click', closeSmartModal);
-            document.getElementById('btnSmartCancel').addEventListener('click', closeSmartModal);
-            document.getElementById('smartModalBackdrop').addEventListener('click', e => {
+            document.getElementById('btnSmartAddOpen')?.addEventListener('click', openSmartModal);
+            document.getElementById('btnSmartClose')?.addEventListener('click', closeSmartModal);
+            document.getElementById('btnSmartCancel')?.addEventListener('click', closeSmartModal);
+            document.getElementById('smartModalBackdrop')?.addEventListener('click', e => {
                 if (e.target.id === 'smartModalBackdrop') closeSmartModal();
             });
-            document.getElementById('smartForm').addEventListener('submit', handleSmartSubmit);
+            document.getElementById('smartForm')?.addEventListener('submit', handleSmartSubmit);
 
             // 캘린더 모달
-            document.getElementById('btnCalendar').addEventListener('click', openCalendarModal);
-            document.getElementById('btnCalClose').addEventListener('click', closeCalendarModal);
-            document.getElementById('calendarModalBackdrop').addEventListener('click', e => {
+            document.getElementById('btnCalendar')?.addEventListener('click', openCalendarModal);
+            document.getElementById('btnCalClose')?.addEventListener('click', closeCalendarModal);
+            document.getElementById('calendarModalBackdrop')?.addEventListener('click', e => {
                 if (e.target.id === 'calendarModalBackdrop') closeCalendarModal();
             });
 
 
             // Deep modal
-            document.getElementById('deepModalBackdrop').addEventListener('click', e => {
+            document.getElementById('deepModalBackdrop')?.addEventListener('click', e => {
                 if (e.target.id === 'deepModalBackdrop') closeDeepModal();
             });
-            document.getElementById('deepCloseBtn').addEventListener('click', closeDeepModal);
-            document.getElementById('deepOkBtn').addEventListener('click', closeDeepModal);
-
-            // ✅ 표준입력 저장/초기화 버튼 바인딩
-            bindStdEditor();
-
+            document.getElementById('deepCloseBtn')?.addEventListener('click', closeDeepModal);
+            document.getElementById('deepOkBtn')?.addEventListener('click', closeDeepModal);
         }
 
         function setGlobalLoading(on, msg) {
@@ -3534,15 +3369,120 @@
 
         // ---------------- 2차 심화 분석 모달 ----------------
 
-        async function openDeepModal(item) {
+        
+        // ================= 표준입력(수기 저장) =================
+        function getStdEls_() {
+            return {
+                region: document.getElementById('std_region'),
+                client: document.getElementById('std_client'),
+                clientContact: document.getElementById('std_clientContact'),
+                servicePeriod: document.getElementById('std_servicePeriod'),
+                serviceAmountEok: document.getElementById('std_serviceAmountEok'),
+                projectBudgetEok: document.getElementById('std_projectBudgetEok'),
+                siteArea: document.getElementById('std_siteArea'),
+                capacityTon: document.getElementById('std_capacityTon'),
+                memo: document.getElementById('std_memo'),
+                status: document.getElementById('stdSaveStatus'),
+                btnSave: document.getElementById('btnStdSave')
+            };
+        }
+
+        function fillStd_(std, fallback = {}) {
+            const els = getStdEls_();
+            if (!els.region) return;
+
+            const pick = (...vals) => vals.find(v => v !== undefined && v !== null && String(v).trim() !== '');
+
+            els.region.value = pick(std.region, fallback.region, '') || '';
+            els.client.value = pick(std.client, fallback.client, '') || '';
+            els.clientContact.value = pick(std.clientContact, fallback.clientContact, '') || '';
+            els.servicePeriod.value = pick(std.servicePeriod, fallback.servicePeriod, '') || '';
+            els.serviceAmountEok.value = pick(std.serviceAmountEok, fallback.serviceAmountEok, '') || '';
+            els.projectBudgetEok.value = pick(std.projectBudgetEok, fallback.projectBudgetEok, '') || '';
+            els.siteArea.value = pick(std.siteArea, fallback.siteArea, '') || '';
+            els.capacityTon.value = pick(std.capacityTon, fallback.capacityTon, '') || '';
+            els.memo.value = pick(std.memo, '') || '';
+
+            if (els.status) els.status.textContent = '';
+        }
+
+        function readStd_() {
+            const els = getStdEls_();
+            const val = (el) => (el ? String(el.value || '').trim() : '');
+            const std = {
+                region: val(els.region),
+                client: val(els.client),
+                clientContact: val(els.clientContact),
+                servicePeriod: val(els.servicePeriod),
+                serviceAmountEok: val(els.serviceAmountEok),
+                projectBudgetEok: val(els.projectBudgetEok),
+                siteArea: val(els.siteArea),
+                capacityTon: val(els.capacityTon),
+                memo: val(els.memo)
+            };
+            // 빈 값은 삭제(저장 시 merge 방해 방지)
+            Object.keys(std).forEach(k => {
+                if (!std[k]) delete std[k];
+            });
+            return std;
+        }
+
+        async function saveStdForCurrent_() {
+            const els = getStdEls_();
+            if (!deepCurrentItem || !(deepCurrentItem.no || deepCurrentItem.rowIndex)) {
+                if (els.status) els.status.textContent = '저장 대상 공고를 찾지 못했습니다.';
+                return;
+            }
+
+            const fields = readStd_();
+            if (Object.keys(fields).length === 0) {
+                if (els.status) els.status.textContent = '저장할 값이 없습니다.';
+                return;
+            }
+
+            if (els.btnSave) els.btnSave.classList.add('loading');
+            if (els.status) els.status.textContent = '저장 중...';
+
+            try {
+                const p = new URLSearchParams();
+                p.set('action', 'update_bid_fields');
+                if (deepCurrentItem.no) p.set('no', String(deepCurrentItem.no));
+                if (deepCurrentItem.rowIndex) p.set('rowIndex', String(deepCurrentItem.rowIndex));
+                p.set('fields', JSON.stringify(fields));
+
+                const r = await fetch(`${API_BASE}?${p.toString()}`, { method: 'GET' });
+                if (!r.ok) {
+                    const t = await r.text();
+                    console.error('update_bid_fields HTTP error:', r.status, t);
+                    if (els.status) els.status.textContent = '저장 실패: HTTP ' + r.status;
+                    return;
+                }
+                const j = await r.json();
+                if (!j || !j.ok) {
+                    console.error('update_bid_fields response:', j);
+                    if (els.status) els.status.textContent = '저장 실패: 서버 응답 오류';
+                    return;
+                }
+
+                deepLastStd = j.updated || fields;
+                if (els.status) els.status.textContent = '저장 완료 ✓';
+            } catch (e) {
+                console.error('saveStdForCurrent_ error:', e);
+                if (els.status) els.status.textContent = '저장 실패: ' + (e && e.message ? e.message : e);
+            } finally {
+                if (els.btnSave) els.btnSave.classList.remove('loading');
+            }
+        }
+
+async function openDeepModal(item) {
             const backdrop = document.getElementById('deepModalBackdrop');
             if (!backdrop) return;
 
             // 모달 열기
             backdrop.classList.add('active');
 
-            // ✅ 현재 선택 공고 저장(표준입력 저장용)
-            deepCurrentItem = item;
+            // 현재 선택 공고 보관(표준입력 저장용)
+            deepCurrentItem = item || null;
 
             // 기본 정보 준비
             const title = normalizeTitle(item) || '(제목 없음)';
@@ -3572,32 +3512,11 @@
             const elAreaNum = document.getElementById('deepAreaNum');
             const elTargetClass = document.getElementById('deepTargetClass');
             const elOrdinance = document.getElementById('deepOrdinanceBasis');
+            const elOrdinanceArticles = document.getElementById('deepOrdinanceArticles');
             const elCapacity = document.getElementById('deepCapacitySummary');
             const elMitigation = document.getElementById('deepMitigationLink');
             const btnMitigation = document.getElementById('btnMitigationReport');
 
-            // ✅ 표준입력(수기 저장) 요소
-            const elStdRegion = document.getElementById('deepStdRegion');
-            const elStdClient = document.getElementById('deepStdClient');
-            const elStdProject = document.getElementById('deepStdProject');
-            const elStdDecision = document.getElementById('deepStdDecision');
-            const elStdSales = document.getElementById('deepStdSales');
-            const elStdDesigner = document.getElementById('deepStdDesigner');
-            const elStdContact = document.getElementById('deepStdContact');
-            const elStdAward = document.getElementById('deepStdAward');
-            const elStdPeriod = document.getElementById('deepStdPeriod');
-            const elStdEnd = document.getElementById('deepStdEnd');
-            const elStdAmount = document.getElementById('deepStdAmount');
-            const elStdBudget = document.getElementById('deepStdBudget');
-            const elStdArea = document.getElementById('deepStdArea');
-            const elStdCapacity = document.getElementById('deepStdCapacity');
-            const elStdMemo = document.getElementById('deepStdMemo');
-            const elOrdinanceArticles = document.getElementById('deepOrdinanceArticlesText');
-
-
-
-            // ✅ 표준입력 기본값 세팅(기존 값)
-            try { fillStdInputs(snapshotStdFromItem(item)); } catch(e) {}
 
             // 제목/메타 기본 세팅
             if (elTitle) elTitle.textContent = title;
@@ -3679,33 +3598,13 @@
 
                 const data = await res.json();
                 const deep = data.deep || {};
+                // 표준입력 프리필
+                try { fillStd_(data.std || {}, { region: region, client: client }); } catch(e) { console.error(e); }
+                const stdEls = getStdEls_();
+                if (stdEls.btnSave) stdEls.btnSave.onclick = saveStdForCurrent_;
+
+
                 const attachments = data.attachments || [];
-
-                // ✅ 표준입력: 2차 분석 결과로 '빈칸'만 보정 채움
-                const fillIfEmpty = (domEl, v) => {
-                    if (!domEl) return;
-                    const cur = String(domEl.value || '').trim();
-                    if (cur) return;
-                    const nv = (v == null) ? '' : String(v).trim();
-                    if (nv) domEl.value = nv;
-                };
-                try {
-                    fillIfEmpty(elStdRegion, data.region || region || '');
-                    fillIfEmpty(elStdClient, data.client || client || agency || '');
-                    fillIfEmpty(elStdProject, data.title || title || '');
-                    fillIfEmpty(elStdDecision, deep.methodDecisionDate || deep.decisionDate || '');
-                    fillIfEmpty(elStdSales, deep.salesStatus || '');
-                    fillIfEmpty(elStdDesigner, deep.designer || deep.designFirm || '');
-                    fillIfEmpty(elStdContact, deep.clientContact || deep.clientManager || '');
-                    fillIfEmpty(elStdAward, deep.awardDate || deep.winDate || '');
-                    fillIfEmpty(elStdPeriod, deep.servicePeriod || '');
-                    fillIfEmpty(elStdEnd, deep.endDate || '');
-                    fillIfEmpty(elStdAmount, deep.serviceAmountEok || deep.serviceAmount || '');
-                    fillIfEmpty(elStdBudget, deep.projectBudgetEok || deep.projectBudget || '');
-                    fillIfEmpty(elStdArea, deep.siteAreaSqm || deep.siteAreaM2 || deep.siteArea || '');
-                    fillIfEmpty(elStdCapacity, deep.capacityTon || deep.estimatedTon || deep.ton || '');
-                } catch(e) {}
-
 
                 // --- 조례/용량/대책문서 정보 표시(확장) ---
                 const pick = (...vals) => vals.find(v => v !== undefined && v !== null && String(v).trim() !== '');
@@ -3725,27 +3624,34 @@
                     (data.ordinanceInfo && (data.ordinanceInfo.basisSummary || data.ordinanceInfo.ordinanceBasis)),
                     data.ordinanceBasis);
 
+                const ordinanceName = pick(
+                    (data.ordinanceInfo && data.ordinanceInfo.ordinanceName),
+                    deep.ordinanceName,
+                    ''
+                );
+
+                const ordinanceArticlesText = pick(
+                    (data.ordinanceInfo && (data.ordinanceInfo.articlesText || data.ordinanceInfo.articles)),
+                    deep.ordinanceArticlesText,
+                    ''
+                );
+
+
+
                 const capTon = pick(deep.capacityTon, deep.recommendedCapacityTon, deep.estimatedTon, deep.estimateTon, deep.ton);
                 const capSummary = pick(deep.capacityCalcSummary, deep.capacitySummary, deep.capacityRationale, deep.capacityCalc);
 
                 if (elAreaNum) elAreaNum.textContent = areaNum ? String(areaNum).replace(/[^\d.]/g, '') : '-';
                 if (elTargetClass) elTargetClass.textContent = formatTargetClass(targetClass);
-                if (elOrdinance) elOrdinance.textContent = ordinanceBasis ? String(ordinanceBasis) : '확인필요';
-                // ✅ 조례 조문(제/항) 표기(있으면)
-                const ordinanceArticlesText = pick(
-                    deep.ordinanceArticlesText,
-                    (data.ordinanceInfo && (data.ordinanceInfo.articlesText || (data.ordinanceInfo.articles || []).join('
-'))),
-                    data.ordinanceArticlesText
-                );
+                if (elOrdinance) {
+                    const head = ordinanceName ? (String(ordinanceName).trim() + '\n') : '';
+                    const body = ordinanceBasis ? String(ordinanceBasis) : '확인필요';
+                    elOrdinance.textContent = head + body;
+                }
                 if (elOrdinanceArticles) {
-                    if (ordinanceArticlesText && String(ordinanceArticlesText).trim()) {
-                        elOrdinanceArticles.style.display = '';
-                        elOrdinanceArticles.textContent = String(ordinanceArticlesText).trim();
-                    } else {
-                        elOrdinanceArticles.style.display = 'none';
-                        elOrdinanceArticles.textContent = '';
-                    }
+                    // articlesText가 없으면 basisSummary를 보여줌
+                    const t = ordinanceArticlesText ? String(ordinanceArticlesText) : '';
+                    elOrdinanceArticles.textContent = t || '조문 확인 필요';
                 }
                 if (elCapacity) {
                     if (capTon || capSummary) {
@@ -3804,32 +3710,22 @@
                         try {
                             setGlobalLoading(true, '우수유출 저감대책 문서를 생성 중입니다...');
 
-                            const tryActions = ['generate_mitigation_doc', 'generate_mitigation_report'];
-                            let j2 = null;
+                            const p2 = new URLSearchParams();
+                            p2.set('action', 'generate_mitigation_doc');
+                            if (item.rowIndex) p2.set('rowIndex', String(item.rowIndex));
+                            if (item.no) p2.set('no', String(item.no));
 
-                            for (const act of tryActions) {
-                                const p2 = new URLSearchParams();
-                                p2.set('action', act);
-                                if (item.rowIndex) p2.set('rowIndex', String(item.rowIndex));
-                                if (item.no) p2.set('no', String(item.no));
-
-                                const r2 = await fetch(`${API_BASE}?${p2.toString()}`, { method: 'GET' });
-                                if (!r2.ok) {
-                                    const t = await r2.text();
-                                    console.error(`${act} HTTP error:`, r2.status, t);
-                                    continue;
-                                }
-
-                                const tmp = await r2.json();
-                                if (tmp && tmp.ok && tmp.docUrl) {
-                                    j2 = tmp;
-                                    break;
-                                } else {
-                                    console.warn(`${act} response not ready:`, tmp);
-                                }
+                            const r2 = await fetch(`${API_BASE}?${p2.toString()}`, { method: 'GET' });
+                            if (!r2.ok) {
+                                const t = await r2.text();
+                                console.error('generate_mitigation_report HTTP error:', r2.status, t);
+                                alert('대책문서 생성 실패: HTTP ' + r2.status);
+                                return;
                             }
 
-                            if (!j2 || !j2.docUrl) {
+                            const j2 = await r2.json();
+                            if (!j2 || !j2.ok || !j2.docUrl) {
+                                console.error('generate_mitigation_report response:', j2);
                                 alert('대책문서 생성 실패: 서버 응답 오류');
                                 return;
                             }
@@ -4008,7 +3904,6 @@
             const backdrop = document.getElementById('deepModalBackdrop');
             if (!backdrop) return;
             backdrop.classList.remove('active');
-            deepCurrentItem = null;
         }
 
         // ---------------검색결과 및 등록 공고 삭제---------------
@@ -4231,4 +4126,26 @@
                         (data.eventEndText ? `종료: ${data.eventEndText}` : '')
                     );
                 }
-
+                // 3) error / errorMessage / result === 'error' 형태
+                else if (data && (data.result === 'error' || data.error || data.errorMessage)) {
+                    alert(
+                        '회사 공용 캘린더 등록 실패: ' +
+                        (data.message || data.errorMessage || JSON.stringify(data))
+                    );
+                }
+                // 4) 그 외 예외적인 경우 – 응답 내용을 그대로 보여줌
+                else {
+                    alert(
+                        '회사 공용 캘린더 등록 결과를 해석하지 못했습니다.\n' +
+                        '원본 응답: ' + JSON.stringify(data)
+                    );
+                }
+            } catch (err) {
+                console.error(err);
+                alert('회사 공용 캘린더 등록 중 오류: ' + err.message);
+            } finally {
+                setGlobalLoading(false);
+            }
+        }</script>
+</body>
+</html>
