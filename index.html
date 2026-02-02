@@ -666,69 +666,6 @@
                 white-space: nowrap;
             }
 
-        /* AI 상태 / 엑셀 표준 라인 ------------------------------------------- */
-
-        .badge-ai {
-            padding: 3px 8px;
-            border-radius: 999px;
-            font-size: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            background: rgba(3, 18, 35, 0.9);
-            color: var(--text-soft);
-            white-space: nowrap;
-        }
-
-            .badge-ai.done {
-                border-color: rgba(0, 200, 150, 0.7);
-                color: #b5ffe5;
-                background: rgba(2, 36, 25, 0.9);
-            }
-
-            .badge-ai.pending {
-                border-color: rgba(255, 184, 63, 0.7);
-                color: #ffe7b4;
-                background: rgba(44, 26, 0, 0.9);
-            }
-
-            .badge-ai.error {
-                border-color: rgba(255, 92, 122, 0.7);
-                color: #ffd0da;
-                background: rgba(44, 14, 20, 0.9);
-            }
-
-        .bid-excel-line {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            font-size: 11px;
-            color: var(--text-soft);
-            margin: 2px 0 4px;
-        }
-
-        .kv-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 3px 8px;
-            border-radius: 999px;
-            background: rgba(18, 35, 58, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: var(--text-soft);
-        }
-
-            .kv-pill strong {
-                color: #f9fbff;
-                font-weight: 600;
-            }
-
-        .deep-grid-4 {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 10px 18px;
-            font-size: 12px;
-        }
-
-
         .meta-label {
             font-size: 10px;
             color: #7f92b2;
@@ -1082,44 +1019,6 @@
             color: #f4f7ff;
         }
 
-
-        .deep-section-title-row{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:10px;
-        }
-        .deep-section-actions{
-            display:flex;
-            gap:8px;
-            flex-wrap:wrap;
-        }
-        .btn-small{ padding:7px 10px; font-size:12px; border-radius:10px; }
-        .deep-section-hint{ font-size:11px; color:var(--text-soft); margin-top:6px; }
-
-        .deep-input{
-            width:100%;
-            padding:10px 12px;
-            border-radius:12px;
-            border:1px solid rgba(255,255,255,.10);
-            background:rgba(255,255,255,.04);
-            color:var(--text);
-            outline:none;
-        }
-        .deep-input:focus{ border-color: rgba(255,184,63,.55); box-shadow: 0 0 0 3px rgba(255,184,63,.15); }
-        .deep-textarea{
-            width:100%;
-            min-height:84px;
-            resize:vertical;
-            padding:10px 12px;
-            border-radius:12px;
-            border:1px solid rgba(255,255,255,.10);
-            background:rgba(255,255,255,.04);
-            color:var(--text);
-            outline:none;
-        }
-
-
         .deep-checkpoints {
             font-size: 12px;
             padding-left: 18px;
@@ -1338,10 +1237,6 @@
             .deep-grid-3 {
                 grid-template-columns: 1fr;
             }
-
-            .deep-grid-4 {
-                grid-template-columns: 1fr;
-            }
         }
 
         @media (max-width: 480px) {
@@ -1528,84 +1423,176 @@
                 text-decoration: underline;
             }
 
-        /* deep calc table */
-        .deep-calc-table td {
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 6px 8px;
-            font-size: 12px;
-            vertical-align: top;
+
+        /* =======================
+           2026-02-01 UI 패치
+           - 캘린더: 패널 제거 → 모달로 이동
+           - 모바일 가독성 개선(폰트/여백 확대)
+           ======================= */
+
+        .main-layout {
+            grid-template-columns: 1fr !important;
         }
 
-            .deep-calc-table td.label {
-                color: var(--text-soft);
-                width: 34%;
+        .modal.modal-calendar {
+            width: min(96vw, 980px);
+            max-width: 980px;
+        }
+
+        .calendar-frame.calendar-frame-modal {
+            height: min(78vh, 720px);
+            border-radius: 0 0 18px 18px;
+        }
+
+            .calendar-frame.calendar-frame-modal iframe {
+                width: 100%;
+                height: 100%;
+                border: 0;
             }
+
+        html {
+            font-size: 15px;
+        }
+
+        body {
+            font-size: 1rem;
+        }
+
+        .bid-title {
+            font-size: 1.05rem;
+            line-height: 1.35;
+        }
+
+        .btn {
+            font-size: 0.95rem;
+        }
+
+        .chip {
+            font-size: 0.9rem;
+        }
+
+        .meta-row,
+        .winner-meta,
+        .panel-header,
+        .login-status-text,
+        .summary-sub {
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 720px) {
+            html {
+                font-size: 18px;
+            }
+
+            .app-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-wrap: wrap;
+                justify-content: flex-start;
+            }
+
+            .btn.btn-small {
+                padding: 10px 14px;
+            }
+
+            .chip {
+                padding: 8px 12px;
+            }
+
+            .bid-list-panel {
+                max-height: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            html {
+                font-size: 19px;
+            }
+
+            .chip, .badge {
+                font-size: 0.95rem;
+            }
+
+            .btn {
+                font-size: 1rem;
+            }
+        }
     
         /* ======================================================
-         * ✅ 가독성 강화 패치 (2026-02-02)
-         * - 현재 UI 디자인 유지 + 폰트/간격/터치영역 확대
+         * ✅ PATCH(2026-02-03): 2차 표준입력 저장 UI + 가독성 강화
+         * - 20251221(v5) UI 기반
+         * - 20260129(v22) 기능(표준입력 저장/대책문서 생성) 참조
          * ====================================================== */
-        html { font-size: 17px; }
-        body { font-size: 17px; line-height: 1.55; letter-spacing: 0.01em; }
 
-        .page-shell { padding: 22px 20px 38px; }
+        /* 가독성(폰트/간격) 오버라이드 */
+        body { font-size: 15px; line-height: 1.55; }
+        .btn { font-size: 14px; padding: 9px 16px; }
+        .btn-small { font-size: 13px; padding: 8px 13px; }
+        input, select, textarea { font-size: 14px; }
 
-        /* 헤더 */
-        .app-title-main h1 { font-size: 24px; }
-        .badge-version { font-size: 12.5px; padding: 5px 10px; }
-        .app-subtitle { font-size: 13px; }
+        .deep-modal-title { font-size: 18px; }
+        .deep-section-title { font-size: 15px; }
+        .deep-summary-text { font-size: 14px; line-height: 1.6; }
 
-        /* 버튼/입력 */
-        .btn { font-size: 14px; padding: 9px 16px; gap: 8px; }
-        .btn span.icon { font-size: 16px; }
-        .controls-bar { gap: 10px; margin-bottom: 12px; }
-        .search-input { font-size: 15px; padding: 10px 40px 10px 36px; }
-        .search-icon-left, .search-icon-right { font-size: 17px; }
-        .select, select { font-size: 15px; padding: 10px 12px; }
-        .chip { font-size: 13px; padding: 7px 12px; }
+        .deep-section-title-row{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            flex-wrap:wrap;
+        }
+        .deep-section-actions{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+        }
+        .deep-section-hint{
+            font-size:12px;
+            color:var(--text-soft);
+            margin-top:6px;
+            line-height:1.5;
+        }
+        .deep-grid-4{
+            display:grid;
+            grid-template-columns:repeat(4, minmax(0, 1fr));
+            gap:10px 18px;
+            margin-top:10px;
+        }
+        .deep-input{
+            width:100%;
+            padding:10px 12px;
+            border-radius:12px;
+            border:1px solid rgba(255,255,255,.12);
+            background:rgba(255,255,255,.04);
+            color:var(--text-main);
+            outline:none;
+        }
+        .deep-input:focus,
+        .deep-textarea:focus{
+            border-color: rgba(255,184,63,.55);
+            box-shadow: 0 0 0 4px rgba(255,184,63,.12);
+        }
+        .deep-textarea{
+            width:100%;
+            min-height:92px;
+            resize:vertical;
+            padding:10px 12px;
+            border-radius:12px;
+            border:1px solid rgba(255,255,255,.12);
+            background:rgba(255,255,255,.04);
+            color:var(--text-main);
+            outline:none;
+        }
 
-        /* 패널/카드 */
-        .panel-header { font-size: 14px; margin-bottom: 8px; }
-        .pill-count { font-size: 13px; padding: 3px 10px; }
-        .bid-list-panel { padding: 16px 16px 12px; }
-        .bid-card { padding: 14px 14px 12px; gap: 8px; }
-        .bid-title { font-size: 16px; line-height: 1.38; margin: 0 0 6px; }
-        .bid-subline { font-size: 13px; gap: 10px; margin-bottom: 6px; }
-        .badge-ai { font-size: 12px; padding: 4px 10px; }
-        .badge { font-size: 12px; padding: 4px 10px; }
-        .bid-meta { font-size: 13px; }
-        .bid-meta .meta-item { padding: 4px 8px; }
-
-        /* 캘린더 */
-        .calendar-panel { padding: 14px 14px 12px; gap: 8px; }
-        .calendar-header { font-size: 14px; }
-        .calendar-tag { font-size: 12px; padding: 4px 10px; }
-
-        /* 모달/폼 */
-        .modal { width: min(760px, 94vw); }
-        .modal-header { padding: 14px 18px 10px; }
-        .modal-title { font-size: 16px; }
-        .modal-body { padding: 14px 18px 16px; gap: 12px; }
-        .modal-footer { font-size: 13px; padding: 12px 18px 14px; }
-        .field-label { font-size: 13px; margin-bottom: 6px; }
-        .textarea { font-size: 14px; padding: 10px 12px; }
-        .input { font-size: 14px; padding: 9px 11px; }
-
-        /* 2차 심화 분석 표(계산표) */
-        .deep-calc-table td { font-size: 14px; padding: 8px 10px; }
-        .deep-calc-table td.label { width: 32%; }
-
-        /* 작은 화면(모바일)에서도 “크게” 유지 */
-        @media (max-width: 720px) {
-          html { font-size: 16px; }
-          body { font-size: 16px; }
-          .page-shell { padding: 18px 14px 30px; }
-          .app-title-main h1 { font-size: 22px; }
-          .btn { font-size: 13px; padding: 9px 14px; }
-          .search-input { font-size: 14px; }
-          .chip { font-size: 12.5px; }
-          .bid-title { font-size: 15px; }
-          .modal { width: 94vw; }
+        @media (max-width: 768px){
+            .deep-grid-4{ grid-template-columns:1fr; gap:10px; }
+            .btn{ padding:10px 16px; }
+            .btn-small{ padding:9px 14px; }
         }
 
     </style>
@@ -1617,7 +1604,7 @@
             <div class="app-title-block">
                 <div class="app-title-main">
                     <h1>한국수안 AI 입찰관리</h1>
-                    <span class="badge-version">AI 분석 필터 v13 (G2B+EAIS 표준필드) · 가독성+</span>
+                    <span class="badge-version">AI 분석 필터 v2</span>
                 </div>
                 <div class="app-subtitle">
                     <span class="dot"></span>
@@ -1629,10 +1616,6 @@
                 <button id="btnExternal" class="btn btn-ghost btn-small">
                     <span class="icon">🌐</span> 외부웹 수집
                 </button>
-
-<button id="btnEAISL04" class="btn btn-ghost btn-small" title="세움터(EAIS) L04 목록에서 HTML/AI 방식으로 수집">
-    <span class="icon">🏗️</span> 세움터 L04 수집
-</button>
                 <button id="btnSmartAddOpen" class="btn btn-ghost btn-small">
                     <span class="icon">➕</span> 공고 스마트 등록
                 </button>
@@ -1644,14 +1627,15 @@
                         <span class="icon">🔑</span>
                         <span id="btnLoginLabel">로그인</span>
                     </button>
+                    <button id="btnCalendar" class="btn btn-ghost btn-small">
+                        <span class="icon">📅</span> 캘린더
+                    </button>
                     <div>
                         <div id="loginStatusDot" class="login-status-dot"></div>
                         <div id="loginStatusText" class="login-status-text">캘린더 미연동</div>
                     </div>
                 </div>
             </div>
-
-            <div id="externalUpdateInfo" class="external-update-info" style="margin-top:8px; font-size:12px; color: var(--text-soft); white-space:pre-line;"></div>
         </header>
 
         <!-- 상단 요약/도넛 -->
@@ -1718,17 +1702,17 @@
 
         <!-- 업무 뷰 탭 -->
         <nav class="view-tabs">
-            <button class="view-tab active" data-view="history">
-                <span class="view-tab-label">전체 / 히스토리</span>
-                <span class="view-tab-sub">전체 레퍼런스</span>
+            <button class="view-tab active" data-view="direct">
+                <span class="view-tab-label">직접입찰 · 공고중</span>
+                <span class="view-tab-sub">D-Day 관제탑</span>
             </button>
             <button class="view-tab" data-view="target">
                 <span class="view-tab-label">낙찰자 타깃</span>
                 <span class="view-tab-sub">메인 영업화면</span>
             </button>
-            <button class="view-tab" data-view="direct">
-                <span class="view-tab-label">직접입찰 · 공고중</span>
-                <span class="view-tab-sub">D-Day 관제탑</span>
+            <button class="view-tab" data-view="history">
+                <span class="view-tab-label">전체 / 히스토리</span>
+                <span class="view-tab-sub">전체 레퍼런스</span>
             </button>
         </nav>
 
@@ -1893,27 +1877,25 @@
 
                 <div id="bidList"></div>
             </section>
+        </section>
+    </div>
 
-            <aside class="calendar-panel">
-                <header class="calendar-header">
-                    <div class="calendar-header-left">
-                        <span>입찰 마감 캘린더</span>
-                        <span class="calendar-tag">Google Calendar</span>
-                    </div>
-                    <span style="font-size:11px;color:var(--text-soft);">
-                        일정 등록 시 자동으로 동기화 됩니다.
-                    </span>
-                </header>
 
-                <div class="calendar-frame">
-                    <!-- showTabs / showNav 활성화 -->
+    <!-- 캘린더 모달 -->
+    <div id="calendarModalBackdrop" class="modal-backdrop">
+        <div class="modal modal-calendar">
+            <div class="modal-header">
+                <div class="modal-title">입찰 마감 캘린더</div>
+                <button id="btnCalClose" class="btn btn-ghost btn-small">닫기</button>
+            </div>
+            <div class="modal-body" style="padding:0;">
+                <div class="calendar-frame calendar-frame-modal">
                     <iframe id="calendarIframe"
                             src="https://calendar.google.com/calendar/embed?src=d51a10e0014dcbd83e98d0da91cda4f52f629c19652c15fc693ee4529bbbab04%40group.calendar.google.com&ctz=Asia%2FSeoul&bgcolor=%23050915&mode=MONTH&showTitle=0&showPrint=0&showTabs=1&showCalendars=0&showTz=0&showNav=1&showDate=1"></iframe>
-                    <!-- Feedback 버튼 가리기 -->
                     <div class="calendar-mask"></div>
                 </div>
-            </aside>
-        </section>
+            </div>
+        </div>
     </div>
 
     <!-- 스마트 등록 모달 -->
@@ -1973,38 +1955,44 @@
             </div>
 
             <div class="deep-modal-body">
+
                 <section>
                     <div class="deep-section-title-row">
-                        <div class="deep-section-title">영업 표준 정보 (샘플 엑셀 기준)</div>
+                        <div class="deep-section-title">영업 표준 정보 (수기 입력 → 저장)</div>
                         <div class="deep-section-actions">
                             <button id="btnStdSave" class="btn btn-primary btn-small" type="button"><span class="icon">💾</span> 저장</button>
                             <button id="btnStdReset" class="btn btn-ghost btn-small" type="button">초기화</button>
                         </div>
                     </div>
-                    <div class="deep-section-hint">※ 이 섹션은 수기 입력 후 저장하면 <b>입찰DB</b>에 반영됩니다.</div>
+                    <div class="deep-section-hint">※ 이 섹션은 저장 시 <b>입찰DB</b> 및 <b>DeepMeta</b>에 반영되며, 대책문서 생성 시 변경값을 우선 적용합니다.</div>
                     <div class="deep-grid-4">
                         <div><div class="deep-grid-item-label">지역</div><input id="deepStdRegion" class="deep-input" type="text" /></div>
                         <div><div class="deep-grid-item-label">발주처</div><input id="deepStdClient" class="deep-input" type="text" /></div>
                         <div><div class="deep-grid-item-label">사업명</div><input id="deepStdProject" class="deep-input" type="text" /></div>
                         <div><div class="deep-grid-item-label">공법 결정시기</div><input id="deepStdDecision" class="deep-input" type="text" placeholder="예: 공법 결정시기" /></div>
+
                         <div><div class="deep-grid-item-label">조사/영업현황</div><input id="deepStdSales" class="deep-input" type="text" placeholder="예: 조사/영업현황" /></div>
                         <div><div class="deep-grid-item-label">설계사</div><input id="deepStdDesigner" class="deep-input" type="text" /></div>
                         <div><div class="deep-grid-item-label">발주처 담당자</div><input id="deepStdContact" class="deep-input" type="text" placeholder="예: 담당자/연락처" /></div>
                         <div><div class="deep-grid-item-label">낙찰일</div><input id="deepStdAward" class="deep-input" type="text" placeholder="예: 2026-01-19" /></div>
+
                         <div><div class="deep-grid-item-label">용역기간</div><input id="deepStdPeriod" class="deep-input" type="text" placeholder="예: 2026-02~2026-06" /></div>
                         <div><div class="deep-grid-item-label">종료일</div><input id="deepStdEnd" class="deep-input" type="text" placeholder="예: 2026-06-30" /></div>
                         <div><div class="deep-grid-item-label">용역금액(억)</div><input id="deepStdAmount" class="deep-input" type="text" placeholder="(억) 예: 3.2" /></div>
                         <div><div class="deep-grid-item-label">사업비(억)</div><input id="deepStdBudget" class="deep-input" type="text" placeholder="(억) 예: 50" /></div>
+
                         <div><div class="deep-grid-item-label">대지면적(㎡)</div><input id="deepStdArea" class="deep-input" type="text" placeholder="㎡" /></div>
-                        <div><div class="deep-grid-item-label">용량</div><input id="deepStdCapacity" class="deep-input" type="text" placeholder="톤" /></div>
-                        <div><div class="deep-grid-item-label">비고</div><textarea id="deepStdMemo" class="deep-textarea" placeholder="비고"></textarea></div>
+                        <div><div class="deep-grid-item-label">용량(톤)</div><input id="deepStdCapacity" class="deep-input" type="text" placeholder="톤" /></div>
+                        <div style="grid-column: span 2;"><div class="deep-grid-item-label">비고</div><textarea id="deepStdMemo" class="deep-textarea" placeholder="비고"></textarea></div>
                     </div>
                 </section>
 
                 <section>
                     <div class="deep-section-title">요약</div>
                     <div id="deepSummary" class="deep-summary-text"></div>
-                </section>                <section>
+                </section>
+
+                <section>
                     <div class="deep-section-title">금액/기간 (AI 추정 포함)</div>
                     <div class="deep-grid-3">
                         <div>
@@ -2040,7 +2028,7 @@
 
                 <section>
                     <div class="deep-section-title">한국수안 대응 제안</div>
-                    <div id="deepSuggestion" class="deep-summary-text" style="white-space:pre-line;"></div>
+                    <div id="deepSuggestion" class="deep-summary-text"></div>
                 </section>
 
                 <section>
@@ -2059,19 +2047,13 @@
 
                     <div class="deep-small-block">
                         <div class="deep-grid-item-label">조례 근거</div>
-                        <div id="deepOrdinanceBasis" class="deep-summary-text" style="margin-top:6px;white-space:pre-line;"></div>
-                        <div class="deep-grid-item-label" style="margin-top:10px;">조례 조항</div>
-                        <div id="deepOrdinanceClauses" class="deep-summary-text" style="margin-top:6px;white-space:pre-line;"></div>
+                        <div id="deepOrdinanceBasis" class="deep-summary-text" style="margin-top:6px;"></div>
+                        <div id="deepOrdinanceArticlesText" class="deep-summary-text" style="margin-top:10px; white-space:pre-line;"></div>
                     </div>
 
                     <div class="deep-small-block">
                         <div class="deep-grid-item-label">용량 산정 요약</div>
                         <div id="deepCapacitySummary" class="deep-summary-text" style="margin-top:6px;"></div>
-                        <div class="deep-calc-table-wrap" style="margin-top:10px;">
-                            <table class="deep-calc-table" style="width:100%;border-collapse:collapse;">
-                                <tbody id="deepCalcTableBody"></tbody>
-                            </table>
-                        </div>
                     </div>
 
                     <div class="deep-report-row">
@@ -2129,13 +2111,10 @@
         // 토큰 localStorage 키
         const STORAGE_KEY_TOKEN = 'koreasuan_calendar_token';
         const STORAGE_KEY_EXP = 'koreasuan_calendar_token_exp';
-        const STORAGE_KEY_EMAIL = 'koreasuan_login_email';
 
         let allData = [];
-        let deepCurrentItem = null;
-
         let filterMode = 'all';
-        let viewMode = 'history';   // 기본 뷰: 직접입찰 · 공고중
+        let viewMode = 'direct';   // 기본 뷰: 직접입찰 · 공고중
 
         // 2단계: 사이드 필터 상태
         let stateFilter = 'all';   // all | open | closed | calendar
@@ -2147,6 +2126,9 @@
         let accessToken = null;
         let loginUserEmail = null;   // ← 로그인한 사용자 이메일
 
+        // ✅ 2차 심화 분석 모달에서 표준입력 저장을 위해 현재 선택 공고 보관
+        let deepCurrentItem = null;
+
         window.addEventListener('load', () => {
             bindUI();
             loadData();
@@ -2154,6 +2136,170 @@
         });
 
         // ---------------- 공통 Helper ----------------
+        // ✅ API 호출 helper (POST 우선, 실패 시 GET으로 자동 폴백 가능)
+        async function apiGet(action, params = {}) {
+            const u = new URL(API_BASE);
+            u.searchParams.set('action', action);
+            Object.keys(params || {}).forEach(k => {
+                if (params[k] === undefined || params[k] === null) return;
+                u.searchParams.set(k, String(params[k]));
+            });
+            const res = await fetch(u.toString(), { method: 'GET' });
+            if (!res.ok) {
+                const t = await res.text();
+                throw new Error(`GET ${action} HTTP ${res.status}: ${t}`);
+            }
+            return await res.json();
+        }
+
+        async function apiPostJson(action, payload = {}) {
+            const bodyObj = Object.assign({ action }, payload || {});
+            const res = await fetch(API_BASE, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(bodyObj)
+            });
+            if (!res.ok) {
+                const t = await res.text();
+                throw new Error(`POST ${action} HTTP ${res.status}: ${t}`);
+            }
+            return await res.json();
+        }
+
+        function pick1(...vals) {
+            for (const v of vals) {
+                if (v === undefined || v === null) continue;
+                const s = String(v).trim();
+                if (s) return s;
+            }
+            return '';
+        }
+
+        function snapshotStdFromItem(it) {
+            if (!it) return {};
+            return {
+                region: pick1(it.region, it.area),
+                client: pick1(it.client, it.agency),
+                projectName: pick1(it.projectName, normalizeTitle(it)),
+                methodDecisionDate: pick1(it.methodDecisionDate, it.decisionDate),
+                salesStatus: pick1(it.salesStatus),
+                designer: pick1(it.designer, it.designFirm),
+                clientContact: pick1(it.clientContact, it.clientManager),
+                awardDate: pick1(it.awardDate, it.winDate),
+                servicePeriod: pick1(it.servicePeriod),
+                endDate: pick1(it.endDate),
+                serviceAmountEok: pick1(it.serviceAmountEok, it.serviceAmount),
+                projectBudgetEok: pick1(it.projectBudgetEok, it.projectBudget),
+                siteArea: pick1(it.siteArea, it.siteAreaSqm, it.siteAreaM2),
+                capacityTon: pick1(it.capacityTon, it.estimatedTon, it.ton),
+                memo: pick1(it.memo)
+            };
+        }
+
+        function collectStdInputs() {
+            const v = (id) => (el(id) ? String(el(id).value || '').trim() : '');
+            return {
+                region: v('deepStdRegion'),
+                client: v('deepStdClient'),
+                projectName: v('deepStdProject'),
+                methodDecisionDate: v('deepStdDecision'),
+                salesStatus: v('deepStdSales'),
+                designer: v('deepStdDesigner'),
+                clientContact: v('deepStdContact'),
+                awardDate: v('deepStdAward'),
+                servicePeriod: v('deepStdPeriod'),
+                endDate: v('deepStdEnd'),
+                serviceAmountEok: v('deepStdAmount'),
+                projectBudgetEok: v('deepStdBudget'),
+                siteArea: v('deepStdArea'),
+                capacityTon: v('deepStdCapacity'),
+                memo: v('deepStdMemo')
+            };
+        }
+
+        function fillStdInputs(obj) {
+            obj = obj || {};
+            const setV = (id, val) => {
+                const e = el(id);
+                if (!e) return;
+                e.value = (val === undefined || val === null) ? '' : String(val);
+            };
+            setV('deepStdRegion', obj.region);
+            setV('deepStdClient', obj.client);
+            setV('deepStdProject', obj.projectName);
+            setV('deepStdDecision', obj.methodDecisionDate);
+            setV('deepStdSales', obj.salesStatus);
+            setV('deepStdDesigner', obj.designer);
+            setV('deepStdContact', obj.clientContact);
+            setV('deepStdAward', obj.awardDate);
+            setV('deepStdPeriod', obj.servicePeriod);
+            setV('deepStdEnd', obj.endDate);
+            setV('deepStdAmount', obj.serviceAmountEok);
+            setV('deepStdBudget', obj.projectBudgetEok);
+            setV('deepStdArea', obj.siteArea);
+            setV('deepStdCapacity', obj.capacityTon);
+            setV('deepStdMemo', obj.memo);
+        }
+
+        function bindStdEditor() {
+            const btnSave = el('btnStdSave');
+            const btnReset = el('btnStdReset');
+
+            if (btnReset) {
+                btnReset.onclick = () => {
+                    if (!deepCurrentItem) return;
+                    fillStdInputs(snapshotStdFromItem(deepCurrentItem));
+                    alert('표준 정보 입력값을 초기화했습니다.');
+                };
+            }
+
+            if (btnSave) {
+                btnSave.onclick = async () => {
+                    if (!deepCurrentItem) return;
+
+                    const payload = {
+                        no: deepCurrentItem.no || '',
+                        rowIndex: deepCurrentItem.rowIndex || '',
+                        fields: collectStdInputs()
+                    };
+
+                    try {
+                        btnSave.classList.add('loading');
+
+                        let j;
+                        try {
+                            j = await apiPostJson('update_bid_fields', payload);
+                        } catch (e) {
+                            const msg = String((e && e.message) ? e.message : e);
+                            // POST(CORS) 실패 가능 → GET 폴백
+                            if (msg.includes('Failed to fetch') || msg.includes('CORS') || msg.includes('TypeError')) {
+                                j = await apiGet('update_bid_fields', {
+                                    no: payload.no,
+                                    rowIndex: payload.rowIndex,
+                                    fields: JSON.stringify(payload.fields || {})
+                                });
+                            } else {
+                                throw e;
+                            }
+                        }
+
+                        if (!j || !j.ok) throw new Error((j && j.message) ? j.message : '서버 저장 실패');
+
+                        // 로컬 데이터 갱신(리스트/필터 즉시 반영)
+                        Object.assign(deepCurrentItem, payload.fields);
+                        applyFilter();
+
+                        alert('저장 완료 (입찰DB/DeepMeta 반영)');
+                    } catch (e) {
+                        console.error(e);
+                        alert('저장 중 오류: ' + (e && e.message ? e.message : e));
+                    } finally {
+                        btnSave.classList.remove('loading');
+                    }
+                };
+            }
+        }
+
 
         // 링크 정규화: 원문 URL(originUrl)을 최우선 사용
         function normalizeLink(item) {
@@ -2213,33 +2359,26 @@
         }
 
 
-        function saveToken(token, expiresInSec, email) {
+        function saveToken(token, expiresInSec) {
             if (!token) {
                 localStorage.removeItem(STORAGE_KEY_TOKEN);
                 localStorage.removeItem(STORAGE_KEY_EXP);
-                localStorage.removeItem(STORAGE_KEY_EMAIL);
                 return;
             }
             const exp = Date.now() + (expiresInSec || 3600) * 1000;
             localStorage.setItem(STORAGE_KEY_TOKEN, token);
             localStorage.setItem(STORAGE_KEY_EXP, String(exp));
-            if (email) localStorage.setItem(STORAGE_KEY_EMAIL, String(email));
         }
 
         function loadSavedTokenIfValid() {
             const t = localStorage.getItem(STORAGE_KEY_TOKEN);
             const exp = parseInt(localStorage.getItem(STORAGE_KEY_EXP) || '0', 10);
-            const savedEmail = localStorage.getItem(STORAGE_KEY_EMAIL);
-
             if (t && exp && exp > Date.now()) {
                 accessToken = t;
-                if (!loginUserEmail && savedEmail) loginUserEmail = savedEmail;
                 updateLoginUI(true);
             } else {
                 accessToken = null;
-                // email은 토큰과 함께 관리
                 saveToken(null);
-                loginUserEmail = null;
                 updateLoginUI(false);
             }
         }
@@ -2252,122 +2391,36 @@
             // 기존 토큰 복구
             loadSavedTokenIfValid();
 
-            // 토큰 갱신을 Promise로 기다릴 수 있게(세션이 풀린 것처럼 보이는 현상 방지)
-            let _tokenWaiter = null;
-            const _resolveTokenWaiter = (ok) => {
-                try { if (_tokenWaiter) { _tokenWaiter(ok); } } finally { _tokenWaiter = null; }
-            };
-
-            async function requestAccessTokenAsync(promptMode) {
-                if (!tokenClient) throw new Error('tokenClient not ready');
-                return await new Promise((resolve, reject) => {
-                    _tokenWaiter = (ok) => ok ? resolve(true) : resolve(false);
-                    try {
-                        tokenClient.requestAccessToken({ prompt: promptMode || '' });
-                    } catch (e) {
-                        _tokenWaiter = null;
-                        reject(e);
-                    }
-                });
-            }
-
-            async function ensureEmailLoaded() {
-                if (loginUserEmail) return true;
-                const savedEmail = localStorage.getItem(STORAGE_KEY_EMAIL);
-                if (savedEmail) {
-                    loginUserEmail = savedEmail;
-                    return true;
-                }
-                if (!accessToken) return false;
-                try {
-                    const uRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                        headers: { Authorization: 'Bearer ' + accessToken }
-                    });
-                    if (uRes.ok) {
-                        const info = await uRes.json();
-                        if (info && info.email) {
-                            loginUserEmail = info.email;
-                            localStorage.setItem(STORAGE_KEY_EMAIL, loginUserEmail);
-                            return true;
-                        }
-                    }
-                } catch (e) {
-                    console.warn('ensureEmailLoaded userinfo error', e);
-                }
-                return false;
-            }
-
-            async function ensureLogin(reasonText) {
-                // access token이 없으면 로그인 필요
-                if (!accessToken) {
-                    alert((reasonText || '해당 기능') + '은(는) 로그인 후 이용 가능합니다. (상단 캘린더 연동 버튼)');
-                    return false;
-                }
-
-                // 만료 임박 시(60초) 자동 갱신 시도
-                const exp = parseInt(localStorage.getItem(STORAGE_KEY_EXP) || '0', 10);
-                if (exp && exp < Date.now() + 60 * 1000) {
-                    try {
-                        await requestAccessTokenAsync('');
-                    } catch (e) {
-                        console.warn('token refresh failed', e);
-                    }
-                }
-
-                // email 확보(실패해도 기존값 유지)
-                const okEmail = await ensureEmailLoaded();
-                if (!okEmail) {
-                    alert('로그인 정보(이메일)를 확인할 수 없습니다.\n상단 로그인(캘린더 연동) 버튼을 다시 눌러 주세요.');
-                    return false;
-                }
-                updateLoginUI(true);
-                return true;
-            }
-
-            // 전역에서 사용(저장/2차분석/대책문서 등)
-            window.__ensureLogin = ensureLogin;
-            window.__ensureEmailLoaded = ensureEmailLoaded;
-            window.__requestAccessTokenAsync = requestAccessTokenAsync;
-            window.__resolveTokenWaiter = _resolveTokenWaiter;
-
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: 'https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/userinfo.email',
                 callback: async (resp) => {
                     if (resp.error) {
                         alert('로그인 실패: ' + resp.error);
-                        if (window.__resolveTokenWaiter) window.__resolveTokenWaiter(false);
                         return;
                     }
-                    if (!resp.access_token) { if (window.__resolveTokenWaiter) window.__resolveTokenWaiter(false); return; }
+                    if (!resp.access_token) return;
 
                     accessToken = resp.access_token;
                     saveToken(resp.access_token, resp.expires_in);
+
                     try {
-                        // 이메일 조회 (실패해도 기존 저장된 이메일을 유지)
+                        // 이메일 조회
                         const uRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                             headers: { Authorization: 'Bearer ' + accessToken }
                         });
                         if (uRes.ok) {
                             const info = await uRes.json();
-                            if (info && info.email) {
-                                loginUserEmail = info.email;
-                                localStorage.setItem(STORAGE_KEY_EMAIL, loginUserEmail);
-                            }
+                            loginUserEmail = info.email || null;
                         } else {
-                            // 유지
-                            const savedEmail = localStorage.getItem(STORAGE_KEY_EMAIL);
-                            if (!loginUserEmail && savedEmail) loginUserEmail = savedEmail;
+                            loginUserEmail = null;
                         }
                     } catch (e) {
                         console.error('userinfo error', e);
-                        const savedEmail = localStorage.getItem(STORAGE_KEY_EMAIL);
-                        if (!loginUserEmail && savedEmail) loginUserEmail = savedEmail;
+                        loginUserEmail = null;
                     }
 
                     updateLoginUI(true);
-                    // 토큰 갱신 대기자 해제
-                    if (window.__resolveTokenWaiter) window.__resolveTokenWaiter(true);
                 }
             });
 
@@ -2390,66 +2443,11 @@
             };
         }
 
-        
-
-        // ---------------- API helper (로그인/이메일/토큰 포함) ----------------
-
-        async function apiGet(action, paramsObj, requireLogin, reasonText) {
-            const params = new URLSearchParams();
-            params.set('action', action);
-            if (paramsObj) {
-                Object.keys(paramsObj).forEach(k => {
-                    const v = paramsObj[k];
-                    if (v === undefined || v === null) return;
-                    const s = String(v);
-                    if (s === '') return;
-                    params.set(k, s);
-                });
-            }
-
-            if (requireLogin) {
-                const ok = await window.__ensureLogin(reasonText || action);
-                if (!ok) return { ok: false, error: 'LOGIN_REQUIRED' };
-                params.set('userEmail', loginUserEmail || '');
-                params.set('authToken', accessToken || '');
-            }
-
-            const res = await fetch(`${API_BASE}?${params.toString()}`, { method: 'GET' });
-            if (!res.ok) {
-                const t = await res.text();
-                return { ok: false, error: 'HTTP_' + res.status, message: t };
-            }
-            return await res.json();
-        }
-
-        async function apiPostJson(action, bodyObj, requireLogin, reasonText) {
-            const payload = Object.assign({ action }, bodyObj || {});
-            if (requireLogin) {
-                const ok = await window.__ensureLogin(reasonText || action);
-                if (!ok) return { ok: false, error: 'LOGIN_REQUIRED' };
-                payload.userEmail = loginUserEmail || '';
-                payload.authToken = accessToken || '';
-            }
-
-            // ⚠️ preflight 방지: Content-Type 헤더를 지정하지 않음 (text/plain로 전송)
-            const res = await fetch(API_BASE, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-            if (!res.ok) {
-                const t = await res.text();
-                return { ok: false, error: 'HTTP_' + res.status, message: t };
-            }
-            return await res.json();
-        }
-
-
-// ---------------- 공통 UI & 데이터 로드 ----------------
+        // ---------------- 공통 UI & 데이터 로드 ----------------
 
         function bindUI() {
             document.getElementById('btnRefresh').addEventListener('click', refreshAll);
             document.getElementById('btnExternal').addEventListener('click', externalUpdate);
-            document.getElementById('btnEAISL04').addEventListener('click', eaisUpdateL04);
             document.getElementById('searchInput').addEventListener('input', applyFilter);
             document.getElementById('filterRegion').addEventListener('change', applyFilter);
 
@@ -2489,7 +2487,7 @@
                 tab.addEventListener('click', () => {
                     document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
-                    viewMode = tab.dataset.view || 'history';  // direct / target / history
+                    viewMode = tab.dataset.view || 'direct';  // direct / target / history
                     applyFilter();
                 });
             });
@@ -2503,12 +2501,24 @@
             });
             document.getElementById('smartForm').addEventListener('submit', handleSmartSubmit);
 
+            // 캘린더 모달
+            document.getElementById('btnCalendar').addEventListener('click', openCalendarModal);
+            document.getElementById('btnCalClose').addEventListener('click', closeCalendarModal);
+            document.getElementById('calendarModalBackdrop').addEventListener('click', e => {
+                if (e.target.id === 'calendarModalBackdrop') closeCalendarModal();
+            });
+
+
             // Deep modal
             document.getElementById('deepModalBackdrop').addEventListener('click', e => {
                 if (e.target.id === 'deepModalBackdrop') closeDeepModal();
             });
             document.getElementById('deepCloseBtn').addEventListener('click', closeDeepModal);
             document.getElementById('deepOkBtn').addEventListener('click', closeDeepModal);
+
+            // ✅ 표준입력 저장/초기화 버튼 바인딩
+            bindStdEditor();
+
         }
 
         function setGlobalLoading(on, msg) {
@@ -2563,94 +2573,20 @@
         // 외부웨 수집 버튼 호출 함수
         async function externalUpdate() {
             const btn = document.getElementById('btnExternal');
-            const infoEl = document.getElementById('externalUpdateInfo');
             btn.classList.add('loading');
             try {
                 setGlobalLoading(true, '외부 소스 수집 중...');
                 const res = await fetch(API_BASE + '?action=external_update');
                 const json = await res.json();
-
-                if (!json || json.ok === false) {
-                    const emsg = (json && (json.error || json.message)) ? (json.error || json.message) : '외부웹 수집 실패';
-                    alert(emsg);
-                    if (infoEl) infoEl.textContent = emsg;
-                    return;
-                }
-
-                const lines = [];
-                lines.push(`신규 ${json.added || 0}건 수집 완료`);
-
-                const tDup = json.dupSkipped ?? 0;
-                const tFil = json.filtered ?? 0;
-                const tLow = json.droppedLow ?? 0;
-                if (tDup || tFil || tLow) {
-                    lines.push(`(중복 ${tDup} / 필터제외 ${tFil} / 하제외 ${tLow})`);
-                }
-
-                if (json.details && Array.isArray(json.details) && json.details.length) {
-                    lines.push('');
-                    lines.push('[사이트별]');
-                    json.details.forEach(d => {
-                        const name = d.siteName || d.source || 'SITE';
-                        const cand = d.candidates ?? 0;
-                        const add = d.added ?? 0;
-                        const errN = (d.errors && Array.isArray(d.errors)) ? d.errors.length : 0;
-                        const dup = d.dupSkipped ?? 0;
-                        const fil = d.filtered ?? 0;
-                        const low = d.droppedLow ?? 0;
-                        const parts = [`- ${name}: 후보 ${cand} / 신규 ${add}`];
-                        if (dup) parts.push(`중복 ${dup}`);
-                        if (fil) parts.push(`필터제외 ${fil}`);
-                        if (low) parts.push(`하제외 ${low}`);
-                        if (errN) parts.push(`오류 ${errN}`);
-                        lines.push(parts.join(' / '));
-                    });
-                }
-
-                if (json.errors && Array.isArray(json.errors) && json.errors.length) {
-                    lines.push('');
-                    lines.push('[오류 요약]');
-                    json.errors.slice(0, 10).forEach(e => lines.push('- ' + e));
-                    if (json.errors.length > 10) lines.push(`- (그 외 ${json.errors.length - 10}건 생략)`);
-                }
-
-                const msg = lines.join('\n');
-                alert(msg);
-                if (infoEl) infoEl.textContent = msg;
-
+                alert(`신규 ${json.added}건 수집 완료`);
                 await loadData();
             } catch (e) {
-                const emsg = '오류: ' + (e && e.message ? e.message : e);
-                alert(emsg);
-                if (infoEl) infoEl.textContent = emsg;
+                alert('오류: ' + e.message);
             } finally {
                 btn.classList.remove('loading');
                 setGlobalLoading(false);
             }
         }
-
-        
-async function eaisUpdateL04() {
-    try {
-        setStatus('세움터 L04 수집 중... (HTML/AI 방식)');
-        const l04 = 'https://www.eais.go.kr/moct/awp/aia01/AWPAIA01L04';
-        const res = await fetch(API_BASE + `?action=update_eais&url=${encodeURIComponent(l04)}`, { cache: 'no-store' });
-        const j = await res.json().catch(() => ({}));
-        if (!res.ok || !j.ok) {
-            console.warn('EAIS update failed:', j);
-            alert('세움터 L04 수집 실패: ' + (j && (j.message || j.error) ? (j.message || j.error) : res.status));
-            return;
-        }
-        const added = (j && j.added != null) ? j.added : '';
-        const scanned = (j && j.scanned != null) ? j.scanned : '';
-        const msg = `세움터 L04 수집 완료 (추가: ${added}, 스캔: ${scanned})`;
-        setStatus(msg);
-        await loadData();
-    } catch (e) {
-        console.error(e);
-        alert('세움터 L04 수집 오류: ' + (e && e.message ? e.message : e));
-    }
-}
 
         // ---------------- 상태/출처 판별 ----------------
 
@@ -2704,6 +2640,50 @@ async function eaisUpdateL04() {
             return 'D+' + Math.abs(diffDays);
         }
 
+
+        // 마감일을 시간값(ms)으로 변환 (정렬/필터용)
+        // - item.deadline / closeDt / bidEndDt 등 다양한 필드명을 허용
+        // - 날짜만 있으면 23:59 기준
+        function getDeadlineTime(item) {
+            if (!item) return null;
+
+            const raw =
+                item.deadline ??
+                item.closeDt ??
+                item.bidEndDt ??
+                item.clseDt ??
+                item.endDt ??
+                item.opngDt ??
+                '';
+
+            const s = String(raw || '').trim();
+            if (!s) return null;
+
+            // 1) YYYY.MM.DD / YYYY-MM-DD / YYYY/MM/DD
+            let m = s.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
+
+            // 2) YYYYMMDD (fallback)
+            if (!m) m = s.match(/(\d{4})(\d{2})(\d{2})/);
+
+            if (!m) return null;
+
+            const y = parseInt(m[1], 10);
+            const mo = parseInt(m[2], 10) - 1;
+            const d = parseInt(m[3], 10);
+
+            // 시간(HH:mm) 있으면 사용, 없으면 23:59
+            const t = s.match(/(\d{1,2}):(\d{2})/);
+            let hh = 23, mm = 59;
+            if (t) {
+                hh = parseInt(t[1], 10);
+                mm = parseInt(t[2], 10);
+            }
+
+            const dt = new Date(y, mo, d, hh, mm, 0);
+            const ts = dt.getTime();
+            return isNaN(ts) ? null : ts;
+        }
+
         // 출처 판별: 나라장터(API) vs 외부
         function detectSource(item) {
             const kind = (item.srcKind || item.sourceKind || '').toUpperCase();
@@ -2716,47 +2696,6 @@ async function eaisUpdateL04() {
             if (/^R\d/i.test(no)) return 'API';
             if (link.includes('g2b.go.kr')) return 'API';
             return 'EXTERNAL';
-        }
-
-        // 관련성 등급: 시트 컬럼(relevanceGrade)이 있으면 우선 사용
-        // 없으면 aiResult/aiSummary에서 추론 (1단계에서 이미 있으시면 중복 추가 X)
-        function getRelevanceGrade(item) {
-            const fromCol = (item.relevanceGrade || item.relevance || '').toString().trim();
-            if (fromCol) return fromCol; // "상" / "중" / "하" 기대
-
-            const txt = (item.aiResult || item.aiSummary || '').toString();
-            if (/관련성\s*상/.test(txt) || /\[.*상.*\]/.test(txt)) return '상';
-            if (/관련성\s*중/.test(txt) || /\[.*중.*\]/.test(txt)) return '중';
-            if (!txt) return '';
-            return '하';
-        }
-
-        // 영업 경로: 시트 컬럼(salesRoute)을 기본으로 사용
-        function getSalesRoute(item) {
-            return (item.salesRoute || item.sales_route || '').toString().trim();
-        }
-
-        // 정렬용 마감일 타임스탬프 (없으면 0)
-        function getDeadlineTime(item) {
-            const s = String(item.deadline || item.closeDate || '').trim();
-            if (!s) return 0;
-
-            const dateMatch = s.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
-            if (!dateMatch) return 0;
-
-            const y = parseInt(dateMatch[1], 10);
-            const mo = parseInt(dateMatch[2], 10) - 1;
-            const d = parseInt(dateMatch[3], 10);
-
-            const timeMatch = s.match(/(\d{1,2}):(\d{2})/);
-            let hh = 23, mm = 59;
-            if (timeMatch) {
-                hh = parseInt(timeMatch[1], 10);
-                mm = parseInt(timeMatch[2], 10);
-            }
-
-            const dt = new Date(y, mo, d, hh, mm, 59);
-            return dt.getTime();
         }
 
         // 캘린더 등록 여부
@@ -2776,7 +2715,14 @@ async function eaisUpdateL04() {
 
         // 채널(소스) 구분: 나라장터 / EAIS / 외부웹 / 스마트등록
         function detectSourceChannel(item) {
-            const base = detectSource(item); // API / SMART / EXTERNAL
+            // srcKind로 먼저 판별 (링크가 없어도 잡히게)
+            const kind = (item.srcKind || item.sourceKind || '').toUpperCase();
+            if (kind === 'API') return 'API';
+            if (kind === 'SMART') return 'SMART';
+            if (kind === 'EAIS') return 'EAIS';
+            if (kind === 'EXTERNAL') return 'EXTERNAL';
+
+            const base = detectSource(item); // 기존 로직 유지
             if (base === 'API') return 'API';
             if (base === 'SMART') return 'SMART';
 
@@ -2785,9 +2731,7 @@ async function eaisUpdateL04() {
             return 'EXTERNAL';
         }
 
-        // 관련성 등급: 시트 컬럼(relevanceGrade)이 있으면 우선 사용
-        // 없으면 aiResult / aiSummary 텍스트에서 추론
-
+        // 상단 요약 카드 통계 반영
         function updateStatsUI(stats, items) {
             const apiRaw = stats.totalCountRaw || stats.totalItemsFromApi || stats.totalRaw || 0;
 
@@ -2798,7 +2742,7 @@ async function eaisUpdateL04() {
             let keptApi = 0, keptExternal = 0, keptSmart = 0;
             let aiApi = 0, aiExternal = 0, aiSmart = 0;
 
-            items.forEach(it => {
+            (items || []).forEach(it => {
                 const src = detectSource(it);
                 const hasAi = !!(it.aiResult || it.aiSummary);
 
@@ -2878,6 +2822,33 @@ async function eaisUpdateL04() {
         }
 
 
+        // 관련성 등급: 시트 컬럼(relevanceGrade)이 있으면 우선 사용
+        // 없으면 aiResult/aiSummary에서 추론 (1단계에서 이미 있으시면 중복 추가 X)
+        function getRelevanceGrade(item) {
+            const fromCol = (item.relevanceGrade || item.relevance || '').toString().trim();
+            if (fromCol) return fromCol; // "상" / "중" / "하" 기대
+
+            const txt = (item.aiResult || item.aiSummary || '').toString();
+            if (/관련성\s*상/.test(txt) || /\[.*상.*\]/.test(txt)) return '상';
+            if (/관련성\s*중/.test(txt) || /\[.*중.*\]/.test(txt)) return '중';
+            if (!txt) return '';
+            return '하';
+        }
+
+        // 영업 경로: 시트 컬럼(salesRoute)을 기본으로 사용
+        function getSalesRoute(item) {
+            const v = (item.salesRoute || '').trim();
+            if (v) return v;
+
+            // ✅ 나라장터(API) 수집 데이터는 기본값을 '직접입찰'로 처리 (마감공고도 목록에 보이게)
+            const ch = detectSourceChannel(item);
+            if (ch === 'API') return '직접입찰';
+
+            // 그 외도 기본은 직접입찰(필요 시 사용자가 후처리 가능)
+            return '직접입찰';
+        }
+
+
         // 현재 화면에 보이는 건수 반영
         function updateVisibleCount(visibleItems) {
             const n = visibleItems.length || 0;
@@ -2911,47 +2882,65 @@ async function eaisUpdateL04() {
             const filtered = allData.filter(item => {
                 const title = normalizeTitle(item);
                 const link = normalizeLink(item);
-                const aiText = (item.aiResult || '').toString().trim();
-                const aiSummary = (item.aiSummary || '').toString().trim();
-                // aiSummary와 aiResult가 동일한 경우(중복 표기 방지)
-                const aiDetail = (aiSummary && aiText && aiText !== aiSummary) ? aiText : (aiSummary ? '' : aiText);
+                const aiText = item.aiResult || '';
+                const aiSummary = item.aiSummary || '';
 
-                const deadlineStr = item.deadline || item.closeDate || '';
+                const deadlineStr =
+                    item.deadline || item.closeDate || item.closeDt || item.bidEndDt || item.endDt || '';
+
                 const isPast = isDeadlinePast(deadlineStr);
                 const salesRoute = getSalesRoute(item);
                 const relGrade = getRelevanceGrade(item); // "상" / "중" / "하" / ""
                 const hasCal = hasCalendarEvent(item);
                 const channel = detectSourceChannel(item); // API / EAIS / EXTERNAL / SMART
+                const isExternal = (channel === 'EXTERNAL' || channel === 'EAIS');
                 const hasWin = hasWinner(item);
 
                 // ① 업무 탭별 기본 조건 --------------------------------------
                 if (viewMode === 'direct') {
-                    // 직접입찰 · 공고중: 마감 전 + 영업경로 = 직접입찰
-                    if (isPast) return false;
-                    if (salesRoute !== '직접입찰') return false;
+                    // 직접입찰 탭: 영업경로=직접입찰 (마감 여부는 '상태' 필터에서 제어)
+                    // ✅ 외부웹(EXTERNAL)은 영업경로/마감 여부와 무관하게 항상 표시
+                    if (!isExternal) {
+                        if (salesRoute !== '직접입찰') return false;
+                    }
                 } else if (viewMode === 'target') {
-                    // 낙찰자 타깃: 마감된 건 + 관련성 상/중 + 영업경로 = 설계사/시공사 타깃
-                    if (!isPast) return false;
-                    if (relGrade !== '상' && relGrade !== '중') return false;
-                    if (salesRoute !== '설계사타깃' && salesRoute !== '시공사타깃') return false;
+                    // 낙찰자 타깃: (기본) 마감된 건 + 관련성 상/중 + 영업경로 = 설계사/시공사 타깃
+                    // ✅ 단, 외부웹(EXTERNAL)은 마감 여부/관련성/영업경로와 무관하게 항상 표시
+                    if (!isExternal) {
+                        if (!isPast) return false;
+                        if (relGrade !== '상' && relGrade !== '중') return false;
+                        if (salesRoute !== '설계사타깃' && salesRoute !== '시공사타깃') return false;
+                    }
                 }
                 // history(전체/히스토리)는 별도 기본 조건 없음
 
                 // ② 상태 필터 (공고중 / 마감 / 캘린더 등록됨) -----------------
-                if (stateFilter === 'open' && isPast) return false;
-                if (stateFilter === 'closed' && !isPast) return false;
+                // ✅ 외부웹(EXTERNAL)은 마감 여부와 무관하게 항상 표시(기본 탭 포함)
                 if (stateFilter === 'calendar' && !hasCal) return false;
+                if (!isExternal) {
+                    if (stateFilter === 'open' && isPast) return false;
+                    if (stateFilter === 'closed' && !isPast) return false;
+                }
 
                 // ③ 영업 경로 필터 --------------------------------------------
-                if (routeFilter === 'direct' && salesRoute !== '직접입찰') return false;
-                if (routeFilter === 'designer' && salesRoute !== '설계사타깃') return false;
-                if (routeFilter === 'builder' && salesRoute !== '시공사타깃') return false;
+                // ✅ 외부웹(EXTERNAL)은 영업경로와 무관하게 항상 표시
+                if (!isExternal) {
+                    if (routeFilter === 'direct' && salesRoute !== '직접입찰') return false;
+                    if (routeFilter === 'designer' && salesRoute !== '설계사타깃') return false;
+                    if (routeFilter === 'builder' && salesRoute !== '시공사타깃') return false;
+                }
 
                 // ④ 소스/채널 필터 -------------------------------------------
-                if (sourceFilter === 'API' && channel !== 'API') return false;
-                if (sourceFilter === 'EAIS' && channel !== 'EAIS') return false;
-                if (sourceFilter === 'EXTERNAL' && channel !== 'EXTERNAL') return false;
-                if (sourceFilter === 'SMART' && channel !== 'SMART') return false;
+                // 정책: "외부웹(EXTERNAL)" 선택 시 세움터(EAIS)까지 같이 보여주기
+                if (sourceFilter !== 'all') {
+                    if (sourceFilter === 'EXTERNAL') {
+                        // 외부웹 버튼 = 외부수집 + 세움터(EAIS)
+                        if (!(channel === 'EXTERNAL' || channel === 'EAIS')) return false;
+                    } else {
+                        // API / EAIS / SMART는 각각만
+                        if (channel !== sourceFilter) return false;
+                    }
+                }
 
                 // ⑤ 지역 필터 -------------------------------------------------
                 if (region) {
@@ -3075,10 +3064,8 @@ async function eaisUpdateL04() {
                 const winnerType = item.winnerType || '';
                 const winnerContact = item.winnerContact || item.winnerPhone || item.winnerTel || '';
 
-                const aiText = (item.aiResult || '').toString().trim();
-                const aiSummary = (item.aiSummary || '').toString().trim();
-                // aiSummary와 aiResult가 동일한 경우(중복 표기 방지)
-                const aiDetail = (aiSummary && aiText && aiText !== aiSummary) ? aiText : (aiSummary ? '' : aiText);
+                const aiText = item.aiResult || '';
+                const aiSummary = item.aiSummary || '';
 
                 const past = isDeadlinePast(deadline);
                 const ddayLabel = (!past && currentView === 'direct')
@@ -3146,23 +3133,6 @@ async function eaisUpdateL04() {
                     statusBadge.textContent = '공고중';
                 }
                 rightTop.appendChild(statusBadge);
-
-                // AI 상태 뱃지 (1차 AI 요약 기준)
-                const aiBadge = document.createElement('span');
-                aiBadge.className = 'badge-ai';
-                const aiHas = !!(aiText || aiSummary);
-                const aiErr = !!(item.aiError || item.aiErrorMsg || item.aiErrorMessage || item.aiStatus === 'ERROR');
-                if (aiErr) {
-                    aiBadge.classList.add('error');
-                    aiBadge.textContent = 'AI오류';
-                } else if (aiHas) {
-                    aiBadge.classList.add('done');
-                    aiBadge.textContent = 'AI완료';
-                } else {
-                    aiBadge.classList.add('pending');
-                    aiBadge.textContent = 'AI대기';
-                }
-                rightTop.appendChild(aiBadge);
 
                 // 출처 뱃지
                 const sourceBadge = document.createElement('span');
@@ -3263,56 +3233,6 @@ async function eaisUpdateL04() {
                 }
                 inner.appendChild(subLine);
 
-                // ---------------- 엑셀 표준(영업) 핵심 정보(있으면 표시) ----------------
-                (function() {
-                    const pick = (...vals) => {
-                        for (const v of vals) {
-                            if (v === undefined || v === null) continue;
-                            const s = String(v).trim();
-                            if (s) return s;
-                        }
-                        return '';
-                    };
-
-                    const designer = pick(item.designer, item.designFirm, item.architect, item.architectFirm, item.designCompany);
-                    const clientContact = pick(item.clientContact, item.ownerContact, item.contact, item.contactPerson, item.clientManager, item.clientOfficer);
-                    const awardDate = pick(item.awardDate, item.winDate, item.winnerDate, item.bidAwardDate, item.contractDate);
-                    const siteArea = pick(item.siteAreaSqm, item.siteAreaM2, item.siteArea, item.landAreaSqm, item.landAreaM2);
-                    const capacity = pick(item.capacityTon, item.recommendedCapacityTon, item.estimatedTon, item.estimateTon, item.ton);
-                    const ordinanceRef = pick(item.ordinanceRef, item.ordinanceArticleRef, item.ordinanceClauseRef, item.ordinanceClause, item.ordinanceBasis);
-                    const targetClass = pick(item.targetClass, item.target, item.applyTarget);
-
-                    const pills = [];
-                    const addPill = (label, value) => {
-                        if (!value) return;
-                        const sp = document.createElement('span');
-                        sp.className = 'kv-pill';
-                        const l = document.createElement('span');
-                        l.textContent = label;
-                        const v = document.createElement('strong');
-                        v.textContent = value;
-                        sp.appendChild(l);
-                        sp.appendChild(v);
-                        pills.push(sp);
-                    };
-
-                    addPill('설계사', designer);
-                    addPill('담당', clientContact);
-                    addPill('낙찰일', awardDate);
-                    addPill('대지㎡', siteArea ? siteArea.replace(/[^0-9.]/g, '') : '');
-                    addPill('용량t', capacity ? capacity.replace(/[^0-9.]/g, '') : '');
-                    // 조례/적용대상은 길 수 있어 태그로만 간단 표시
-                    if (ordinanceRef) addPill('조례', ordinanceRef.length > 16 ? ordinanceRef.slice(0, 16) + '…' : ordinanceRef);
-                    if (targetClass) addPill('적용', targetClass);
-
-                    if (pills.length) {
-                        const line = document.createElement('div');
-                        line.className = 'bid-excel-line';
-                        pills.forEach(p => line.appendChild(p));
-                        inner.appendChild(line);
-                    }
-                })();
-
                 // ---------------- 4줄目: 낙찰자 정보 (낙찰자 타깃 / 히스토리에서 강조) ------
                 if (winnerName) {
                     const winBlock = document.createElement('div');
@@ -3395,7 +3315,7 @@ async function eaisUpdateL04() {
 
                     const val = document.createElement('div');
                     val.className = 'meta-value';
-                    val.textContent = m.value || '';
+                    val.textContent = m.value || '-';
 
                     itemDiv.appendChild(lab);
                     itemDiv.appendChild(val);
@@ -3405,7 +3325,7 @@ async function eaisUpdateL04() {
                 inner.appendChild(metaGrid);
 
                 // ---------------- AI 요약 박스 -----------------------------------------
-                if (aiSummary || aiDetail) {
+                if (aiText || aiSummary) {
                     const aiBox = document.createElement('div');
                     aiBox.className = 'ai-result-box';
 
@@ -3422,10 +3342,10 @@ async function eaisUpdateL04() {
                         strong.textContent = aiSummary;
                         textWrap.appendChild(strong);
                     }
-                    if (aiDetail) {
+                    if (aiText) {
                         if (aiSummary) textWrap.appendChild(document.createElement('br'));
                         const span = document.createElement('span');
-                        span.textContent = aiDetail;
+                        span.textContent = aiText;
                         textWrap.appendChild(span);
                     }
 
@@ -3539,6 +3459,17 @@ async function eaisUpdateL04() {
             document.getElementById('smartModalBackdrop').classList.remove('active');
         }
 
+
+        // ---------------- 캘린더 모달 ----------------
+
+        function openCalendarModal() {
+            document.getElementById('calendarModalBackdrop').classList.add('active');
+        }
+
+        function closeCalendarModal() {
+            document.getElementById('calendarModalBackdrop').classList.remove('active');
+        }
+
         async function handleSmartSubmit(e) {
             e.preventDefault();
             const text = document.getElementById('smartText').value.trim();
@@ -3610,6 +3541,9 @@ async function eaisUpdateL04() {
             // 모달 열기
             backdrop.classList.add('active');
 
+            // ✅ 현재 선택 공고 저장(표준입력 저장용)
+            deepCurrentItem = item;
+
             // 기본 정보 준비
             const title = normalizeTitle(item) || '(제목 없음)';
             const link = normalizeLink(item);
@@ -3638,13 +3572,11 @@ async function eaisUpdateL04() {
             const elAreaNum = document.getElementById('deepAreaNum');
             const elTargetClass = document.getElementById('deepTargetClass');
             const elOrdinance = document.getElementById('deepOrdinanceBasis');
-            const elOrdinanceClauses = document.getElementById('deepOrdinanceClauses');
             const elCapacity = document.getElementById('deepCapacitySummary');
-            const elCalcBody = document.getElementById('deepCalcTableBody');
             const elMitigation = document.getElementById('deepMitigationLink');
             const btnMitigation = document.getElementById('btnMitigationReport');
 
-            // 샘플 엑셀 표준 필드 표시
+            // ✅ 표준입력(수기 저장) 요소
             const elStdRegion = document.getElementById('deepStdRegion');
             const elStdClient = document.getElementById('deepStdClient');
             const elStdProject = document.getElementById('deepStdProject');
@@ -3660,7 +3592,12 @@ async function eaisUpdateL04() {
             const elStdArea = document.getElementById('deepStdArea');
             const elStdCapacity = document.getElementById('deepStdCapacity');
             const elStdMemo = document.getElementById('deepStdMemo');
+            const elOrdinanceArticles = document.getElementById('deepOrdinanceArticlesText');
 
+
+
+            // ✅ 표준입력 기본값 세팅(기존 값)
+            try { fillStdInputs(snapshotStdFromItem(item)); } catch(e) {}
 
             // 제목/메타 기본 세팅
             if (elTitle) elTitle.textContent = title;
@@ -3691,170 +3628,7 @@ async function eaisUpdateL04() {
             if (elTargetClass) elTargetClass.textContent = '-';
             if (elOrdinance) elOrdinance.textContent = '';
             if (elCapacity) elCapacity.textContent = '';
-            if (elCalcBody) elCalcBody.innerHTML = '';
             if (elMitigation) elMitigation.textContent = '-';
-
-
-            deepCurrentItem = item;
-            const pick1 = (...vals) => {
-                for (const v of vals) {
-                    if (v === undefined || v === null) continue;
-                    const s = String(v).trim();
-                    if (s) return s;
-                }
-                return '';
-            };
-
-
-            const btnStdSave = document.getElementById('btnStdSave');
-            const btnStdReset = document.getElementById('btnStdReset');
-
-            const snapshotStdFromItem = (it) => ({
-                region: pick1(it.region, it.area) || '',
-                client: pick1(it.client, it.agency) || '',
-                projectName: pick1(it.projectName, normalizeTitle(it)) || '',
-                methodDecisionDate: pick1(it.methodDecisionDate) || '',
-                salesStatus: pick1(it.salesStatus) || '',
-                designer: pick1(it.designer) || '',
-                clientContact: pick1(it.clientContact, it.clientManager) || '',
-                awardDate: pick1(it.awardDate) || '',
-                servicePeriod: pick1(it.servicePeriod) || '',
-                endDate: pick1(it.endDate) || '',
-                serviceAmountEok: pick1(it.serviceAmountEok) || '',
-                projectBudgetEok: pick1(it.projectBudgetEok) || '',
-                siteArea: pick1(it.siteArea) || '',
-                capacityTon: pick1(it.capacityTon, it.expectedTon) || '',
-                memo: pick1(it.memo) || ''
-            });
-
-            const fillStdInputs = (vals) => {
-                if (elStdRegion) elStdRegion.value = vals.region || '';
-                if (elStdClient) elStdClient.value = vals.client || '';
-                if (elStdProject) elStdProject.value = vals.projectName || '';
-                if (elStdDecision) elStdDecision.value = vals.methodDecisionDate || '';
-                if (elStdSales) elStdSales.value = vals.salesStatus || '';
-                if (elStdDesigner) elStdDesigner.value = vals.designer || '';
-                if (elStdContact) elStdContact.value = vals.clientContact || '';
-                if (elStdAward) elStdAward.value = vals.awardDate || '';
-                if (elStdPeriod) elStdPeriod.value = vals.servicePeriod || '';
-                if (elStdEnd) elStdEnd.value = vals.endDate || '';
-                if (elStdAmount) elStdAmount.value = vals.serviceAmountEok || '';
-                if (elStdBudget) elStdBudget.value = vals.projectBudgetEok || '';
-                if (elStdArea) elStdArea.value = vals.siteArea || '';
-                if (elStdCapacity) elStdCapacity.value = vals.capacityTon || '';
-                if (elStdMemo) elStdMemo.value = vals.memo || '';
-            };
-
-            const collectStdInputs = () => ({
-                region: elStdRegion ? (elStdRegion.value || '').trim() : '',
-                client: elStdClient ? (elStdClient.value || '').trim() : '',
-                projectName: elStdProject ? (elStdProject.value || '').trim() : '',
-                methodDecisionDate: elStdDecision ? (elStdDecision.value || '').trim() : '',
-                salesStatus: elStdSales ? (elStdSales.value || '').trim() : '',
-                designer: elStdDesigner ? (elStdDesigner.value || '').trim() : '',
-                clientContact: elStdContact ? (elStdContact.value || '').trim() : '',
-                awardDate: elStdAward ? (elStdAward.value || '').trim() : '',
-                servicePeriod: elStdPeriod ? (elStdPeriod.value || '').trim() : '',
-                endDate: elStdEnd ? (elStdEnd.value || '').trim() : '',
-                serviceAmountEok: elStdAmount ? (elStdAmount.value || '').trim() : '',
-                projectBudgetEok: elStdBudget ? (elStdBudget.value || '').trim() : '',
-                siteArea: elStdArea ? (elStdArea.value || '').trim() : '',
-                capacityTon: elStdCapacity ? (elStdCapacity.value || '').trim() : '',
-                memo: elStdMemo ? (elStdMemo.value || '').trim() : ''
-            });
-
-            // 기본값(리스트 기반)으로 한번 채움
-            fillStdInputs(snapshotStdFromItem(item));
-
-            if (btnStdReset) {
-                btnStdReset.onclick = () => {
-                    if (!deepCurrentItem) return;
-                    fillStdInputs(snapshotStdFromItem(deepCurrentItem));
-                    alert('표준 정보 입력값을 초기화했습니다.');
-                };
-            }
-
-            if (btnStdSave) {
-                btnStdSave.onclick = async () => {
-                    if (!deepCurrentItem) return;
-                    const payload = {
-                        no: deepCurrentItem.no || '',
-                        rowIndex: deepCurrentItem.rowIndex || '',
-                        fields: collectStdInputs()
-                    };
-                    try {
-                        btnStdSave.classList.add('loading');
-                        let j;
-                        try {
-                          j = await apiPostJson('update_bid_fields', payload, true, '저장');
-                        } catch (e) {
-                          const msg = String((e && e.message) ? e.message : e);
-                          if (msg.includes('Failed to fetch')) {
-                            // POST(CORS) 실패 시 GET으로 자동 재시도
-                            j = await apiGet('update_bid_fields', { no: payload.no || '', rowIndex: payload.rowIndex || '', fields: JSON.stringify(payload.fields || {}) }, true, '저장');
-                          } else {
-                            throw e;
-                          }
-                        }
-                        if (!j || j.ok === false) {
-                            const msg = (j && (j.error || j.message)) ? (j.error || j.message) : '서버 오류';
-                            alert('저장 실패: ' + msg);
-                            return;
-                        }
-                        const u = j.updated || {};
-                        // 현재 item + 전체 데이터에 반영
-                        Object.assign(deepCurrentItem, {
-                            region: u.region || deepCurrentItem.region,
-                            client: u.client || deepCurrentItem.client,
-                            projectName: u.projectName || deepCurrentItem.projectName,
-                            methodDecisionDate: u.methodDecisionDate || deepCurrentItem.methodDecisionDate,
-                            salesStatus: u.salesStatus || deepCurrentItem.salesStatus,
-                            designer: u.designer || deepCurrentItem.designer,
-                            clientContact: u.clientContact || deepCurrentItem.clientContact,
-                            awardDate: u.awardDate || deepCurrentItem.awardDate,
-                            servicePeriod: u.servicePeriod || deepCurrentItem.servicePeriod,
-                            endDate: u.endDate || deepCurrentItem.endDate,
-                            serviceAmountEok: u.serviceAmountEok || deepCurrentItem.serviceAmountEok,
-                            projectBudgetEok: u.projectBudgetEok || deepCurrentItem.projectBudgetEok,
-                            siteArea: u.siteArea || deepCurrentItem.siteArea,
-                            capacityTon: u.capacityTon || deepCurrentItem.capacityTon,
-                            memo: u.memo || deepCurrentItem.memo
-                        });
-                        applyFilter();
-                        alert('저장 완료 (입찰DB 반영)');
-                    } catch (e) {
-                        console.error(e);
-                        alert('저장 중 오류: ' + e.message);
-                    } finally {
-                        btnStdSave.classList.remove('loading');
-                    }
-                };
-            }
-            const pick0 = (...vals) => {
-                for (const v of vals) {
-                    if (v === undefined || v === null) continue;
-                    const s = String(v).trim();
-                    if (s) return s;
-                }
-                return '';
-            };
-
-            // 2차 분석 전에도 보이는 기본값 세팅(있으면)
-            if (elStdRegion) elStdRegion.value = pick0(region, item.region, item.area) || '';
-            if (elStdClient) elStdClient.value = pick0(client, agency, item.client, item.agency) || '';
-            if (elStdProject) elStdProject.value = pick0(title, item.projectName, item.bizName) || '';
-            if (elStdDecision) elStdDecision.value = pick0(item.methodDecisionDate, item.decisionDate, item.procDecisionDate) || '';
-            if (elStdSales) elStdSales.value = pick0(item.salesStatus, item.salesMemo, item.salesNote) || '';
-            if (elStdDesigner) elStdDesigner.value = pick0(item.designer, item.designFirm, item.architect, item.architectFirm) || '';
-            if (elStdContact) elStdContact.value = pick0(item.clientContact, item.contactPerson, item.ownerContact, item.clientManager) || '';
-            if (elStdAward) elStdAward.value = pick0(item.awardDate, item.winDate, item.contractDate) || '';
-            if (elStdPeriod) elStdPeriod.value = pick0(item.servicePeriod, item.period) || '';
-            if (elStdEnd) elStdEnd.value = pick0(item.endDate, item.finishDate) || '';
-            if (elStdAmount) elStdAmount.value = pick0(item.serviceAmount, item.amount) || '';
-            if (elStdBudget) elStdBudget.value = pick0(item.projectBudget, item.budget) || '';
-            if (elStdArea) elStdArea.value = pick0(item.siteAreaSqm, item.siteAreaM2, item.siteArea) || '';
-            if (elStdCapacity) elStdCapacity.value = pick0(item.capacityTon, item.estimatedTon, item.ton) || '';
-            if (elStdMemo) elStdMemo.value = pick0(item.memo, item.note, item.remark) || '';
 
             const canMakeReport = !!(item && (item.rowIndex || item.no));
             if (btnMitigation) {
@@ -3881,49 +3655,55 @@ async function eaisUpdateL04() {
             try {
                 setGlobalLoading(true, '해당 공고의 2차 심화 분석을 진행 중입니다...');
 
-                const data = await apiGet('deepAnalyze', {
-                    rowIndex: item.rowIndex || '',
-                    no: item.no || '',
-                    link: link || '',
-                    title: title || '',
-                    client: client || '',
-                    agency: agency || '',
-                    region: region || ''
-                }, true, '2차 심화분석');
-                if (data && data.ok === false) {
-                    const msg = data.error || data.message || '서버 오류';
-                    if (elRisk) elRisk.textContent = '2차 심화 분석 실패: ' + msg;
+                const params = new URLSearchParams();
+                params.set('action', 'deepAnalyze');
+                if (item.rowIndex) params.set('rowIndex', String(item.rowIndex));
+                if (item.no) params.set('no', String(item.no));
+                if (link) params.set('link', link);
+                if (title) params.set('title', title);
+                if (client) params.set('client', client);
+                if (agency) params.set('agency', agency);
+                if (region) params.set('region', region);
+
+                const res = await fetch(`${API_BASE}?${params.toString()}`, {
+                    method: 'GET'
+                });
+
+                if (!res.ok) {
+                    const errText = await res.text();
+                    console.error('deepAnalyze HTTP error:', res.status, errText);
+                    if (elRisk) elRisk.textContent = 'AI 심화 분석 호출 실패: HTTP ' + res.status;
                     if (elBadges) elBadges.textContent = '심화 분석 실패';
-                    alert('2차 심화 분석 실패: ' + msg);
                     return;
                 }
 
-                const deep = data.deep || data.aiReport || data.report || {};
-                // JSON 파싱이 실패해 rawText로 내려오는 경우에도 화면에 표시
-                if (deep && deep.rawText && !deep.summary2) deep.summary2 = deep.rawText;
-                if (deep && deep._parseError) console.warn('AI JSON parse warning:', deep._parseError);
+                const data = await res.json();
+                const deep = data.deep || {};
+                const attachments = data.attachments || [];
 
-                const aiReport = deep;
-                const attachments = data.attachments || deep.attachments || [];
-
-                // (표준 입력) 2차 분석 결과로 빈칸만 보정
-                const fillIfEmpty = (el, v) => {
-                    if (!el) return;
-                    const cur = (el.value || '').trim();
+                // ✅ 표준입력: 2차 분석 결과로 '빈칸'만 보정 채움
+                const fillIfEmpty = (domEl, v) => {
+                    if (!domEl) return;
+                    const cur = String(domEl.value || '').trim();
                     if (cur) return;
                     const nv = (v == null) ? '' : String(v).trim();
-                    if (nv) el.value = nv;
+                    if (nv) domEl.value = nv;
                 };
-
                 try {
+                    fillIfEmpty(elStdRegion, data.region || region || '');
+                    fillIfEmpty(elStdClient, data.client || client || agency || '');
+                    fillIfEmpty(elStdProject, data.title || title || '');
                     fillIfEmpty(elStdDecision, deep.methodDecisionDate || deep.decisionDate || '');
                     fillIfEmpty(elStdSales, deep.salesStatus || '');
                     fillIfEmpty(elStdDesigner, deep.designer || deep.designFirm || '');
+                    fillIfEmpty(elStdContact, deep.clientContact || deep.clientManager || '');
                     fillIfEmpty(elStdAward, deep.awardDate || deep.winDate || '');
+                    fillIfEmpty(elStdPeriod, deep.servicePeriod || '');
                     fillIfEmpty(elStdEnd, deep.endDate || '');
-                    // 금액/면적/용량은 추정치가 있을 때만
+                    fillIfEmpty(elStdAmount, deep.serviceAmountEok || deep.serviceAmount || '');
+                    fillIfEmpty(elStdBudget, deep.projectBudgetEok || deep.projectBudget || '');
                     fillIfEmpty(elStdArea, deep.siteAreaSqm || deep.siteAreaM2 || deep.siteArea || '');
-                    fillIfEmpty(elStdCapacity, deep.capacityTon || deep.recommendedCapacityTon || deep.estimatedTon || '');
+                    fillIfEmpty(elStdCapacity, deep.capacityTon || deep.estimatedTon || deep.ton || '');
                 } catch(e) {}
 
 
@@ -3945,24 +3725,28 @@ async function eaisUpdateL04() {
                     (data.ordinanceInfo && (data.ordinanceInfo.basisSummary || data.ordinanceInfo.ordinanceBasis)),
                     data.ordinanceBasis);
 
-                let ordinanceClausesText = '';
-                try {
-                    ordinanceClausesText = pick(
-                        deep.ordinanceArticlesText,
-                        (deep.ordinanceArticles && Array.isArray(deep.ordinanceArticles) ? deep.ordinanceArticles.join('\n') : ''),
-                        (data.ordinanceInfo && (data.ordinanceInfo.articlesText || (Array.isArray(data.ordinanceInfo.articles) ? data.ordinanceInfo.articles.join('\n') : data.ordinanceInfo.articles) || '')),
-                        ''
-                    );
-                    if (Array.isArray(ordinanceClausesText)) ordinanceClausesText = ordinanceClausesText.join('\n');
-                } catch (e) { }
-
                 const capTon = pick(deep.capacityTon, deep.recommendedCapacityTon, deep.estimatedTon, deep.estimateTon, deep.ton);
                 const capSummary = pick(deep.capacityCalcSummary, deep.capacitySummary, deep.capacityRationale, deep.capacityCalc);
 
                 if (elAreaNum) elAreaNum.textContent = areaNum ? String(areaNum).replace(/[^\d.]/g, '') : '-';
                 if (elTargetClass) elTargetClass.textContent = formatTargetClass(targetClass);
                 if (elOrdinance) elOrdinance.textContent = ordinanceBasis ? String(ordinanceBasis) : '확인필요';
-                if (elOrdinanceClauses) elOrdinanceClauses.textContent = ordinanceClausesText ? String(ordinanceClausesText) : '';
+                // ✅ 조례 조문(제/항) 표기(있으면)
+                const ordinanceArticlesText = pick(
+                    deep.ordinanceArticlesText,
+                    (data.ordinanceInfo && (data.ordinanceInfo.articlesText || (data.ordinanceInfo.articles || []).join('
+'))),
+                    data.ordinanceArticlesText
+                );
+                if (elOrdinanceArticles) {
+                    if (ordinanceArticlesText && String(ordinanceArticlesText).trim()) {
+                        elOrdinanceArticles.style.display = '';
+                        elOrdinanceArticles.textContent = String(ordinanceArticlesText).trim();
+                    } else {
+                        elOrdinanceArticles.style.display = 'none';
+                        elOrdinanceArticles.textContent = '';
+                    }
+                }
                 if (elCapacity) {
                     if (capTon || capSummary) {
                         elCapacity.textContent =
@@ -3972,31 +3756,6 @@ async function eaisUpdateL04() {
                         elCapacity.textContent = '확인필요';
                     }
                 }
-                // ✅ 산정 결과 표(모달) 렌더링
-                if (elCalcBody) {
-                    elCalcBody.innerHTML = '';
-                    const rows = [];
-                    if (areaNum) rows.push(['면적(㎡)', String(areaNum).replace(/[^\d.]/g, '')]);
-                    rows.push(['적용대상', formatTargetClass(targetClass)]);
-                    if (ordinanceBasis) rows.push(['조례 근거', String(ordinanceBasis)]);
-                    if (capTon) rows.push(['권장/예상 용량(톤)', String(capTon).toString().replace(/[^\d.]/g, '')]);
-                    if (capSummary) rows.push(['산정 요약', String(capSummary)]);
-
-                    rows.forEach(([k, v]) => {
-                        const tr = document.createElement('tr');
-                        const th = document.createElement('th');
-                        const td = document.createElement('td');
-                        th.textContent = k;
-                        td.textContent = v;
-                        th.style.cssText = 'text-align:left;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.08);width:140px;vertical-align:top;font-weight:600;';
-                        td.style.cssText = 'text-align:left;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.08);white-space:pre-wrap;';
-                        tr.appendChild(th);
-                        tr.appendChild(td);
-                        elCalcBody.appendChild(tr);
-                    });
-                }
-
-
 
                 let reportUrl = pick(deep.mitigationDocUrl, deep.mitigationDocURL, deep.mitigationReportUrl,
                     item.mitigationDocUrl, item.mitigationDocURL, item.mitigationUrl, item.reportUrl, item.docUrl);
@@ -4044,14 +3803,34 @@ async function eaisUpdateL04() {
                         btnMitigation.classList.add('loading');
                         try {
                             setGlobalLoading(true, '우수유출 저감대책 문서를 생성 중입니다...');
-                            const j2 = await apiGet('generate_mitigation_doc', {
-                                rowIndex: item.rowIndex || '',
-                                no: item.no || ''
-                            }, true, '대책문서 생성');
-                            if (!j2 || !j2.ok || !j2.docUrl) {
-                                console.error('generate_mitigation_doc response:', j2);
-                                const msg = (j2 && (j2.error || j2.message)) ? (j2.error || j2.message) : '서버 응답 오류';
-                                alert('대책문서 생성 실패: ' + msg);
+
+                            const tryActions = ['generate_mitigation_doc', 'generate_mitigation_report'];
+                            let j2 = null;
+
+                            for (const act of tryActions) {
+                                const p2 = new URLSearchParams();
+                                p2.set('action', act);
+                                if (item.rowIndex) p2.set('rowIndex', String(item.rowIndex));
+                                if (item.no) p2.set('no', String(item.no));
+
+                                const r2 = await fetch(`${API_BASE}?${p2.toString()}`, { method: 'GET' });
+                                if (!r2.ok) {
+                                    const t = await r2.text();
+                                    console.error(`${act} HTTP error:`, r2.status, t);
+                                    continue;
+                                }
+
+                                const tmp = await r2.json();
+                                if (tmp && tmp.ok && tmp.docUrl) {
+                                    j2 = tmp;
+                                    break;
+                                } else {
+                                    console.warn(`${act} response not ready:`, tmp);
+                                }
+                            }
+
+                            if (!j2 || !j2.docUrl) {
+                                alert('대책문서 생성 실패: 서버 응답 오류');
                                 return;
                             }
 
@@ -4153,35 +3932,9 @@ async function eaisUpdateL04() {
                     item.budget ||
                     '';
 
-                if (elPeriod) elPeriod.textContent = periodText || '';
-                if (elAmount) elAmount.textContent = amountText || '';
-                if (elBudget) elBudget.textContent = budgetText || '';
-
-                // 샘플 엑셀 표준 필드도 가능한 값으로 업데이트
-                const pickStd = (...vals) => {
-                    for (const v of vals) {
-                        if (v === undefined || v === null) continue;
-                        const s = String(v).trim();
-                        if (s) return s;
-                    }
-                    return '';
-                };
-
-                if (elStdRegion) elStdRegion.value = pickStd(region, deep.region, data.region, item.region) || (elStdRegion.textContent || '-');
-                if (elStdClient) elStdClient.value = pickStd(client, agency, deep.client, deep.agency, data.client, data.agency, item.client, item.agency) || (elStdClient.textContent || '-');
-                if (elStdProject) elStdProject.value = pickStd(title, deep.projectName, deep.bizName, data.projectName, data.bizName) || (elStdProject.textContent || '-');
-                if (elStdDesigner) elStdDesigner.value = pickStd(deep.designer, deep.designFirm, item.designer, item.designFirm) || (elStdDesigner.textContent || '-');
-                if (elStdContact) elStdContact.value = pickStd(deep.clientContact, deep.contactPerson, item.clientContact, item.contactPerson) || (elStdContact.textContent || '-');
-                if (elStdAward) elStdAward.value = pickStd(deep.awardDate, deep.winDate, deep.contractDate, item.awardDate, item.winDate) || (elStdAward.textContent || '-');
-                if (elStdPeriod) elStdPeriod.value = pickStd(periodText, deep.servicePeriod, data.servicePeriod) || (elStdPeriod.textContent || '-');
-                if (elStdEnd) elStdEnd.value = pickStd(deep.endDate, deep.finishDate, item.endDate) || (elStdEnd.textContent || '-');
-                if (elStdAmount) elStdAmount.value = pickStd(amountText, deep.serviceAmount, data.serviceAmount) || (elStdAmount.textContent || '-');
-                if (elStdBudget) elStdBudget.value = pickStd(budgetText, deep.projectBudget, data.projectBudget) || (elStdBudget.textContent || '-');
-                if (elStdArea) elStdArea.value = pickStd(deep.siteAreaSqm, deep.siteAreaM2, deep.siteArea, areaNum, item.siteAreaSqm) || (elStdArea.textContent || '-');
-                if (elStdCapacity) elStdCapacity.value = pickStd(deep.capacityTon, deep.recommendedCapacityTon, deep.estimatedTon, capTon) || (elStdCapacity.textContent || '-');
-                if (elStdMemo) elStdMemo.value = pickStd(deep.memo, deep.note, deep.remark, item.memo, item.note) || (elStdMemo.textContent || '-');
-                if (elStdDecision) elStdDecision.value = pickStd(deep.methodDecisionDate, deep.decisionDate, item.methodDecisionDate) || (elStdDecision.textContent || '-');
-                if (elStdSales) elStdSales.value = pickStd(deep.salesStatus, deep.salesMemo, item.salesStatus) || (elStdSales.textContent || '-');
+                if (elPeriod) elPeriod.textContent = periodText || '-';
+                if (elAmount) elAmount.textContent = amountText || '-';
+                if (elBudget) elBudget.textContent = budgetText || '-';
 
                 // 체크 포인트
                 if (elCheckpoints) {
@@ -4203,56 +3956,27 @@ async function eaisUpdateL04() {
                 }
 
                 // 첨부파일
-
                 if (elAttachList && elAttachEmpty && elAttachNote) {
                     elAttachList.innerHTML = '';
-                    const originUrl = link || (item && item.link) || (deep && deep.link) || '#';
-
                     if (attachments && attachments.length) {
                         elAttachEmpty.style.display = 'none';
-
-                        let hasMissingUrl = false;
+                        elAttachNote.style.display = 'block';
 
                         attachments.forEach(a => {
                             const li = document.createElement('li');
-
-                            const name = (a && (a.name || a.fileName)) ? String(a.name || a.fileName) : (a && a.url ? String(a.url) : '첨부파일');
-                            const url = (a && (a.url || a.link)) ? String(a.url || a.link).trim() : '';
-
-                            if (url) {
-                                const aLink = document.createElement('a');
-                                aLink.href = url;
-                                aLink.target = '_blank';
-                                aLink.rel = 'noreferrer noopener';
-                                aLink.textContent = name;
-                                li.appendChild(aLink);
-                            } else {
-                                hasMissingUrl = true;
-                                const span = document.createElement('span');
-                                span.textContent = name;
-                                span.style.opacity = '0.9';
-                                li.appendChild(span);
-                            }
-
+                            const aLink = document.createElement('a');
+                            aLink.href = a.url || a.link || link || '#';
+                            aLink.target = '_blank';
+                            aLink.rel = 'noreferrer noopener';
+                            aLink.textContent = a.name || a.fileName || a.url || '첨부파일';
+                            li.appendChild(aLink);
                             elAttachList.appendChild(li);
                         });
-
-                        // 링크 없는 첨부가 있으면: 파일명만 보여주고, 원문 링크로 안내
-                        if (hasMissingUrl) {
-                            elAttachNote.style.display = 'block';
-                            elAttachNote.innerHTML =
-                                '원문 첨부파일(원문에서 확인)<br>' +
-                                '※ 나라장터 원문 페이지에서 동일 파일명을 찾아 다운로드하실 수 있습니다. ' +
-                                (originUrl && originUrl !== '#' ? ('<a href=\"' + originUrl + '\" target=\"_blank\" rel=\"noreferrer noopener\">원문 열기</a>') : '');
-                        } else {
-                            elAttachNote.style.display = 'none';
-                        }
                     } else {
                         elAttachEmpty.style.display = 'block';
                         elAttachNote.style.display = 'none';
                     }
                 }
-
 
                 // 한국수안 대응 제안
                 if (elSuggestion) {
@@ -4284,6 +4008,7 @@ async function eaisUpdateL04() {
             const backdrop = document.getElementById('deepModalBackdrop');
             if (!backdrop) return;
             backdrop.classList.remove('active');
+            deepCurrentItem = null;
         }
 
         // ---------------검색결과 및 등록 공고 삭제---------------
@@ -4506,26 +4231,3 @@ async function eaisUpdateL04() {
                         (data.eventEndText ? `종료: ${data.eventEndText}` : '')
                     );
                 }
-                // 3) error / errorMessage / result === 'error' 형태
-                else if (data && (data.result === 'error' || data.error || data.errorMessage)) {
-                    alert(
-                        '회사 공용 캘린더 등록 실패: ' +
-                        (data.message || data.errorMessage || JSON.stringify(data))
-                    );
-                }
-                // 4) 그 외 예외적인 경우 – 응답 내용을 그대로 보여줌
-                else {
-                    alert(
-                        '회사 공용 캘린더 등록 결과를 해석하지 못했습니다.\n' +
-                        '원본 응답: ' + JSON.stringify(data)
-                    );
-                }
-            } catch (err) {
-                console.error(err);
-                alert('회사 공용 캘린더 등록 중 오류: ' + err.message);
-            } finally {
-                setGlobalLoading(false);
-            }
-        }</script>
-</body>
-</html>
