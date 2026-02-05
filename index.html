@@ -2279,40 +2279,55 @@
         }
 
         async function refreshAll() {
-            const btn = document.getElementById('btnRefresh');
-            btn.classList.add('loading');
-            try {
-                setGlobalLoading(true, '나라장터 재조회 및 AI 필터링 중...');
-                await fetch(API_BASE + '?action=updateAll');
-                await loadData();
-            } catch (e) {
-                alert('오류: ' + e.message);
-            } finally {
-                btn.classList.remove('loading');
-                setGlobalLoading(false);
-            }
-        }
+  const btn = document.getElementById('btnRefresh');
+  btn.classList.add('loading');
+  try {
+    setGlobalLoading(true, '나라장터 업데이트 시작...');
+
+    // 1) reset=1로 작업 시작
+    let res = await fetch(API_BASE + '?action=updateAll&reset=1');
+    let json = await res.json();
+
+    // 2) done 될 때까지 step 반복
+    while (!json.done) {
+      setGlobalLoading(true, '진행중... ' + (json.progress || ''));
+      await new Promise(r => setTimeout(r, 800));
+
+      res = await fetch(API_BASE + '?action=updateAll');
+      json = await res.json();
+    }
+
+    setGlobalLoading(true, '완료: DB 새로고침 중...');
+    await loadData();
+    alert('완료되었습니다.\n외부추가: ' + (json.externalAdded || 0) + '건');
+  } catch (e) {
+    alert('오류: ' + e.message);
+  } finally {
+    btn.classList.remove('loading');
+    setGlobalLoading(false);
+  }
+}
+
 
         // 외부웨 수집 버튼 호출 함수
         async function externalUpdate() {
-            const btn = document.getElementById('btnExternal');
-            btn.classList.add('loading');
-            try {
-                setGlobalLoading(true, '외부 소스 수집 중...');
-                const res = await fetch(API_BASE + '?action=external_update');
-                const json = await res.json();
+  const btn = document.getElementById('btnExternal');
+  btn.classList.add('loading');
+  try {
+    setGlobalLoading(true, '외부 소스 수집 중...');
+    const res = await fetch(API_BASE + '?action=external_update');
+    const json = await res.json();
+    alert(`신규 ${json.added || 0}건 수집 완료\n(EAIS:${json.eaisInserted||0}, 사이트:${json.extListAdded||0}, 문서:${json.extDocAdded||0})`);
+    await loadData();
+  } catch (e) {
+    alert('오류: ' + e.message);
+  } finally {
+    btn.classList.remove('loading');
+    setGlobalLoading(false);
+    btn.classList.remove('loading');
+  }
+}
 
-                // 백엔드 응답키 호환: { totalAdded } (구버전 { added }도 허용)
-                const added = (json && (json.totalAdded ?? json.added)) ?? 0;
-                alert(`신규 ${added}건 수집 완료`);
-                await loadData();
-            } catch (e) {
-                alert('오류: ' + e.message);
-            } finally {
-                btn.classList.remove('loading');
-                setGlobalLoading(false);
-            }
-        }
 
         // ---------------- 상태/출처 판별 ----------------
 
@@ -3902,3 +3917,4 @@
         }</script>
 </body>
 </html>
+
